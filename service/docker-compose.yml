@@ -1,0 +1,38 @@
+version: '3.9'
+services:
+    postgres_db:
+        build: ./conf/postgresql
+        image: hoshisakan/postgresql:15.0
+        container_name: postgresql-dev
+        environment:
+            - DATABASE_HOST=${DATABASE_HOST}
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_DB=${POSTGRES_DB}
+        volumes:
+            - ./data/postgresql/pgdata:/var/lib/postgresql/data
+            - ./data/postgresql/pgdata_backup:/pgdata_backup
+        ports:
+            - 5432:5432
+        networks:
+            - ${EXTERNAL_NETWORK}
+        restart: always
+
+    pgadmin:
+        build: ./conf/postgresql_admin
+        image: hoshisakan/pgadmin:6.18
+        container_name: postgresql-admin-dev
+        environment:
+            - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-test@test.com}
+            - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-test123!}
+        ports:
+            - 5433:80
+        depends_on:
+            - postgres_db
+        networks:
+            - ${EXTERNAL_NETWORK}
+        restart: always
+
+networks:
+    common-overlay:
+        external: true
