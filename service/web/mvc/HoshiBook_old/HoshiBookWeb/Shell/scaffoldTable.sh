@@ -1,2 +1,0 @@
-#!bin/bash
-dotnet ef dbcontext scaffold "User ID=root;Password=Shirushi398610;Host=192.168.1.103;Port=5432;Database=hoshi;" Npgsql.EntityFrameworkCore.PostgreSQL -o Models --context-dir Data -c ApplicationDbContext --schema bookstore -f
