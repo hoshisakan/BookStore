@@ -1,5 +1,5 @@
-using HoshiBookWeb.Data;
-using HoshiBookWeb.Models;
+using HoshiBook.DataAccess;
+using HoshiBook.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

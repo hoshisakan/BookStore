@@ -1,4 +1,4 @@
-using HoshiBookWeb.Data;
+using HoshiBook.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
