@@ -3,51 +3,24 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoshiBookWeb", "HoshiBookWeb\HoshiBookWeb.csproj", "{92E976A9-A7DB-4EA3-AAD8-71BEE7152EB8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HoshiBookWeb", "HoshiBookWeb\HoshiBookWeb.csproj", "{92E976A9-A7DB-4EA3-AAD8-71BEE7152EB8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ho", "Ho\Ho.csproj", "{478D45A5-3EB6-4B9E-B5E6-9728E2D9952F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HoshiBook.DataAccess", "HoshiBook.DataAccess\HoshiBook.DataAccess.csproj", "{4C898C10-56E9-4309-B4F0-8C64192B63AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoshiBookWeb.DataAccess", "HoshiBookWeb.DataAccess\HoshiBookWeb.DataAccess.csproj", "{3A5FC1C6-1D66-4183-8CF2-B2B6664E2D9E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HoshiBook.Models", "HoshiBook.Models\HoshiBook.Models.csproj", "{01A29D10-0AA8-4D46-91CA-04D4B4ECDE87}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoshiBookWeb.Models", "HoshiBookWeb.Models\HoshiBookWeb.Models.csproj", "{1EF143F3-EC13-4EF3-A628-EA436014C380}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoshiBookWeb.Utility", "HoshiBookWeb.Utility\HoshiBookWeb.Utility.csproj", "{2AF89FE4-CCD5-4A47-8767-5B917DF66C78}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoshiBook.DataAccess", "HoshiBook.DataAccess\HoshiBook.DataAccess.csproj", "{4C898C10-56E9-4309-B4F0-8C64192B63AA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoshiBook.Models", "HoshiBook.Models\HoshiBook.Models.csproj", "{01A29D10-0AA8-4D46-91CA-04D4B4ECDE87}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoshiBook.Utility", "HoshiBook.Utility\HoshiBook.Utility.csproj", "{0DF88FAB-E825-41F9-889D-26147A565D48}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HoshiBook.Utility", "HoshiBook.Utility\HoshiBook.Utility.csproj", "{0DF88FAB-E825-41F9-889D-26147A565D48}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{92E976A9-A7DB-4EA3-AAD8-71BEE7152EB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{92E976A9-A7DB-4EA3-AAD8-71BEE7152EB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92E976A9-A7DB-4EA3-AAD8-71BEE7152EB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92E976A9-A7DB-4EA3-AAD8-71BEE7152EB8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{478D45A5-3EB6-4B9E-B5E6-9728E2D9952F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{478D45A5-3EB6-4B9E-B5E6-9728E2D9952F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{478D45A5-3EB6-4B9E-B5E6-9728E2D9952F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{478D45A5-3EB6-4B9E-B5E6-9728E2D9952F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3A5FC1C6-1D66-4183-8CF2-B2B6664E2D9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3A5FC1C6-1D66-4183-8CF2-B2B6664E2D9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3A5FC1C6-1D66-4183-8CF2-B2B6664E2D9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3A5FC1C6-1D66-4183-8CF2-B2B6664E2D9E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1EF143F3-EC13-4EF3-A628-EA436014C380}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1EF143F3-EC13-4EF3-A628-EA436014C380}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1EF143F3-EC13-4EF3-A628-EA436014C380}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1EF143F3-EC13-4EF3-A628-EA436014C380}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2AF89FE4-CCD5-4A47-8767-5B917DF66C78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2AF89FE4-CCD5-4A47-8767-5B917DF66C78}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2AF89FE4-CCD5-4A47-8767-5B917DF66C78}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2AF89FE4-CCD5-4A47-8767-5B917DF66C78}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4C898C10-56E9-4309-B4F0-8C64192B63AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4C898C10-56E9-4309-B4F0-8C64192B63AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C898C10-56E9-4309-B4F0-8C64192B63AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -60,5 +33,11 @@ Global
 		{0DF88FAB-E825-41F9-889D-26147A565D48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DF88FAB-E825-41F9-889D-26147A565D48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DF88FAB-E825-41F9-889D-26147A565D48}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6C8B1C05-2637-4F83-9988-57082E3D7630}
 	EndGlobalSection
 EndGlobal

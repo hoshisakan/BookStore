@@ -10,13 +10,13 @@
         @* <div asp-validation-summary="All"></div> *@
         <div class="mb-3">
             <label asp-for="Name"></label>
-            <input asp-for="Name" class="form-control" />
+            <input asp-for="Name" class="form-control" readonly />
             <!-- check field enter content by backend server -->
             <span asp-validation-for="Name" class="text-danger"></span>
         </div>
         <div class="mb-3">
             <label asp-for="DisplayOrder"></label>
-            <input asp-for="DisplayOrder" class="form-control" />
+            <input asp-for="DisplayOrder" class="form-control" readonly />
             <!-- check field enter content by backend server -->
             <span asp-validation-for="DisplayOrder" class="text-danger"></span>
         </div>

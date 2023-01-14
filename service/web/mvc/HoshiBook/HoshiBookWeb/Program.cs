@@ -14,6 +14,7 @@ builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
+        // b => b.MigrationsAssembly("")
         x => x.MigrationsHistoryTable(
             HistoryRepository.DefaultTableName,
             "bookstore"
