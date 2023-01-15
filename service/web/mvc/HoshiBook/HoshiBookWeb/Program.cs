@@ -1,4 +1,6 @@
 using HoshiBook.DataAccess;
+using HoshiBook.DataAccess.Repository;
+using HoshiBook.DataAccess.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,13 +16,13 @@ builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        // b => b.MigrationsAssembly("")
         x => x.MigrationsHistoryTable(
             HistoryRepository.DefaultTableName,
             "bookstore"
         )
     )
 );
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

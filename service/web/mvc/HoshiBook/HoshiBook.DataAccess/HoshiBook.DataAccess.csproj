@@ -21,4 +21,8 @@
     <ProjectReference Include="..\HoshiBook.Models\HoshiBook.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Repository\IRepository\" />
+  </ItemGroup>
+
 </Project>
