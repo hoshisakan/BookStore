@@ -9,20 +9,21 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace HoshiBookWeb.Controllers
+namespace HoshiBookWeb.Areas.Admin.Controllers
 {
+    [Area("Admin")]
     public class CategoryController : Controller
     {
-        private readonly ICategoryRepository _db;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public CategoryController(ICategoryRepository db)
+        public CategoryController(IUnitOfWork unitOfWork)
         {
-            _db = db;
+            _unitOfWork = unitOfWork;
         }
 
         public ActionResult Index()
         {
-            List<Category> objCategoryList = _db.GetAll();
+            List<Category> objCategoryList = _unitOfWork.Category.GetAll();
             return View(objCategoryList);
         }
 
@@ -43,8 +44,8 @@ namespace HoshiBookWeb.Controllers
                 ModelState.AddModelError("name", "The DisplayOrder cannot exactly match the Name.");
             }
             if (ModelState.IsValid) {
-                _db.Add(obj);
-                _db.Save();
+                _unitOfWork.Category.Add(obj);
+                _unitOfWork.Save();
                 TempData["success"] = "Category created successfully";
                 return RedirectToAction("Index");
             }
@@ -57,10 +58,9 @@ namespace HoshiBookWeb.Controllers
             if (id == null || id == 0) {
                 return NotFound();
             }
-            // var categoryFromDb = _db.Categories.FindAsync(id);
-            var categoryFromDbFirst = _db.GetFirstOrDefault(u => u.Id == id);
-            // var categoryFromDbFirst = _db.Categories.FirstOrDefaultAsync(u => u.Id == id);
-            // var categoryFromDbSingle = _db.Categories.SingleOrDefaultAsync(u => u.Id == id);
+            // var categoryFromDb = _unitOfWork.Category.Categories.FindAsync(id);
+            var categoryFromDbFirst = _unitOfWork.Category.GetFirstOrDefault(u => u.Id == id);
+            // var categoryFromDbSingle = _unitOfWork.Category.Categories.SingleOrDefaultAsync(u => u.Id == id);
             if (categoryFromDbFirst == null) {
                 return NotFound();
             }
@@ -78,8 +78,8 @@ namespace HoshiBookWeb.Controllers
                 ModelState.AddModelError("name", "The DisplayOrder cannot exactly match the Name.");
             }
             if (ModelState.IsValid) {
-                _db.Update(obj);
-                _db.Save();
+                _unitOfWork.Category.Update(obj);
+                _unitOfWork.Save();
                 TempData["success"] = "Category updated successfully";
                 return RedirectToAction("Index");
             }
@@ -92,9 +92,9 @@ namespace HoshiBookWeb.Controllers
             if (id == null || id == 0) {
                 return NotFound();
             }
-            // var categoryFromDb = _db.Categories.FindAsync(id);
-            var categoryFromDbFirst = _db.GetFirstOrDefault(u => u.Id == id);
-            // var categoryFromDbSingle = _db.Categories.SingleOrDefaultAsync(u => u.Id == id);
+            // var categoryFromDb = _unitOfWork.Category.Categories.FindAsync(id);
+            var categoryFromDbFirst = _unitOfWork.Category.GetFirstOrDefault(u => u.Id == id);
+            // var categoryFromDbSingle = _unitOfWork.Category.Categories.SingleOrDefaultAsync(u => u.Id == id);
             if (categoryFromDbFirst == null) {
                 return NotFound();
             }
@@ -107,13 +107,13 @@ namespace HoshiBookWeb.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeletePOST(int? id)
         {
-            var obj = _db.GetFirstOrDefault(u => u.Id == id);
+            var obj = _unitOfWork.Category.GetFirstOrDefault(u => u.Id == id);
 
             if (obj == null) {
                 return NotFound();
             }
-            _db.Remove(obj);
-            _db.Save();
+            _unitOfWork.Category.Remove(obj);
+            _unitOfWork.Save();
             TempData["success"] = "Category deleted successfully";
 
             return RedirectToAction("Index");

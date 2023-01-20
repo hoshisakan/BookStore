@@ -1,4 +1,5 @@
 #!/bin/bash
+# Check ApplicationDbContext.cs have models of want to create before Use the shell script migrations database
 # Usage: dotnet ef migrations add [arguments] [options]
 # Arguments:
 #   <NAME>  The name of the migration.
@@ -16,5 +17,12 @@
 #   -v|--verbose                           Show verbose output.
 #   --no-color                             Don't colorize output.
 #   --prefix-output   
-dotnet ef migrations add AddCategory --project HoshiBook.DataAccess -s HoshiBookWeb -c ApplicationDbContext --verbose
-dotnet ef database update --project HoshiBook.DataAccess -s HoshiBookWeb -c ApplicationDbContext --verbose
+if [ -z "$1" ]; then
+    echo "ERROR: Please enter a valid migrations name."
+    exit 1
+else
+    dotnet build
+    # dotnet ef migrations add AddCategory --project HoshiBook.DataAccess -s HoshiBookWeb -c ApplicationDbContext --verbose
+    dotnet ef migrations add $1 --project HoshiBook.DataAccess -s HoshiBookWeb -c ApplicationDbContext --verbose
+    dotnet ef database update --project HoshiBook.DataAccess -s HoshiBookWeb -c ApplicationDbContext --verbose
+fi
