@@ -9,4 +9,5 @@ public class ApplicationDbContext: DbContext {
     }
 
     public virtual DbSet<Category> Categories { get; set; } = default!;
+    public virtual DbSet<CoverType> CoverTypes { get; set; } = default!;
 }
