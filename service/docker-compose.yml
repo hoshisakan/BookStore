@@ -20,7 +20,7 @@ services:
 
     pgadmin:
         build: ./conf/postgresql_admin
-        image: hoshisakan/pgadmin:6.18
+        image: hoshisakan/pgadmin:6.19
         container_name: postgresql-admin-dev
         environment:
             - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-test@test.com}
