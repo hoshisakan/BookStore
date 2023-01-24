@@ -34,7 +34,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         }
 
         //POST
-        //TODO add ValidateAntiForgeryToken to avoid CORS attack
+        //TODO Add ValidateAntiForgeryToken to avoid CORS attack
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Category obj)
@@ -68,7 +68,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         }
 
         //POST
-        //TODO add ValidateAntiForgeryToken to avoid CORS attack
+        //TODO Add ValidateAntiForgeryToken to avoid CORS attack
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Category obj)
@@ -102,7 +102,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         }
 
         //POST
-        //TODO add ValidateAntiForgeryToken to avoid CORS attack
+        //TODO Add ValidateAntiForgeryToken to avoid CORS attack
         [HttpPost,ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeletePOST(int? id)

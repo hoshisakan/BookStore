@@ -23,7 +23,6 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
         public ActionResult Index()
         {
-            Console.WriteLine("Test Cover Type.");
             List<CoverType> objCoverTypeList = _unitOfWork.CoverType.GetAll();
             return View(objCoverTypeList);
         }
@@ -35,7 +34,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         }
 
         //POST
-        //TODO add ValidateAntiForgeryToken to avoid CORS attack
+        //TODO Add ValidateAntiForgeryToken to avoid CORS attack
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(CoverType obj)
@@ -65,7 +64,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         }
 
         //POST
-        //TODO add ValidateAntiForgeryToken to avoid CORS attack
+        //TODO Add ValidateAntiForgeryToken to avoid CORS attack
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(CoverType obj)
@@ -95,7 +94,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         }
 
         //POST
-        //TODO add ValidateAntiForgeryToken to avoid CORS attack
+        //TODO Add ValidateAntiForgeryToken to avoid CORS attack
         [HttpPost,ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeletePOST(int? id)
