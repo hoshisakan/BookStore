@@ -4,6 +4,9 @@ using HoshiBook.DataAccess.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+// using HoshiBookWeb;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +25,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(
         )
     )
 );
+
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<ApplicationDbContext>();
 // builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -39,10 +45,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthentication();;
 app.UseAuthorization();
 //app.UseAuthentication();
 
+app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",
     // pattern: "{controller=Home}/{action=Index}/{id?}");

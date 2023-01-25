@@ -12,3 +12,5 @@ dotnet add package Microsoft.EntityFrameworkCore.Tools --version 6.0.12
 dotnet tool uninstall -g dotnet-aspnet-codegenerator
 dotnet tool install -g dotnet-aspnet-codegenerator
 dotnet add package Microsoft.VisualStudio.Web.CodeGeneration.Design --version 6.0.8
+dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore --version 6.0.12
+dotnet add package Microsoft.AspNetCore.Identity.UI --version 6.0.12
