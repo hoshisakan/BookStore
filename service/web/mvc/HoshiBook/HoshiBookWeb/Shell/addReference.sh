@@ -5,3 +5,4 @@
 cd D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\mvc\\HoshiBook\\HoshiBookWeb
 dotnet add reference ../HoshiBook.DataAccess/HoshiBook.DataAccess.csproj
 dotnet add reference ../HoshiBook.Models/HoshiBook.Models.csproj
+dotnet add reference ../HoshiBook.Utility/HoshiBook.Utility.csproj
