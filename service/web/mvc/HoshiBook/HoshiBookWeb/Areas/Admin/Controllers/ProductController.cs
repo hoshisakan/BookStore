@@ -30,8 +30,6 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         public IActionResult Index()
         {
             return View();
-            // List<Product> objProductList = _unitOfWork.Product.GetAll();
-            // return View(objProductList);
         }
 
         //GET
@@ -75,7 +73,8 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         public IActionResult Upsert(ProductVM obj, IFormFile? file)
         {
             try {
-                if (ModelState.IsValid) {
+                if (ModelState.IsValid) 
+                {
                     string wwwRootPath = _hostEnvironment.WebRootPath;
                     if (file != null)
                     {
@@ -101,21 +100,18 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                         }
                         obj.Product.ImageUrl = @"images\products\" + filename + extension;
                     }
-                    Console.WriteLine($"obj.Product.Id: {obj.Product.Id}\nobj.Product.Title: {obj.Product.Title}\nobj.Product.CategoryId: {obj.Product.CategoryId}");
+
                     if (obj.Product.Id == 0)
                     {
-                        Console.WriteLine("Added product item.");
                         _unitOfWork.Product.Add(obj.Product);
                         _unitOfWork.Save();
                     }
                     else
                     {
-                        Console.WriteLine("Updated product item.");
                         _unitOfWork.Product.Update(obj.Product);
                         _unitOfWork.Save();
                     }
                     TempData["success"] = "Product created successfully";
-                    Console.WriteLine("OK, product add or update action successfully.");
                     return RedirectToAction("Index");
                 }
             }
@@ -123,7 +119,6 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             {
                 ExceptionTool.CollectDetailMessage(ex);
             }
-            Console.WriteLine("Error, product add or update action faield.");
             return View(obj);
         }
 
@@ -141,8 +136,9 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         public IActionResult Delete(int? id)
         {
             var obj = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == id);
-            Console.WriteLine("Testing Delete.");
-            if (obj == null) {
+
+            if (obj == null)
+            {
                 return Json(
                     new {success = false, message = "Error while deleting"}
                 );
