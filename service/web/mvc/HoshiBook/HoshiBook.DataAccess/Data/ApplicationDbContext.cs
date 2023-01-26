@@ -14,6 +14,8 @@ public class ApplicationDbContext: IdentityDbContext {
     public virtual DbSet<Category> Categories { get; set; } = default!;
     public virtual DbSet<CoverType> CoverTypes { get; set; } = default!;
     public virtual DbSet<Product> Products { get; set; } = default!;
+    public virtual DbSet<ApplicationUser> ApplicationUsers { get; set; } = default!;
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
