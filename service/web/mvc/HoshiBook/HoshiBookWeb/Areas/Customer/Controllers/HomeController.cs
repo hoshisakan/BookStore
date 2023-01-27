@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using HoshiBook.Models;
 using HoshiBook.DataAccess.Repository.IRepository;
 using HoshiBook.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace HoshiBookWeb.Areas.Customer.Controllers
 {
@@ -25,21 +27,48 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             return View(productList);
         }
 
-        public IActionResult Details(int? id)
+        public IActionResult Details(int? productId)
         {
-            if (id == null)
+            if (productId == null)
             {
                 return NotFound();
             }
             ShoppingCart cardObj = new ()
             {
                 Count = 1,
+                ProductId = productId.Value,
                 Product = _unitOfWork.Product.GetFirstOrDefault(
-                            u => u.Id == id,
+                            u => u.Id == productId,
                             includeProperties: "Category,CoverType"
                         )
             };
             return View(cardObj);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public IActionResult Details(ShoppingCart shoppingCart)
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+            shoppingCart.ApplicationUserId = claim.Value;
+
+            ShoppingCart cartFromDb = _unitOfWork.ShoppingCart.GetFirstOrDefault(
+                u => u.ApplicationUserId == claim.Value && u.ProductId == shoppingCart.ProductId
+            );
+
+            if (cartFromDb == null)
+            {
+                _unitOfWork.ShoppingCart.Add(shoppingCart);
+            }
+            else
+            {
+                _unitOfWork.ShoppingCart.IncrementCount(cartFromDb, shoppingCart.Count);
+            }
+            _unitOfWork.Save();
+
+            return RedirectToAction(nameof(Index));
         }
 
         public IActionResult Privacy()

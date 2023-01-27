@@ -8,6 +8,7 @@ if [ -z "$2" ]; then
     exit 1
 fi
 
+# dotnet aspnet-codegenerator view Details Empty -p HoshiBookWeb -outDir Areas\\Customer\\Views\\Home -udl -f
 dotnet aspnet-codegenerator view $1 Empty -outDir $2 -udl -f
 
 if [ $? -eq 0 ]; then
