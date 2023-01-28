@@ -38,9 +38,55 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             };
             foreach(var cart in ShoppingCartVM.ListCart)
             {
-                cart.Price = GetPriceBasedOnQuantity(cart.Count, cart.Product.Price, cart.Product.Price50, cart.Product.Price100);
+                cart.Price = GetPriceBasedOnQuantity(
+                    cart.Count, cart.Product.Price, cart.Product.Price50, cart.Product.Price100
+                );
+                ShoppingCartVM.CartTotal += cart.Price * cart.Count;
             }
             return View(ShoppingCartVM);
+        }
+
+        public IActionResult Plus(int? cardId)
+        {
+            if (cardId == null)
+            {
+                return NotFound();
+            }
+            var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault(u => u.Id == cardId);
+            _unitOfWork.ShoppingCart.IncrementCount(cart, 1);
+            _unitOfWork.Save();
+            return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult Minus(int? cardId)
+        {
+            if (cardId == null)
+            {
+                return NotFound();
+            }
+            var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault(u => u.Id == cardId);
+            if (cart.Count <= 1)
+            {
+                _unitOfWork.ShoppingCart.Remove(cart);
+            }
+            else
+            {
+                _unitOfWork.ShoppingCart.DecrementCount(cart, 1);
+            }
+            _unitOfWork.Save();
+            return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult Remove(int? cardId)
+        {
+            if (cardId == null)
+            {
+                return NotFound();
+            }
+            var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault(u => u.Id == cardId);
+            _unitOfWork.ShoppingCart.Remove(cart);
+            _unitOfWork.Save();
+            return RedirectToAction(nameof(Index));
         }
 
         private double GetPriceBasedOnQuantity(double quantity, double price, double price50, double price100)

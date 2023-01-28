@@ -10,5 +10,6 @@ namespace HoshiBook.Models.ViewModels
     public class ShoppingCartVM
     {
         public List<ShoppingCart> ListCart { get; set; } = default!;
+        public double CartTotal { get; set; }
     }
 }
