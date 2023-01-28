@@ -73,7 +73,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         public IActionResult Upsert(ProductVM obj, IFormFile? file)
         {
             try {
-                if (ModelState.IsValid) 
+                if (ModelState.IsValid)
                 {
                     string wwwRootPath = _hostEnvironment.WebRootPath;
                     if (file != null)

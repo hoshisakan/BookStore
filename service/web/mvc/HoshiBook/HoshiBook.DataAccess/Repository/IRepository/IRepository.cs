@@ -12,7 +12,7 @@ namespace HoshiBook.DataAccess.Repository.IRepository
     {
         //T - Category
         T GetFirstOrDefault(Expression<Func<T, bool>> filter, string? includeProperties = null);
-        List<T> GetAll(string? includeProperties = null);
+        List<T> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null);
         void Add(T entity);
         void Remove(T entity);
         void RemoveRange(List<T> entity);

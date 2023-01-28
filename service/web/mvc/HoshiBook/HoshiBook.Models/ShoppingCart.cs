@@ -24,5 +24,7 @@ namespace HoshiBook.Models
         [ForeignKey("ApplicationUserId")]
         [ValidateNever]
         public ApplicationUser ApplicationUser { get; set; }= default!;
+        [NotMapped]
+        public double Price { get; set; }
     }
 }

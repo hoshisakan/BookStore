@@ -20,7 +20,7 @@ namespace HoshiBook.DataAccess.Repository
         public Repository(ApplicationDbContext db)
         {
             _db = db;
-            // _db.Products.Include(u => u.Category).Include(u => u.CoverType);
+            // _db.ShoppingCarts.Include(u => u.Product).Include(u => u.CoverType);
             this.dbSet = _db.Set<T>();
         }
 
@@ -30,9 +30,15 @@ namespace HoshiBook.DataAccess.Repository
         }
 
         //includeProp - "Category,CoverType
-        public List<T> GetAll(string? includeProperties = null)
+        public List<T> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
             if (includeProperties != null)
             {
                 foreach(var includeProp in includeProperties.Split(
