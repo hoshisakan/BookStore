@@ -46,6 +46,29 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             return View(ShoppingCartVM);
         }
 
+        public IActionResult Summary()
+        {
+            // var claimsIdentity = (ClaimsIdentity)User.Identity;
+            // var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+            // ShoppingCartVM = new ShoppingCartVM()
+            // {
+            //     ListCart =_unitOfWork.ShoppingCart.GetAll(
+            //         u => u.ApplicationUserId == claim.Value,
+            //         includeProperties: "Product"
+            //     )
+            // };
+            // foreach(var cart in ShoppingCartVM.ListCart)
+            // {
+            //     cart.Price = GetPriceBasedOnQuantity(
+            //         cart.Count, cart.Product.Price, cart.Product.Price50, cart.Product.Price100
+            //     );
+            //     ShoppingCartVM.CartTotal += cart.Price * cart.Count;
+            // }
+            // return View(ShoppingCartVM);
+            return View();
+        }
+
         public IActionResult Plus(int? cardId)
         {
             if (cardId == null)
