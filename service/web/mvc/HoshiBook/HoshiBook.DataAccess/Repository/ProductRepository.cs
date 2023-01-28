@@ -26,6 +26,7 @@ namespace HoshiBook.DataAccess.Repository
                 objFromDb.ISBN = obj.ISBN;
                 objFromDb.Price = obj.Price;
                 objFromDb.Price50 = obj.Price50;
+                objFromDb.Price100 = obj.Price100;
                 objFromDb.ListPrice = obj.ListPrice;
                 objFromDb.Author = obj.Author;
                 objFromDb.CategoryId = obj.CategoryId;
@@ -35,7 +36,6 @@ namespace HoshiBook.DataAccess.Repository
                 {
                     objFromDb.ImageUrl = obj.ImageUrl;
                 }
-                // _db.Products.Update(obj);
             }
         }
     }
