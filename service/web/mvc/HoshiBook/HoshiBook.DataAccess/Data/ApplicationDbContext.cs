@@ -16,8 +16,10 @@ public class ApplicationDbContext: IdentityDbContext {
     public virtual DbSet<Product> Products { get; set; } = default!;
     public virtual DbSet<ApplicationUser> ApplicationUsers { get; set; } = default!;
     public virtual DbSet<Company> Companies { get; set; } = default!;
-
     public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; } = default!;
+    public virtual DbSet<OrderHeader> OrderHeaders { get; set; } = default!;
+    public virtual DbSet<OrderDetail> OrderDetails { get; set; } = default!;
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
