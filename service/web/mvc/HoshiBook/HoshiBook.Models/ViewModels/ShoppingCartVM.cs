@@ -11,5 +11,6 @@ namespace HoshiBook.Models.ViewModels
     {
         public List<ShoppingCart> ListCart { get; set; } = default!;
         public double CartTotal { get; set; }
+        public OrderHeader OrderHeader { get; set; } = default!;
     }
 }
