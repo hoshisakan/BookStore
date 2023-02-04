@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using HoshiBookWeb.Tools;
 
 
 namespace HoshiBookWeb.Tools {
@@ -16,7 +17,7 @@ namespace HoshiBookWeb.Tools {
                     }
                     Console.WriteLine("----------------------------------------------------------------------------------");
                 }
-                Console.WriteLine("------------------------------------------題庫分隔線---------------------------------------");
+                Console.WriteLine("-------------------------------------------------------------------------------------------");
             }
             Console.WriteLine($"twoDimListDictObj count is: {twoDimListDictObj.Count}");
         }
@@ -29,7 +30,7 @@ namespace HoshiBookWeb.Tools {
                 }
                 Console.WriteLine("----------------------------------------------------------------------------------");
             }
-            Console.WriteLine($"Question count: {dictObjList.Count}");
+            Console.WriteLine($"List items count: {dictObjList.Count}");
         }
 
         // public static void ReadDictObj(Dictionary<string,object> dictObj) {

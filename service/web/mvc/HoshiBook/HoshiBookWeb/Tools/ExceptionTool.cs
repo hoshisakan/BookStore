@@ -7,28 +7,7 @@ using System.IO;
 
 namespace HoshiBookWeb.Tools {
     public class ExceptionTool {
-        
-        public static ExceptionDetail CollectDetailMessage(Exception ex)
-        {
-            ExceptionDetail errorDetailInfo = new ExceptionDetail();
-            //TODO Get stack trace for the exception with source file information
-            StackTrace stackTrace = new StackTrace(ex, true);
-            //TODO Get the top stack frame
-            StackFrame? stackFrame = stackTrace.GetFrame(0);
-
-            errorDetailInfo = new ExceptionDetail{
-                errorType = ex.GetType().Name,
-                errorFileName = stackFrame?.GetFileName()?.ToString() ?? "",
-                errorMethod = stackFrame?.GetMethod()?.ToString() ?? "",
-                errorFileColumnNumber = stackFrame?.GetFileColumnNumber() ?? -1,
-                errorFileLineNumber = stackFrame?.GetFileLineNumber() ?? -1,
-                errorStackTrace = ex.StackTrace ?? "",
-                errorMessage = ex.Message,
-                errorOccurredTime = DateTime.Now
-            };
-            return errorDetailInfo;
-        }
-        public static Dictionary<string, string> CollectDetailMessage(Exception ex, bool isShow)
+        public static void CollectDetailMessage(Exception ex, bool isShow = true)
         {
             Dictionary<string, string> errorDetailInfo = new Dictionary<string, string>();
             //TODO Get stack trace for the exception with source file information
@@ -63,7 +42,6 @@ namespace HoshiBookWeb.Tools {
             if (isShow) {
                 IterationTool.ReadDictItems(errorDetailInfo);
             }
-            return errorDetailInfo;
         }
     }
 }

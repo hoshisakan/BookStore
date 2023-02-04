@@ -10,6 +10,8 @@ using HoshiBook.Models.ViewModels;
 using System.Security.Claims;
 using HoshiBook.Utility;
 using HoshiBook.Models;
+using HoshiBookWeb.Tools;
+using Stripe.Checkout;
 
 namespace HoshiBookWeb.Areas.Customer.Controllers
 {
@@ -92,44 +94,118 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             var claimsIdentity = (ClaimsIdentity?)User.Identity;
             var claim = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier);
 
-            ShoppingCartVM.ListCart = _unitOfWork.ShoppingCart.GetAll(
-                u => u.ApplicationUserId == claim.Value,
-                includeProperties: "Product"
-            );
-
-            ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
-            ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
-            ShoppingCartVM.OrderHeader.OrderDate = DateTime.Now;
-            ShoppingCartVM.OrderHeader.ApplicationUserId = claim.Value;
-
-            foreach(var cart in ShoppingCartVM.ListCart)
-            {
-                cart.Price = GetPriceBasedOnQuantity(
-                    cart.Count, cart.Product.Price, cart.Product.Price50, cart.Product.Price100
+            try {
+                ShoppingCartVM.ListCart = _unitOfWork.ShoppingCart.GetAll(
+                    u => u.ApplicationUserId == claim.Value,
+                    includeProperties: "Product"
                 );
-                ShoppingCartVM.OrderHeader.OrderTotal += cart.Price * cart.Count;
-            }
 
-            _unitOfWork.OrderHeader.Add(ShoppingCartVM.OrderHeader);
-            _unitOfWork.Save();
+                ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
+                ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
+                ShoppingCartVM.OrderHeader.OrderDate = DateTime.Now;
+                ShoppingCartVM.OrderHeader.ApplicationUserId = claim.Value;
 
-            foreach(var cart in ShoppingCartVM.ListCart)
-            {
-                OrderDetail orderDetail = new()
+                foreach(var cart in ShoppingCartVM.ListCart)
                 {
-                    ProductId = cart.ProductId,
-                    OrderId = ShoppingCartVM.OrderHeader.Id,
-                    Price = cart.Price,
-                    Count = cart.Count
+                    cart.Price = GetPriceBasedOnQuantity(
+                        cart.Count, cart.Product.Price, cart.Product.Price50, cart.Product.Price100
+                    );
+                    ShoppingCartVM.OrderHeader.OrderTotal += cart.Price * cart.Count;
+                }
+
+                _unitOfWork.OrderHeader.Add(ShoppingCartVM.OrderHeader);
+                _unitOfWork.Save();
+
+                foreach(var cart in ShoppingCartVM.ListCart)
+                {
+                    OrderDetail orderDetail = new()
+                    {
+                        ProductId = cart.ProductId,
+                        OrderId = ShoppingCartVM.OrderHeader.Id,
+                        Price = cart.Price,
+                        Count = cart.Count
+                    };
+                    _unitOfWork.OrderDetail.Add(orderDetail);
+                    _unitOfWork.Save();
+                }
+
+                //stripe settings
+                var domain = "https://localhost:7229/";
+                var options = new SessionCreateOptions
+                {
+                    PaymentMethodTypes = new List<string>
+                    {
+                        "card"
+                    },
+                    LineItems = new List<SessionLineItemOptions>(),
+                    Mode = "payment",
+                    SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",
+                    CancelUrl = domain + $"customer/cart/index",
                 };
-                _unitOfWork.OrderDetail.Add(orderDetail);
+
+                foreach(var item in ShoppingCartVM.ListCart)
+                {
+                    var sessionLineItem = new SessionLineItemOptions
+                    {
+                        PriceData = new SessionLineItemPriceDataOptions
+                        {
+                            UnitAmount = (long)(item.Price * 100), //20.00 -> 2000
+                            Currency = "usd",
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = item.Product.Title
+                            },
+                        },
+                        Quantity = item.Count,
+                    };
+                    options.LineItems.Add(sessionLineItem);
+                }
+
+                Console.WriteLine($"options.LineItems.Count: {options.LineItems.Count}");
+
+                var service = new SessionService();
+                Session session = service.Create(options);
+                
+                Console.WriteLine($"session id: {session.Id}");
+                Console.WriteLine($"session paymentIntentId: {session.PaymentIntentId}");
+
+                ShoppingCartVM.OrderHeader.SessionId = session.Id;
+                ShoppingCartVM.OrderHeader.PaymentIntentId = session.PaymentIntentId;
+
+                _unitOfWork.OrderHeader.UpdateStripePaymentID(
+                    ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId
+                );
+                _unitOfWork.Save();
+
+                Response.Headers.Add("Location", session.Url);
+                return new StatusCodeResult(303);
+            }
+            catch (Exception ex)
+            {
+                ExceptionTool.CollectDetailMessage(ex);
+            }
+            return View();
+        }
+
+        public IActionResult OrderConfirmation(int id)
+        {
+            OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u => u.Id == id);
+            var service = new SessionService();
+            Session session = service.Get(orderHeader.SessionId);
+            //check the stripe status
+            if(session.PaymentStatus.ToLower() == "paid")
+            {
+                _unitOfWork.OrderHeader.UpdateStatus(
+                    id, SD.StatusApproved, SD.PaymentStatusApproved
+                );
                 _unitOfWork.Save();
             }
-
-            _unitOfWork.ShoppingCart.RemoveRange(ShoppingCartVM.ListCart);
+            List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart.GetAll(
+                u => u.ApplicationUserId == orderHeader.ApplicationUserId
+            ).ToList();
+            _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
             _unitOfWork.Save();
-
-            return RedirectToAction("Index", "Home");
+            return View(id);
         }
 
         public IActionResult Plus(int? cardId)
