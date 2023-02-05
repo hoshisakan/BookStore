@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
 using HoshiBook.DataAccess.Repository.IRepository;
 using HoshiBook.Models;
 using HoshiBook.Utility;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using HoshiBook.Models.ViewModels;
 
 
 
@@ -18,6 +20,8 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
     public class OrderController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        [BindProperty]
+        public OrderVM OrderVM { get; set; }
 
         public OrderController(IUnitOfWork unitOfWork)
         {
@@ -27,6 +31,20 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         public IActionResult Index()
         {
             return View();
+        }
+
+        public IActionResult Details(int orderId)
+        {
+            OrderVM = new OrderVM()
+            {
+                OrderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(
+                    u => u.Id == orderId, includeProperties: "ApplicationUser"
+                ),
+                OrderDetail = _unitOfWork.OrderDetail.GetAll(
+                    u => u.OrderId == orderId, includeProperties: "Product"
+                )
+            };
+            return View(OrderVM);
         }
 
         #region API CALLS
