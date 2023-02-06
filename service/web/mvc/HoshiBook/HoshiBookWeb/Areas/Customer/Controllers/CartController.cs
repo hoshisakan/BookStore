@@ -100,7 +100,6 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     includeProperties: "Product"
                 );
 
-               
                 ShoppingCartVM.OrderHeader.OrderDate = DateTime.Now;
                 ShoppingCartVM.OrderHeader.ApplicationUserId = claim.Value;
 
