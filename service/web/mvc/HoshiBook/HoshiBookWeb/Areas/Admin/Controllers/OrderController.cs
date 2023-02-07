@@ -99,9 +99,13 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             );
             orderHeader.TrackingNumber = OrderVM.OrderHeader.TrackingNumber;
             orderHeader.Carrier = OrderVM.OrderHeader.Carrier;
+            orderHeader.PaymentStatus = SD.PaymentStatusDelayed;
             orderHeader.OrderStatus = SD.StatusShipped;
             orderHeader.ShippingDate = DateTime.Now;
-
+            if (orderHeader.PaymentStatus == SD.PaymentStatusDelayed)
+            {
+                orderHeader.PaymentDueDate = DateTime.Now.AddDays(30);
+            }
             _unitOfWork.OrderHeader.Update(orderHeader);
             _unitOfWork.Save();
             TempData["Success"] = "Order Shipped Successfully.";

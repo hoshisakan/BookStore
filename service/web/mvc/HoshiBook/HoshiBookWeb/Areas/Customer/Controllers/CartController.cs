@@ -215,6 +215,12 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                 //check the stripe status
                 if(session.PaymentStatus.ToLower() == "paid")
                 {
+                    Console.WriteLine($"session id: {orderHeader.SessionId ?? "Unknown"}");
+                    Console.WriteLine($"session paymentIntentId: {session.PaymentIntentId}");
+
+                    _unitOfWork.OrderHeader.UpdateStripePaymentID(
+                        id, orderHeader.SessionId, session.PaymentIntentId
+                    );
                     _unitOfWork.OrderHeader.UpdateStatus(
                         id, SD.StatusApproved, SD.PaymentStatusApproved
                     );
