@@ -11,6 +11,7 @@ using HoshiBook.Models;
 using HoshiBook.Utility;
 using HoshiBook.Models.ViewModels;
 using Stripe;
+using Stripe.Checkout;
 
 namespace HoshiBookWeb.Areas.Admin.Controllers
 {
@@ -44,6 +45,90 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 )
             };
             return View(OrderVM);
+        }
+
+        [ActionName("Details")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Details_PAY_NOW(int orderId)
+        {
+            OrderVM.OrderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(
+                u => u.Id == OrderVM.OrderHeader.Id, includeProperties: "ApplicationUser"
+            );
+            OrderVM.OrderDetail = _unitOfWork.OrderDetail.GetAll(
+                    u => u.OrderId == OrderVM.OrderHeader.Id, includeProperties: "Product"
+            );
+            //stripe settings
+            var domain = "https://localhost:7229/";
+            var options = new SessionCreateOptions
+            {
+                PaymentMethodTypes = new List<string>
+                {
+                    "card"
+                },
+                LineItems = new List<SessionLineItemOptions>(),
+                Mode = "payment",
+                SuccessUrl = domain + $"admin/order/PaymentConfirmation?orderHeaderid={OrderVM.OrderHeader.Id}",
+                CancelUrl = domain + $"admin/order/details?orderID={OrderVM.OrderHeader.Id}",
+            };
+
+            foreach(var item in OrderVM.OrderDetail)
+            {
+                var sessionLineItem = new SessionLineItemOptions
+                {
+                    PriceData = new SessionLineItemPriceDataOptions
+                    {
+                        UnitAmount = (long)(item.Price * 100), //20.00 -> 2000
+                        Currency = "usd",
+                        ProductData = new SessionLineItemPriceDataProductDataOptions
+                        {
+                            Name = item.Product.Title
+                        },
+                    },
+                    Quantity = item.Count,
+                };
+                options.LineItems.Add(sessionLineItem);
+            }
+
+            Console.WriteLine($"options.LineItems.Count: {options.LineItems.Count}");
+
+            var service = new SessionService();
+            Session session = service.Create(options);
+
+            _unitOfWork.OrderHeader.UpdateStripePaymentID(
+                OrderVM.OrderHeader.Id, session.Id, session.PaymentIntentId
+            );
+            _unitOfWork.Save();
+
+            Response.Headers.Add("Location", session.Url);
+            return new StatusCodeResult(303);
+        }
+
+        //TODO Maybe can be added 'lastUpdateTime' to OrderHeader table for record the payment data last update time
+        public IActionResult PaymentConfirmation(int orderHeaderid)
+        {
+            OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u => u.Id == orderHeaderid);
+
+            if (orderHeader.PaymentStatus == SD.PaymentStatusDelayed)
+            {
+                var service = new SessionService();
+                Session session = service.Get(orderHeader.SessionId);
+                //check the stripe status
+                if(session.PaymentStatus.ToLower() == "paid")
+                {
+                    Console.WriteLine($"session id: {orderHeader.SessionId ?? "Unknown"}");
+                    Console.WriteLine($"session paymentIntentId: {session.PaymentIntentId}");
+
+                    _unitOfWork.OrderHeader.UpdateStripePaymentID(
+                        orderHeaderid, orderHeader.SessionId, session.PaymentIntentId
+                    );
+                    _unitOfWork.OrderHeader.UpdateStatus(
+                        orderHeaderid, orderHeader.OrderStatus, SD.PaymentStatusApproved
+                    );
+                    _unitOfWork.Save();
+                }
+            }
+            return View(orderHeaderid);
         }
 
         [HttpPost]

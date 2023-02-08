@@ -204,6 +204,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             return View();
         }
 
+        //TODO Maybe can be added 'lastUpdateTime' to OrderHeader table for record the payment data last update time
         public IActionResult OrderConfirmation(int id)
         {
             OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u => u.Id == id);
