@@ -12,6 +12,8 @@ using HoshiBook.Utility;
 using HoshiBook.Models;
 using HoshiBookWeb.Tools;
 using Stripe.Checkout;
+using Microsoft.AspNetCore.Identity.UI.Services;
+
 
 namespace HoshiBookWeb.Areas.Customer.Controllers
 {
@@ -20,13 +22,15 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
     public class CartController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailSender _emailSender;
         [BindProperty]
         public ShoppingCartVM ShoppingCartVM { get; set; }
         public int OrderTotal { get; set; }
 
-        public CartController(IUnitOfWork unitOfWork)
+        public CartController(IUnitOfWork unitOfWork, IEmailSender email)
         {
             _unitOfWork = unitOfWork;
+            _emailSender = email;
         }
 
         public IActionResult Index()
@@ -207,7 +211,10 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
         //TODO Maybe can be added 'lastUpdateTime' to OrderHeader table for record the payment data last update time
         public IActionResult OrderConfirmation(int id)
         {
-            OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u => u.Id == id);
+            OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(
+                u => u.Id == id,
+                includeProperties: "ApplicationUser"
+            );
 
             if (orderHeader.PaymentStatus != SD.PaymentStatusDelayed)
             {
@@ -228,6 +235,11 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     _unitOfWork.Save();
                 }
             }
+            _emailSender.SendEmailAsync(
+                orderHeader.ApplicationUser.Email,
+                "New Order - Hoshi Book",
+                "<p>New Order Created</p>"
+            );
             List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart.GetAll(
                 u => u.ApplicationUserId == orderHeader.ApplicationUserId
             ).ToList();
