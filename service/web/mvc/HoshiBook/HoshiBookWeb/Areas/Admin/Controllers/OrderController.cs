@@ -245,6 +245,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             {
                 var claimsIdentity = (ClaimsIdentity?)User.Identity;
                 var claim = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier);
+                // Console.WriteLine($"Claim: {claim?.Value}");
                 orderHeaders = _unitOfWork.OrderHeader.GetAll(
                     u => u.ApplicationUserId == claim.Value,
                     includeProperties: "ApplicationUser"

@@ -2,7 +2,8 @@ using HoshiBook.DataAccess;
 using HoshiBook.Models;
 using HoshiBook.DataAccess.Repository.IRepository;
 using HoshiBookWeb.Tools;
-
+using HoshiBook.Utility;
+using HoshiBook.Models.ViewModels;
 
 using System;
 using System.Collections.Generic;
@@ -11,11 +12,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using HoshiBook.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace HoshiBookWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
