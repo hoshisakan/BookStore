@@ -15,3 +15,5 @@ dotnet add package Microsoft.VisualStudio.Web.CodeGeneration.Design --version 6.
 dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore --version 6.0.12
 dotnet add package Microsoft.AspNetCore.Identity.UI --version 6.0.12
 dotnet add package Stripe.net --version 41.5.0
+dotnet add package Microsoft.AspNetCore.Authentication.Facebook -
+-version 6.0.12
