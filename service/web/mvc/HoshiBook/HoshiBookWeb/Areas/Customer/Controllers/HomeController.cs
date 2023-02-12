@@ -6,6 +6,7 @@ using HoshiBook.DataAccess.Repository.IRepository;
 using HoshiBook.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using HoshiBook.Utility;
 
 namespace HoshiBookWeb.Areas.Customer.Controllers
 {
@@ -61,13 +62,21 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             if (cartFromDb == null)
             {
                 _unitOfWork.ShoppingCart.Add(shoppingCart);
+                _unitOfWork.Save();
+                // int count = _unitOfWork.ShoppingCart.GetAll(
+                //     u => u.ApplicationUserId == claim.Value
+                // ).ToList().Count();
+                int count = _unitOfWork.ShoppingCart.GetAll(
+                    u => u.ApplicationUserId == claim.Value
+                ).Select(u => u.Count).Sum();
+                Console.WriteLine($"The user {claim.Value} has {count} items in the cart.");
+                HttpContext.Session.SetInt32(SD.SessionCart, count);
             }
             else
             {
                 _unitOfWork.ShoppingCart.IncrementCount(cartFromDb, shoppingCart.Count);
+                _unitOfWork.Save();
             }
-            _unitOfWork.Save();
-
             return RedirectToAction(nameof(Index));
         }
 
