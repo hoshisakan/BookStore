@@ -12,6 +12,8 @@ using HoshiBook.Utility;
 using HoshiBook.Models;
 using HoshiBookWeb.Tools;
 using Stripe.Checkout;
+using Microsoft.AspNetCore.Identity.UI.Services;
+
 
 namespace HoshiBookWeb.Areas.Customer.Controllers
 {
@@ -20,13 +22,15 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
     public class CartController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailSender _emailSender;
         [BindProperty]
         public ShoppingCartVM ShoppingCartVM { get; set; }
         public int OrderTotal { get; set; }
 
-        public CartController(IUnitOfWork unitOfWork)
+        public CartController(IUnitOfWork unitOfWork, IEmailSender email)
         {
             _unitOfWork = unitOfWork;
+            _emailSender = email;
         }
 
         public IActionResult Index()
@@ -207,7 +211,10 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
         //TODO Maybe can be added 'lastUpdateTime' to OrderHeader table for record the payment data last update time
         public IActionResult OrderConfirmation(int id)
         {
-            OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u => u.Id == id);
+            OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(
+                u => u.Id == id,
+                includeProperties: "ApplicationUser"
+            );
 
             if (orderHeader.PaymentStatus != SD.PaymentStatusDelayed)
             {
@@ -228,54 +235,94 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     _unitOfWork.Save();
                 }
             }
+            Console.WriteLine($"orderHeader.ApplicationUser.Email: {orderHeader.ApplicationUser.Email}");
+            _emailSender.SendEmailAsync(
+                orderHeader.ApplicationUser.Email,
+                "New Order - Hoshi Book",
+                "<p>New Order Created</p>"
+            );
             List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart.GetAll(
                 u => u.ApplicationUserId == orderHeader.ApplicationUserId
             ).ToList();
+            HttpContext.Session.Clear();
             _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
             _unitOfWork.Save();
             return View(id);
         }
 
-        public IActionResult Plus(int? cardId)
+        public IActionResult Plus(int? cartId)
         {
-            if (cardId == null)
+            if (cartId == null)
             {
                 return NotFound();
             }
-            var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault(u => u.Id == cardId);
+            var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault(u => u.Id == cartId);
             _unitOfWork.ShoppingCart.IncrementCount(cart, 1);
             _unitOfWork.Save();
+            // int count = _unitOfWork.ShoppingCart.GetAll(
+            //     u => u.ApplicationUserId == cart.ApplicationUserId
+            // ).ToList().Count;
+            int count = _unitOfWork.ShoppingCart.GetAll(
+                u => u.ApplicationUserId == cart.ApplicationUserId
+            ).Select(u => u.Count).Sum();
+            Console.WriteLine($"The user {cart.ApplicationUserId} has {count} items in the cart after increment product {cartId}.");
+            HttpContext.Session.SetInt32(SD.SessionCart, count);
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Minus(int? cardId)
+        public IActionResult Minus(int? cartId)
         {
-            if (cardId == null)
+            if (cartId == null)
             {
                 return NotFound();
             }
-            var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault(u => u.Id == cardId);
+            var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault(u => u.Id == cartId);
             if (cart.Count <= 1)
             {
                 _unitOfWork.ShoppingCart.Remove(cart);
+                _unitOfWork.Save();
+                // int count = _unitOfWork.ShoppingCart.GetAll(
+                //     u => u.ApplicationUserId == cart.ApplicationUserId
+                // ).ToList().Count;
+                int count = _unitOfWork.ShoppingCart.GetAll(
+                    u => u.ApplicationUserId == cart.ApplicationUserId
+                ).Select(u => u.Count).Sum();
+                Console.WriteLine($"The user {cart.ApplicationUserId} has {count} items in the cart after clear product {cartId}.");
+                HttpContext.Session.SetInt32(SD.SessionCart, count);
             }
             else
             {
                 _unitOfWork.ShoppingCart.DecrementCount(cart, 1);
+                _unitOfWork.Save();
+                // int count = _unitOfWork.ShoppingCart.GetAll(
+                //     u => u.ApplicationUserId == cart.ApplicationUserId
+                // ).ToList().Count;
+                int count = _unitOfWork.ShoppingCart.GetAll(
+                    u => u.ApplicationUserId == cart.ApplicationUserId
+                ).Select(u => u.Count).Sum();
+                Console.WriteLine($"The user {cart.ApplicationUserId} has {count} items in the cart after decrement product {cartId}.");
+                HttpContext.Session.SetInt32(SD.SessionCart, count);
             }
-            _unitOfWork.Save();
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Remove(int? cardId)
+        public IActionResult Remove(int? cartId)
         {
-            if (cardId == null)
+            if (cartId == null)
             {
                 return NotFound();
             }
-            var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault(u => u.Id == cardId);
+            var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault(u => u.Id == cartId);
             _unitOfWork.ShoppingCart.Remove(cart);
             _unitOfWork.Save();
+            // int count = _unitOfWork.ShoppingCart.GetAll(
+            //     u => u.ApplicationUserId == cart.ApplicationUserId
+            // ).ToList().Count - 1;
+            int count = _unitOfWork.ShoppingCart.GetAll(
+                u => u.ApplicationUserId == cart.ApplicationUserId
+            ).Select(u => u.Count).Sum();
+            Console.WriteLine($"The user {cart.ApplicationUserId} has {count} items in the cart after remove.");
+            HttpContext.Session.SetInt32(SD.SessionCart, count);
             return RedirectToAction(nameof(Index));
         }
 

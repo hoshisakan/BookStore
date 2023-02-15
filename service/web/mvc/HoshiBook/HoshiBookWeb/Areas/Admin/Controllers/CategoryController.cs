@@ -1,6 +1,7 @@
 using HoshiBook.DataAccess;
 using HoshiBook.Models;
 using HoshiBook.DataAccess.Repository.IRepository;
+using HoshiBook.Utility;
 
 using System;
 using System.Collections.Generic;
@@ -8,10 +9,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+
+
 
 namespace HoshiBookWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
+    
     public class CategoryController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
