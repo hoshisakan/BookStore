@@ -20,8 +20,10 @@ builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 builder.Services.AddAuthentication()
     .AddFacebook(options =>
     {
-        options.AppId = builder.Configuration["Authentication:Facebook:AppId"];
-        options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
+        options.AppId = builder.Configuration["Authentication:Facebook:LocalDebug:AppId"];
+        options.AppSecret = builder.Configuration["Authentication:Facebook:LocalDebug:AppSecret"];
+        // options.AppId = builder.Configuration["Authentication:Facebook:LocalServer:AppId"];
+        // options.AppSecret = builder.Configuration["Authentication:Facebook:LocalServer:AppSecret"];
     })
     .AddGoogle(options =>
     {

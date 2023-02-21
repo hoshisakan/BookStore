@@ -55,27 +55,54 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
             shoppingCart.ApplicationUserId = claim.Value;
 
+            //TODO Get the product from the database.
             ShoppingCart cartFromDb = _unitOfWork.ShoppingCart.GetFirstOrDefault(
                 u => u.ApplicationUserId == claim.Value && u.ProductId == shoppingCart.ProductId
             );
 
+            //TODO Check the product does exists in currently logged in user's cart.
             if (cartFromDb == null)
             {
-                _unitOfWork.ShoppingCart.Add(shoppingCart);
-                _unitOfWork.Save();
-                // int count = _unitOfWork.ShoppingCart.GetAll(
-                //     u => u.ApplicationUserId == claim.Value
-                // ).ToList().Count();
-                int count = _unitOfWork.ShoppingCart.GetAll(
-                    u => u.ApplicationUserId == claim.Value
-                ).Select(u => u.Count).Sum();
-                Console.WriteLine($"The user {claim.Value} has {count} items in the cart.");
-                HttpContext.Session.SetInt32(SD.SessionCart, count);
+                if (shoppingCart.Count < 1)
+                {
+                    TempData["error"] = "Add to car failed, because the product quantity is less than 1.";
+                    return RedirectToAction(nameof(Details), new { productId = shoppingCart.ProductId });
+                }
+                else
+                {
+                    _unitOfWork.ShoppingCart.Add(shoppingCart);
+                    _unitOfWork.Save();
+                    // int count = _unitOfWork.ShoppingCart.GetAll(
+                    //     u => u.ApplicationUserId == claim.Value
+                    // ).ToList().Count();
+                    //TODO Get the count of the single product in the cart.
+                    int count = _unitOfWork.ShoppingCart.GetAll(
+                        u => u.ApplicationUserId == claim.Value
+                    ).Select(u => u.Count).Sum();
+                    HttpContext.Session.SetInt32(SD.SessionCart, count);
+                }
             }
             else
             {
-                _unitOfWork.ShoppingCart.IncrementCount(cartFromDb, shoppingCart.Count);
-                _unitOfWork.Save();
+                if (shoppingCart.Count < 1)
+                {
+                    TempData["error"] = "Add to car failed, because the product quantity is less than 1.";
+                    return RedirectToAction(nameof(Details), new { productId = shoppingCart.ProductId });
+                }
+                else
+                {
+                    TempData["success"] = $"Add to car sucessfully.";
+                    _unitOfWork.ShoppingCart.IncrementCount(cartFromDb, shoppingCart.Count);
+                    _unitOfWork.Save();
+                    // int count = _unitOfWork.ShoppingCart.GetAll(
+                    //     u => u.ApplicationUserId == claim.Value
+                    // ).ToList().Count();
+                    //TODO Get the count of the single product in the cart.
+                    int count = _unitOfWork.ShoppingCart.GetAll(
+                        u => u.ApplicationUserId == claim.Value
+                    ).Select(u => u.Count).Sum();
+                    HttpContext.Session.SetInt32(SD.SessionCart, count);
+                }
             }
             return RedirectToAction(nameof(Index));
         }

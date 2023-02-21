@@ -19,13 +19,16 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
     [Authorize]
     public class OrderController : Controller
     {
+        private readonly string domain;
         private readonly IUnitOfWork _unitOfWork;
         [BindProperty]
         public OrderVM OrderVM { get; set; }
 
-        public OrderController(IUnitOfWork unitOfWork)
+        public OrderController(IUnitOfWork unitOfWork, IConfiguration _config)
         {
             _unitOfWork = unitOfWork;
+            domain = _config.GetValue<string>("DomainList:LocalDebug:Domain:https");
+            // domain = _config.GetValue<string>("DomainList:LocalServer:Domain:http");
         }
 
         public IActionResult Index()
@@ -58,8 +61,6 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             OrderVM.OrderDetail = _unitOfWork.OrderDetail.GetAll(
                     u => u.OrderId == OrderVM.OrderHeader.Id, includeProperties: "Product"
             );
-            //stripe settings
-            var domain = "https://localhost:7229/";
             var options = new SessionCreateOptions
             {
                 PaymentMethodTypes = new List<string>

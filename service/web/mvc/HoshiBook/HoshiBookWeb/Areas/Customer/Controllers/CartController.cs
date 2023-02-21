@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,16 +17,19 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
     [Authorize]
     public class CartController : Controller
     {
+        private readonly string domain;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailSender _emailSender;
         [BindProperty]
         public ShoppingCartVM ShoppingCartVM { get; set; }
         public int OrderTotal { get; set; }
 
-        public CartController(IUnitOfWork unitOfWork, IEmailSender email)
+        public CartController(IUnitOfWork unitOfWork, IEmailSender email, IConfiguration _config)
         {
             _unitOfWork = unitOfWork;
             _emailSender = email;
+            domain = _config.GetValue<string>("DomainList:LocalDebug:Domain:https");
+            // domain = _config.GetValue<string>("DomainList:LocalServer:Domain:http");
         }
 
         public IActionResult Index()
@@ -59,6 +58,14 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
         {
             var claimsIdentity = (ClaimsIdentity?)User.Identity;
             var claim = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier);
+
+            ShoppingCart cartFromDb = _unitOfWork.ShoppingCart.GetFirstOrDefault(
+                u => u.ApplicationUserId == claim.Value
+            );
+            if (cartFromDb == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
 
             ShoppingCartVM = new ShoppingCartVM()
             {
@@ -145,8 +152,6 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
 
                 if (applicationUser.CompanyId.GetValueOrDefault() == 0)
                 {
-                    //stripe settings
-                    var domain = "https://localhost:7229/";
                     var options = new SessionCreateOptions
                     {
                         PaymentMethodTypes = new List<string>
@@ -177,13 +182,13 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                         options.LineItems.Add(sessionLineItem);
                     }
 
-                    Console.WriteLine($"options.LineItems.Count: {options.LineItems.Count}");
+                    // Console.WriteLine($"options.LineItems.Count: {options.LineItems.Count}");
 
                     var service = new SessionService();
                     Session session = service.Create(options);
                     
-                    Console.WriteLine($"session id: {session.Id}");
-                    Console.WriteLine($"session paymentIntentId: {session.PaymentIntentId}");
+                    // Console.WriteLine($"session id: {session.Id}");
+                    // Console.WriteLine($"session paymentIntentId: {session.PaymentIntentId}");
 
                     ShoppingCartVM.OrderHeader.SessionId = session.Id;
                     ShoppingCartVM.OrderHeader.PaymentIntentId = session.PaymentIntentId;
