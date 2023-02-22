@@ -4,3 +4,4 @@
 # dotnet add reference [../Project1.Api/Project1.Api.csproj] => [Your Reference Project Directory]
 cd D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\mvc\\HoshiBook\\HoshiBook.DataAccess
 dotnet add reference ../HoshiBook.Models/HoshiBook.Models.csproj
+dotnet add reference ../HoshiBook.Utility/HoshiBook.Utility.csproj

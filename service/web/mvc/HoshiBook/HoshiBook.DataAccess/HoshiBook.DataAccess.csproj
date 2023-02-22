@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HoshiBook.Models\HoshiBook.Models.csproj" />
+    <ProjectReference Include="..\HoshiBook.Utility\HoshiBook.Utility.csproj" />
   </ItemGroup>
 
   <ItemGroup>

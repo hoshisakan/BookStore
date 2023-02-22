@@ -4,10 +4,10 @@ using HoshiBook.DataAccess.Repository.IRepository;
 using HoshiBook.Utility;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Stripe;
+using HoshiBook.DataAccess.DbInitializer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,12 +46,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(
     )
 );
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
-// builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-//     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddIdentity<IdentityUser,IdentityRole>().AddDefaultTokenProviders()
     .AddEntityFrameworkStores<ApplicationDbContext>();
-// builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -84,6 +82,7 @@ app.UseRouting();
 
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
 
+SeedDatabase();
 app.UseAuthentication();;
 app.UseAuthorization();
 app.UseSession();
@@ -96,3 +95,12 @@ app.MapControllerRoute(
 );
 
 app.Run();
+
+void SeedDatabase()
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        dbInitializer.Initializer();
+    }
+}
