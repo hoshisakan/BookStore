@@ -27,8 +27,9 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         public OrderController(IUnitOfWork unitOfWork, IConfiguration _config)
         {
             _unitOfWork = unitOfWork;
-            domain = _config.GetValue<string>("DomainList:LocalDebug:Domain:https");
-            // domain = _config.GetValue<string>("DomainList:LocalServer:Domain:http");
+            // domain = _config.GetValue<string>("DomainList:Kestrel:LocalDebug:Domain:https");
+            // domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:https");
+            domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:http");
         }
 
         public IActionResult Index()

@@ -1,8 +1,45 @@
 version: '3.9'
 services:
+    reverse_proxy:
+        build: ./conf/nginx
+        image: hoshisakan/nginx:1.23.3
+        container_name: nginx-dev
+        volumes:
+            - ./web/temp/dist/index.html:/web/dist/index.html
+            - ./conf/nginx/nginx.conf:/etc/nginx/nginx.conf
+            - ./conf/nginx/conf.d:/etc/nginx/conf.d
+            - ./logs/nginx:/var/log/nginx
+        ports:
+            - 80:80
+        depends_on:
+            - postgres_db
+            - dotnet_web
+        networks:
+            - ${EXTERNAL_NETWORK}
+        user: root
+        tty: true
+        restart: always
+
+    dotnet_web:
+      build: ./conf/dotnet/6.0
+      image: hoshisakan/dotnet:6.0
+      container_name: dotnet-web-dev
+      volumes:
+          - ./web/mvc/HoshiBook:/app
+          - ./web/mvc/deploy/HoshiBookWeb:/deploy/HoshiBookWeb
+          - ./web/mvc/deploy/certs:/deploy/certs
+      expose:
+        - 5000
+      depends_on:
+        - postgres_db
+      networks:
+          - ${EXTERNAL_NETWORK}
+      tty: true
+      restart: always
+
     postgres_db:
         build: ./conf/postgresql
-        image: hoshisakan/postgresql:15.0
+        image: hoshisakan/postgresql:15.2
         container_name: postgresql-dev
         environment:
             - DATABASE_HOST=${DATABASE_HOST}

@@ -1,2 +1,2 @@
 #TODO For Linux Container
-FROM postgres:15.0
+FROM postgres:15.2

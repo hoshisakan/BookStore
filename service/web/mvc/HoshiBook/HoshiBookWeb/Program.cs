@@ -14,6 +14,31 @@ var builder = WebApplication.CreateBuilder(args);
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
 
+// Add Kerstrel configuration
+// builder.WebHost.ConfigureKestrel(options =>
+// {
+//     options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Http:Port").Get<int>());
+//     options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Https:Port").Get<int>(), listenOptions =>
+//     {
+//         listenOptions.UseHttps(
+//             builder.Configuration["Deployment:Kestrel:Https:Certificate:Path"],
+//             builder.Configuration["Deployment:Kestrel:Https:Certificate:Password"]
+//         );
+//     });
+// });
+
+builder.WebHost.UseKestrel(options =>
+{
+    options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Http:Port").Get<int>());
+    // options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Https:Port").Get<int>(), listenOptions =>
+    // {
+    //     listenOptions.UseHttps(
+    //         builder.Configuration["Deployment:Kestrel:Https:Certificate:Path"],
+    //         builder.Configuration["Deployment:Kestrel:Https:Certificate:Password"]
+    //     );
+    // });
+});
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
