@@ -30,13 +30,13 @@ AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
 builder.WebHost.UseKestrel(options =>
 {
     options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Http:Port").Get<int>());
-    // options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Https:Port").Get<int>(), listenOptions =>
-    // {
-    //     listenOptions.UseHttps(
-    //         builder.Configuration["Deployment:Kestrel:Https:Certificate:Path"],
-    //         builder.Configuration["Deployment:Kestrel:Https:Certificate:Password"]
-    //     );
-    // });
+    options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Https:Port").Get<int>(), listenOptions =>
+    {
+        listenOptions.UseHttps(
+            builder.Configuration["Deployment:Kestrel:Https:Certificate:Path"],
+            builder.Configuration["Deployment:Kestrel:Https:Certificate:Password"]
+        );
+    });
 });
 
 // Add services to the container.
@@ -45,20 +45,18 @@ builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 builder.Services.AddAuthentication()
     .AddFacebook(options =>
     {
-        options.AppId = builder.Configuration["Authentication:Facebook:LocalDebug:AppId"];
-        options.AppSecret = builder.Configuration["Authentication:Facebook:LocalDebug:AppSecret"];
-        // options.AppId = builder.Configuration["Authentication:Facebook:LocalServer:AppId"];
-        // options.AppSecret = builder.Configuration["Authentication:Facebook:LocalServer:AppSecret"];
+        options.AppId = builder.Configuration["Authentication:Facebook:Kestrel:AppId"];
+        options.AppSecret = builder.Configuration["Authentication:Facebook:Kestrel:AppSecret"];
     })
     .AddGoogle(options =>
     {
-        options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+        options.ClientId = builder.Configuration["Authentication:Google:Kestrel:ClientId"];
+        options.ClientSecret = builder.Configuration["Authentication:Google:Kestrel:ClientSecret"];
     })
     .AddMicrosoftAccount(options =>
     {
-        options.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"];
-        options.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"];
+        options.ClientId = builder.Configuration["Authentication:Microsoft:Kestrel:ClientId"];
+        options.ClientSecret = builder.Configuration["Authentication:Microsoft:Kestrel:ClientSecret"];
     });
 
 builder.Services.AddDbContext<ApplicationDbContext>(

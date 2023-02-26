@@ -29,8 +29,8 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             _unitOfWork = unitOfWork;
             _emailSender = email;
             // domain = _config.GetValue<string>("DomainList:Kestrel:LocalDebug:Domain:https");
-            // domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:https");
-            domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:http");
+            domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:https");
+            // domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:http");
         }
 
         public IActionResult Index()

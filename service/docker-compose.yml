@@ -8,9 +8,11 @@ services:
             - ./web/temp/dist/index.html:/web/dist/index.html
             - ./conf/nginx/nginx.conf:/etc/nginx/nginx.conf
             - ./conf/nginx/conf.d:/etc/nginx/conf.d
+            - ./web/mvc/deploy/certs:/etc/nginx/ssl
             - ./logs/nginx:/var/log/nginx
         ports:
             - 80:80
+            - 443:443
         depends_on:
             - postgres_db
             - dotnet_web
@@ -30,6 +32,7 @@ services:
           - ./web/mvc/deploy/certs:/deploy/certs
       expose:
         - 5000
+        - 7230
       depends_on:
         - postgres_db
       networks:
@@ -71,5 +74,5 @@ services:
         restart: always
 
 networks:
-    common-overlay:
+    common-bridge:
         external: true
