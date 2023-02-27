@@ -8,24 +8,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Stripe;
 using HoshiBook.DataAccess.DbInitializer;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
-
-// Add Kerstrel configuration
-// builder.WebHost.ConfigureKestrel(options =>
-// {
-//     options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Http:Port").Get<int>());
-//     options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Https:Port").Get<int>(), listenOptions =>
-//     {
-//         listenOptions.UseHttps(
-//             builder.Configuration["Deployment:Kestrel:Https:Certificate:Path"],
-//             builder.Configuration["Deployment:Kestrel:Https:Certificate:Password"]
-//         );
-//     });
-// });
 
 builder.WebHost.UseKestrel(options =>
 {
@@ -45,18 +33,18 @@ builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 builder.Services.AddAuthentication()
     .AddFacebook(options =>
     {
-        options.AppId = builder.Configuration["Authentication:Facebook:Kestrel:AppId"];
-        options.AppSecret = builder.Configuration["Authentication:Facebook:Kestrel:AppSecret"];
+        options.AppId = builder.Configuration["Authentication:ExternalLogin:Facebook:Kestrel:AppId"];
+        options.AppSecret = builder.Configuration["Authentication:ExternalLogin:Facebook:Kestrel:AppSecret"];
     })
     .AddGoogle(options =>
     {
-        options.ClientId = builder.Configuration["Authentication:Google:Kestrel:ClientId"];
-        options.ClientSecret = builder.Configuration["Authentication:Google:Kestrel:ClientSecret"];
+        options.ClientId = builder.Configuration["Authentication:ExternalLogin:Google:Kestrel:ClientId"];
+        options.ClientSecret = builder.Configuration["Authentication:ExternalLogin:Google:Kestrel:ClientSecret"];
     })
     .AddMicrosoftAccount(options =>
     {
-        options.ClientId = builder.Configuration["Authentication:Microsoft:Kestrel:ClientId"];
-        options.ClientSecret = builder.Configuration["Authentication:Microsoft:Kestrel:ClientSecret"];
+        options.ClientId = builder.Configuration["Authentication:ExternalLogin:Microsoft:Kestrel:ClientId"];
+        options.ClientSecret = builder.Configuration["Authentication:ExternalLogin:Microsoft:Kestrel:ClientSecret"];
     });
 
 builder.Services.AddDbContext<ApplicationDbContext>(
@@ -79,14 +67,31 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = $"/Identity/Account/Login";
     options.LogoutPath = $"/Identity/Account/Logout";
     options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromHours(
+        builder.Configuration.GetSection("Authentication:Application:Cookie:ExpireTimeSpan").Get<double>()
+    );
+    options.Cookie.HttpOnly = true;
+    options.SlidingExpiration = true;
+    options.Cookie.Name = builder.Configuration.GetSection(
+        "Authentication:Application:Cookie:Name"
+    ).Get<string>();
 });
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout = TimeSpan.FromMinutes(
+        builder.Configuration.GetSection(
+            "Authentication:Application:Session:IdleTimeout"
+        ).Get<double>()
+    );
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.Name = builder.Configuration.GetSection(
+        "Authentication:Application:Session:Name"
+    ).Get<string>();
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
+
 
 var app = builder.Build();
 
