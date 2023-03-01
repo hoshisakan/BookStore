@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Stripe;
 using HoshiBook.DataAccess.DbInitializer;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Quartz;
+using HoshiBookWeb.QuartzPostgreSQLBackupScheduler;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -92,6 +93,26 @@ builder.Services.AddSession(options =>
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
+builder.Services.AddQuartz(q =>
+{
+    q.UseMicrosoftDependencyInjectionScopedJobFactory();
+    q.UseSimpleTypeLoader();
+    q.UseInMemoryStore();
+    q.UseDefaultThreadPool(tp =>
+    {
+        tp.MaxConcurrency = 10;
+    });
+    q.ScheduleJob<BackupJob>(trigger => trigger
+        .WithIdentity("BackupJob")
+        // .WithCronSchedule(builder.Configuration.GetSection("Quartz:BackupJob:CronSchedule").Get<string>())
+        .WithCronSchedule("0/5 * * * * ?")
+    );
+});
+
+builder.Services.AddQuartzHostedService(qs =>
+{
+    qs.WaitForJobsToComplete = true;
+});
 
 var app = builder.Build();
 

@@ -18,3 +18,5 @@ dotnet add package Stripe.net --version 41.5.0
 dotnet add package Microsoft.AspNetCore.Authentication.Facebook --version 6.0.12
 dotnet add package Microsoft.AspNetCore.Authentication.Google --version 6.0.12
 dotnet add package Microsoft.AspNetCore.Authentication.MicrosoftAccount --version 6.0.12
+dotnet add package Quartz --version 3.6.2
+dotnet add package Quartz.Extensions.Hosting --version 3.6.2

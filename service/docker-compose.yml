@@ -1,18 +1,21 @@
-version: '3.8'
+version: '3.9'
 services:
     reverse_proxy:
         build:
             context: ./conf/nginx
             dockerfile: Dockerfile
             args:
-                - TIME_ZONE=${TIME_ZONE}
-                - LANG_NAME=${LANG_NAME}
-                - LANG_INPUTFILE=${LANG_INPUTFILE}
-                - LANG_CHARMAP=${LANG_CHARMAP}
+                - NGINX_TIME_ZONE=${NGINX_TIME_ZONE}
+                - NGINX_LANG_NAME=${NGINX_LANG_NAME}
+                - NGINX_LANG_INPUTFILE=${NGINX_LANG_INPUTFILE}
+                - NGINX_LANG_CHARMAP=${NGINX_LANG_CHARMAP}
+                - DEBIAN_FRONTEND=${NGINX_DEBIAN_FRONTEND}
         image: hoshisakan/nginx:1.23.3
         container_name: nginx-dev
+        env_file:
+          - ./.env
         environment:
-          - LANG=${LANG_NAME}
+          - LANG=${NGINX_LANG_NAME}
         volumes:
             - ./web/temp/dist/index.html:/web/dist/index.html
             - ./conf/nginx/nginx.conf:/etc/nginx/nginx.conf
@@ -24,31 +27,37 @@ services:
             - 443:443
         depends_on:
             - postgres_db
-            - web_1
+            - web
         networks:
             - ${EXTERNAL_NETWORK}
         user: root
         tty: true
         restart: always
 
-    web_1:
+    web:
       build:
-          context: ./conf/dotnet/6.0/web_1
+          context: ./conf/dotnet/6.0/debian
           dockerfile: Dockerfile
           args:
               - DOTNET_VERSION=${DOTNET_VERSION}
-              - TIME_ZONE=${TIME_ZONE}
-              - LANG_NAME=${LANG_NAME}
-              - LANG_INPUTFILE=${LANG_INPUTFILE}
-              - LANG_CHARMAP=${LANG_CHARMAP}
-      image: hoshisakan/web_1/dotnet:6.0
-      container_name: web-1-dev
+              - DOTNET_TIME_ZONE=${DOTNET_TIME_ZONE}
+              - DOTNET_LANG_NAME=${DOTNET_LANG_NAME}
+              - DOTNET_LANG_INPUTFILE=${DOTNET_LANG_INPUTFILE}
+              - DOTNET_LANG_CHARMAP=${DOTNET_LANG_CHARMAP}
+              - DEBIAN_FRONTEND=${DOTNET_DEBIAN_FRONTEND}
+              - DOTNET_POSTGRESQL_CLIENT_HOME=${DOTNET_POSTGRESQL_CLIENT_HOME}
+      image: hoshisakan/dotnet:6.0
+      container_name: web-dev
+      env_file:
+          - ./.env
       environment:
-          - LANG=${LANG_NAME}
+          - DOTNET_LANG_NAME=${DOTNET_LANG_NAME}
+          - PGPASSWORD=${POSTGRES_PASSWORD}
       volumes:
           - ./web/mvc/HoshiBook:/app
           - ./web/mvc/deploy/HoshiBookWeb:/deploy/HoshiBookWeb
           - ./web/mvc/deploy/certs:/deploy/certs
+          - ./data/postgresql/pgdata_backup:/pgdata_backup
       expose:
         - 5002
         - 7232
@@ -64,20 +73,22 @@ services:
             context: ./conf/postgresql
             dockerfile: Dockerfile
             args:
-                - TIME_ZONE=${TIME_ZONE}
-                - LANG_NAME=${LANG_NAME}
-                - LANG_INPUTFILE=${LANG_INPUTFILE}
-                - LANG_CHARMAP=${LANG_CHARMAP}
+                - POSTGRES_TIME_ZONE=${POSTGRES_TIME_ZONE}
+                - POSTGRES_LANG_NAME=${POSTGRES_LANG_NAME}
+                - POSTGRES_LANG_INPUTFILE=${POSTGRES_LANG_INPUTFILE}
+                - POSTGRES_LANG_CHARMAP=${POSTGRES_LANG_CHARMAP}
         image: hoshisakan/postgresql:15.2
         container_name: postgresql-dev
+        env_file:
+          - ./.env
         environment:
             - DATABASE_HOST=${DATABASE_HOST}
             - POSTGRES_USER=${POSTGRES_USER}
             - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
             - POSTGRES_DB=${POSTGRES_DB}
             - PGDATA=/var/lib/postgresql/data
-            - TZ=${TIME_ZONE}
-            - LANG=${LANG_NAME}
+            - TZ=${POSTGRES_TIME_ZONE}
+            - POSTGRES_LANG_NAME=${POSTGRES_LANG_NAME}
         volumes:
             - ./data/postgresql/pgdata:/var/lib/postgresql/data
             - ./data/postgresql/pgdata_backup:/pgdata_backup
@@ -91,10 +102,11 @@ services:
         build: ./conf/postgresql_admin
         image: hoshisakan/pgadmin:6.20
         container_name: postgresql-admin-dev
+        env_file:
+          - ./.env
         environment:
             - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-test@test.com}
             - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-test123!}
-            - LANG=${LANG_NAME}
         volumes:
             - pgadmin:/var/lib/pgadmin
             - ./data/pgadmin/pgadmin_data:/var/lib/pgadmin
@@ -108,7 +120,7 @@ services:
         restart: always
 
 networks:
-    common-bridge:
+    bookstore-common-network:
         external: true
 
 volumes:
