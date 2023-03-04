@@ -1,4 +1,4 @@
-FROM debian:11.6
+FROM ubuntu:22.10
 
 # Add arguments to set timezone and dotnet version
 ARG DOTNET_VERSION
@@ -15,14 +15,14 @@ ARG DOTNET_PACKAGES_PATH
 # Set environment variable for postgresql-client specific version
 ENV PATH=$DOTNET_POSTGRESQL_CLIENT_HOME/bin:$PATH
 
-# Install base packages, build-essential libreadline-dev zlib1g-dev for make install postgresql-client 15 on debian 11
+# Install base packages, build-essential libreadline-dev zlib1g-dev for make install postgresql-client specific version
 RUN apt update && apt install -y wget locales gnupg2 apt-transport-https \
     ca-certificates curl software-properties-common \
     libnss3-tools iputils-ping telnet net-tools \
     openssl tzdata build-essential libreadline-dev zlib1g-dev
 
-# Add the Microsoft package signing key to your list of trusted keys and add the package repository.
-RUN wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+# Add the Microsoft package signing key to your list of trusted keys and add the package repository
+RUN wget https://packages.microsoft.com/config/ubuntu/22.10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
 RUN dpkg -i packages-microsoft-prod.deb
 RUN rm packages-microsoft-prod.deb
 

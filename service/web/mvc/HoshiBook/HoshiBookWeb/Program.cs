@@ -1,20 +1,32 @@
-using HoshiBook.DataAccess;
-using HoshiBook.DataAccess.Repository;
-using HoshiBook.DataAccess.Repository.IRepository;
-using HoshiBook.Utility;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Stripe;
-using HoshiBook.DataAccess.DbInitializer;
 using Quartz;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
+
+using HoshiBook.DataAccess;
+using HoshiBook.DataAccess.Repository;
+using HoshiBook.DataAccess.Repository.IRepository;
+using HoshiBook.Utility;
+using HoshiBook.DataAccess.DbInitializer;
 using HoshiBookWeb.QuartzPostgreSQLBackupScheduler;
 
 var builder = WebApplication.CreateBuilder(args);
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+
+builder.Services.AddDataProtection().UseCryptographicAlgorithms(
+    new AuthenticatedEncryptorConfiguration()
+    {
+        EncryptionAlgorithm = EncryptionAlgorithm.AES_256_CBC,
+        ValidationAlgorithm = ValidationAlgorithm.HMACSHA256
+    }
+);
 
 builder.WebHost.UseKestrel(options =>
 {
@@ -95,7 +107,7 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddQuartz(q =>
 {
-    q.UseMicrosoftDependencyInjectionScopedJobFactory();
+    q.UseMicrosoftDependencyInjectionJobFactory();
     q.UseSimpleTypeLoader();
     q.UseInMemoryStore();
     q.UseDefaultThreadPool(tp =>
@@ -103,9 +115,40 @@ builder.Services.AddQuartz(q =>
         tp.MaxConcurrency = 10;
     });
     q.ScheduleJob<BackupJob>(trigger => trigger
-        .WithIdentity("BackupJob")
-        // .WithCronSchedule(builder.Configuration.GetSection("Quartz:BackupJob:CronSchedule").Get<string>())
-        .WithCronSchedule("0/5 * * * * ?")
+        .WithIdentity(
+            builder.Configuration.GetSection(
+                "Quartz:MainDatabaseBackupJob:Identity"
+            ).Get<string>()
+        )
+        .UsingJobData(
+            "backupTarget",
+            builder.Configuration.GetSection(
+                "Quartz:MainDatabaseBackupJob:Target"
+            ).Get<string>()
+        )
+        .WithCronSchedule(
+            builder.Configuration.GetSection(
+                "Quartz:MainDatabaseBackupJob:Schedule:WeekendCronExpression"
+            ).Get<string>()
+        )
+    );
+    q.ScheduleJob<BackupJob>(trigger => trigger
+        .WithIdentity(
+            builder.Configuration.GetSection(
+                "Quartz:SecondaryDatabaseBackupJob:Identity"
+            ).Get<string>()
+        )
+        .UsingJobData(
+            "backupTarget",
+            builder.Configuration.GetSection(
+                "Quartz:SecondaryDatabaseBackupJob:Target"
+            ).Get<string>()
+        )
+        .WithCronSchedule(
+            builder.Configuration.GetSection(
+                "Quartz:SecondaryDatabaseBackupJob:Schedule:WeekendCronExpression"
+            ).Get<string>()
+        )
     );
 });
 
@@ -139,7 +182,6 @@ app.UseSession();
 app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",
-    // pattern: "{controller=Home}/{action=Index}/{id?}");
     pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}"
 );
 

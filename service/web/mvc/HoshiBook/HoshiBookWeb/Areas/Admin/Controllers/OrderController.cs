@@ -22,7 +22,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         private readonly string domain;
         private readonly IUnitOfWork _unitOfWork;
         [BindProperty]
-        public OrderVM OrderVM { get; set; }
+        public OrderVM? OrderVM { get; set; }
 
         public OrderController(IUnitOfWork unitOfWork, IConfiguration _config)
         {
@@ -122,10 +122,10 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     Console.WriteLine($"session paymentIntentId: {session.PaymentIntentId}");
 
                     _unitOfWork.OrderHeader.UpdateStripePaymentID(
-                        orderHeaderid, orderHeader.SessionId, session.PaymentIntentId
+                        orderHeaderid, orderHeader.SessionId ?? "", session.PaymentIntentId
                     );
                     _unitOfWork.OrderHeader.UpdateStatus(
-                        orderHeaderid, orderHeader.OrderStatus, SD.PaymentStatusApproved
+                        orderHeaderid, orderHeader.OrderStatus ?? "", SD.PaymentStatusApproved
                     );
                     _unitOfWork.Save();
                 }
@@ -138,6 +138,10 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult UpdateOrderDetail()
         {
+            if (OrderVM == null)
+            {
+                throw new ArgumentNullException($"OrderVM is null.");
+            }
             var orderHeaderFromDb = _unitOfWork.OrderHeader.GetFirstOrDefault(
                 u => u.Id == OrderVM.OrderHeader.Id, tracked: false
             );
@@ -167,6 +171,10 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult StartProcessing()
         {
+            if (OrderVM == null)
+            {
+                throw new ArgumentNullException($"OrderVM is null.");
+            }
             var orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(
                 u => u.Id == OrderVM.OrderHeader.Id, tracked: false
             );
@@ -181,6 +189,10 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ShipOrder()
         {
+            if (OrderVM == null)
+            {
+                throw new ArgumentNullException($"OrderVM is null.");
+            }
             var orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(
                 u => u.Id == OrderVM.OrderHeader.Id, tracked: false
             );
@@ -204,6 +216,10 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult CancelOrder()
         {
+            if (OrderVM == null)
+            {
+                throw new ArgumentNullException($"OrderVM is null.");
+            }
             var orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(
                 u => u.Id == OrderVM.OrderHeader.Id, tracked: false
             );

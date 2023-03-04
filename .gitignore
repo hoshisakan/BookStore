@@ -30,3 +30,20 @@ service/web/mvc/HoshiBook/HoshiBookWeb/Shell/scaffoldTable.sh
 service/web/mvc/HoshiBook/HoshiBookWeb/Shell/readme.txt
 service/web/mvc/HoshiBook/HoshiBookWeb/appsettings.json
 service/web/mvc/zips
+service/web/mvc/HoshiBook/HoshiBookWeb/wwwroot/images
+service/web/mvc/HoshiBook/HoshiBook.Utility/Config.cs
+service/web/mvc/index.html
+.hintrc
+service/web/temp
+service/web/mvc/deploy
+service/web/mvc/deploy/certs
+*.crt
+*.key
+*.pfx
+service/conf/nginx/conf.d/server_default.conf
+service/web/mvc/HoshiBook/HoshiBookWeb/Shell/publishDotnetWebApp.sh
+service/conf/nginx/conf.d/server_https.conf
+*.log
+service/conf/dotnet/6.0/web_2/Dockerfile
+service/images
+# service/conf/dotnet/6.0/ubuntu

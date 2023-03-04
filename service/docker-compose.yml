@@ -29,14 +29,15 @@ services:
             - postgres_db
             - web
         networks:
-            - ${EXTERNAL_NETWORK}
+          bookstore_common_net:
+              ipv4_address: ${NGINX_HOST_IP}
         user: root
         tty: true
-        restart: always
+        restart: on-failure:3
 
     web:
       build:
-          context: ./conf/dotnet/6.0/debian
+          context: ./conf/dotnet/6.0/ubuntu
           dockerfile: Dockerfile
           args:
               - DOTNET_VERSION=${DOTNET_VERSION}
@@ -46,6 +47,9 @@ services:
               - DOTNET_LANG_CHARMAP=${DOTNET_LANG_CHARMAP}
               - DEBIAN_FRONTEND=${DOTNET_DEBIAN_FRONTEND}
               - DOTNET_POSTGRESQL_CLIENT_HOME=${DOTNET_POSTGRESQL_CLIENT_HOME}
+              - DOTNET_POSTGRESQL_CLIENT_VERSION=${DOTNET_POSTGRESQL_CLIENT_VERSION}
+              - POSTGRES_DATA_BACKUP_PATH=:${POSTGRES_DATA_BACKUP_PATH}
+              - DOTNET_PACKAGES_PATH=${DOTNET_PACKAGES_PATH}
       image: hoshisakan/dotnet:6.0
       container_name: web-dev
       env_file:
@@ -53,20 +57,24 @@ services:
       environment:
           - DOTNET_LANG_NAME=${DOTNET_LANG_NAME}
           - PGPASSWORD=${POSTGRES_PASSWORD}
+          - DOTNET_POSTGRES_USER=${POSTGRES_USER}
+          - DOTNET_POSTGRES_HOST_IP=${POSTGRES_HOST_IP}
+          - DOTNET_POSTGRES_PORT=${POSTGRES_PORT}
       volumes:
           - ./web/mvc/HoshiBook:/app
           - ./web/mvc/deploy/HoshiBookWeb:/deploy/HoshiBookWeb
           - ./web/mvc/deploy/certs:/deploy/certs
-          - ./data/postgresql/pgdata_backup:/pgdata_backup
+          - ./data/postgresql/pgdata_backup:${POSTGRES_DATA_BACKUP_PATH}
       expose:
         - 5002
         - 7232
       depends_on:
         - postgres_db
       networks:
-          - ${EXTERNAL_NETWORK}
+          bookstore_common_net:
+              ipv4_address: ${DOTNET_HOST_IP}
       tty: true
-      restart: always
+      restart: on-failure:3
 
     postgres_db:
         build:
@@ -91,12 +99,13 @@ services:
             - POSTGRES_LANG_NAME=${POSTGRES_LANG_NAME}
         volumes:
             - ./data/postgresql/pgdata:/var/lib/postgresql/data
-            - ./data/postgresql/pgdata_backup:/pgdata_backup
+            - ./data/postgresql/pgdata_backup:${POSTGRES_DATA_BACKUP_PATH}
         ports:
-            - 5432:5432
+            - 5432:${POSTGRES_PORT}
         networks:
-            - ${EXTERNAL_NETWORK}
-        restart: always
+            bookstore_common_net:
+                ipv4_address: ${POSTGRES_HOST_IP}
+        restart: on-failure:3
 
     pgadmin:
         build: ./conf/postgresql_admin
@@ -115,13 +124,17 @@ services:
         depends_on:
             - postgres_db
         networks:
-            - ${EXTERNAL_NETWORK}
+          bookstore_common_net:
+              ipv4_address: ${PGADMIN_HOST_IP}
         user: root
-        restart: always
+        restart: on-failure:2
 
 networks:
-    bookstore-common-network:
-        external: true
+    bookstore_common_net:
+        ipam:
+          config:
+            - subnet: ${NETWORK_SUBNET}
+              gateway: ${NETWORK_GATEWAY}
 
 volumes:
     pgadmin:
