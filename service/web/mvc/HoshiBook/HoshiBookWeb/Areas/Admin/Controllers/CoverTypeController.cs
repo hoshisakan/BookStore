@@ -1,14 +1,8 @@
-using HoshiBook.DataAccess;
 using HoshiBook.Models;
 using HoshiBook.DataAccess.Repository.IRepository;
 using HoshiBook.Utility;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 
 
@@ -19,10 +13,12 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
     [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
     public class CoverTypeController : Controller
     {
+        private readonly ILogger<CoverTypeController> _logger;
         private readonly IUnitOfWork _unitOfWork;
 
-        public CoverTypeController(IUnitOfWork unitOfWork)
+        public CoverTypeController(ILogger<CoverTypeController> logger, IUnitOfWork unitOfWork)
         {
+            _logger = logger;
             _unitOfWork = unitOfWork;
         }
 

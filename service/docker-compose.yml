@@ -65,6 +65,7 @@ services:
           - ./web/mvc/deploy/HoshiBookWeb:/deploy/HoshiBookWeb
           - ./web/mvc/deploy/certs:/deploy/certs
           - ./data/postgresql/pgdata_backup:${POSTGRES_DATA_BACKUP_PATH}
+          - ./logs/dotnet:/var/log/dotnet
       expose:
         - 5002
         - 7232

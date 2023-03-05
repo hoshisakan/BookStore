@@ -1,12 +1,6 @@
 using HoshiBook.DataAccess.Repository.IRepository;
 
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -20,8 +14,6 @@ namespace HoshiBook.DataAccess.Repository
         public Repository(ApplicationDbContext db)
         {
             _db = db;
-            //_db.ShoppingCarts.AsNoTracking()
-            // _db.ShoppingCarts.Include(u => u.Product).Include(u => u.CoverType);
             this.dbSet = _db.Set<T>();
         }
 

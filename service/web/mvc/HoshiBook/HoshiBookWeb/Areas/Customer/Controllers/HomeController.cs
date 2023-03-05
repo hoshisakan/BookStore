@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-
 using HoshiBook.Models;
 using HoshiBook.DataAccess.Repository.IRepository;
-using HoshiBook.Models.ViewModels;
+using HoshiBook.Utility;
+
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using HoshiBook.Utility;
+
 
 namespace HoshiBookWeb.Areas.Customer.Controllers
 {
@@ -72,9 +72,6 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                 {
                     _unitOfWork.ShoppingCart.Add(shoppingCart);
                     _unitOfWork.Save();
-                    // int count = _unitOfWork.ShoppingCart.GetAll(
-                    //     u => u.ApplicationUserId == claim.Value
-                    // ).ToList().Count();
                     //TODO Get the count of the single product in the cart.
                     int count = _unitOfWork.ShoppingCart.GetAll(
                         u => u.ApplicationUserId == claim.Value
@@ -94,9 +91,6 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     TempData["success"] = $"Add to car sucessfully.";
                     _unitOfWork.ShoppingCart.IncrementCount(cartFromDb, shoppingCart.Count);
                     _unitOfWork.Save();
-                    // int count = _unitOfWork.ShoppingCart.GetAll(
-                    //     u => u.ApplicationUserId == claim.Value
-                    // ).ToList().Count();
                     //TODO Get the count of the single product in the cart.
                     int count = _unitOfWork.ShoppingCart.GetAll(
                         u => u.ApplicationUserId == claim.Value

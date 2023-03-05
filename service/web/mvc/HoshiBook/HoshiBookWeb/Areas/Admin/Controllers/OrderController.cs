@@ -1,15 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
 using HoshiBook.DataAccess.Repository.IRepository;
 using HoshiBook.Models;
 using HoshiBook.Utility;
 using HoshiBook.Models.ViewModels;
+
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Stripe;
 using Stripe.Checkout;
 
@@ -20,12 +16,15 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
     public class OrderController : Controller
     {
         private readonly string domain;
+        private readonly ILogger<OrderController> _logger;
+
         private readonly IUnitOfWork _unitOfWork;
         [BindProperty]
         public OrderVM? OrderVM { get; set; }
 
-        public OrderController(IUnitOfWork unitOfWork, IConfiguration _config)
+        public OrderController(ILogger<OrderController> logger, IUnitOfWork unitOfWork, IConfiguration _config)
         {
+            _logger = logger;
             _unitOfWork = unitOfWork;
             // domain = _config.GetValue<string>("DomainList:Kestrel:LocalDebug:Domain:https");
             domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:https");

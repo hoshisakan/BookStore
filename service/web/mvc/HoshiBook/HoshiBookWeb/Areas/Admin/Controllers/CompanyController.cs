@@ -1,27 +1,21 @@
-using HoshiBook.DataAccess;
 using HoshiBook.Models;
+
 using HoshiBook.DataAccess.Repository.IRepository;
 using HoshiBookWeb.Tools;
-
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using HoshiBook.Models.ViewModels;
+
 
 namespace HoshiBookWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class CompanyController : Controller
     {
+        private readonly ILogger<CompanyController> _logger;
         private readonly IUnitOfWork _unitOfWork;
 
-        public CompanyController(IUnitOfWork unitOfWork)
+        public CompanyController(ILogger<CompanyController> logger, IUnitOfWork unitOfWork)
         {
+            _logger = logger;
             _unitOfWork = unitOfWork;
         }
 

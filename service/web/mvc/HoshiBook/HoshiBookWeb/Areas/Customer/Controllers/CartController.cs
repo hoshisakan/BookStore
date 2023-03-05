@@ -1,12 +1,12 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using HoshiBook.DataAccess.Repository.IRepository;
-using HoshiBook.Models.ViewModels;
-using System.Security.Claims;
 using HoshiBook.Utility;
 using HoshiBook.Models;
 using HoshiBookWeb.Tools;
+using HoshiBook.DataAccess.Repository.IRepository;
+using HoshiBook.Models.ViewModels;
+
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Stripe.Checkout;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
@@ -18,14 +18,20 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
     public class CartController : Controller
     {
         private readonly string domain;
+        private readonly ILogger<CartController> _logger;
+
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailSender _emailSender;
         [BindProperty]
         public ShoppingCartVM ShoppingCartVM { get; set; }
         public int OrderTotal { get; set; }
 
-        public CartController(IUnitOfWork unitOfWork, IEmailSender email, IConfiguration _config)
+        public CartController(
+            IUnitOfWork unitOfWork, IEmailSender email, IConfiguration _config,
+            ILogger<CartController> logger
+        )
         {
+            _logger = logger;
             _unitOfWork = unitOfWork;
             _emailSender = email;
             // domain = _config.GetValue<string>("DomainList:Kestrel:LocalDebug:Domain:https");
@@ -183,13 +189,13 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                         options.LineItems.Add(sessionLineItem);
                     }
 
-                    // Console.WriteLine($"options.LineItems.Count: {options.LineItems.Count}");
+                    // _logger.LogInformation($"options.LineItems.Count: {options.LineItems.Count}");
 
                     var service = new SessionService();
                     Session session = service.Create(options);
                     
-                    // Console.WriteLine($"session id: {session.Id}");
-                    // Console.WriteLine($"session paymentIntentId: {session.PaymentIntentId}");
+                    // _logger.LogInformation($"session id: {session.Id}");
+                    // _logger.LogInformation($"session paymentIntentId: {session.PaymentIntentId}");
 
                     ShoppingCartVM.OrderHeader.SessionId = session.Id;
                     ShoppingCartVM.OrderHeader.PaymentIntentId = session.PaymentIntentId;
@@ -229,8 +235,8 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                 //check the stripe status
                 if(session.PaymentStatus.ToLower() == "paid")
                 {
-                    Console.WriteLine($"session id: {orderHeader.SessionId ?? "Unknown"}");
-                    Console.WriteLine($"session paymentIntentId: {session.PaymentIntentId}");
+                    _logger.LogInformation($"session id: {orderHeader.SessionId ?? "Unknown"}");
+                    _logger.LogInformation($"session paymentIntentId: {session.PaymentIntentId}");
 
                     _unitOfWork.OrderHeader.UpdateStripePaymentID(
                         id, orderHeader.SessionId, session.PaymentIntentId
@@ -241,7 +247,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     _unitOfWork.Save();
                 }
             }
-            Console.WriteLine($"orderHeader.ApplicationUser.Email: {orderHeader.ApplicationUser.Email}");
+            _logger.LogInformation($"orderHeader.ApplicationUser.Email: {orderHeader.ApplicationUser.Email}");
             _emailSender.SendEmailAsync(
                 orderHeader.ApplicationUser.Email,
                 "New Order - Hoshi Book",
@@ -265,13 +271,10 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault(u => u.Id == cartId);
             _unitOfWork.ShoppingCart.IncrementCount(cart, 1);
             _unitOfWork.Save();
-            // int count = _unitOfWork.ShoppingCart.GetAll(
-            //     u => u.ApplicationUserId == cart.ApplicationUserId
-            // ).ToList().Count;
             int count = _unitOfWork.ShoppingCart.GetAll(
                 u => u.ApplicationUserId == cart.ApplicationUserId
             ).Select(u => u.Count).Sum();
-            Console.WriteLine($"The user {cart.ApplicationUserId} has {count} items in the cart after increment product {cartId}.");
+            _logger.LogInformation($"The user {cart.ApplicationUserId} has {count} items in the cart after increment product {cartId}.");
             HttpContext.Session.SetInt32(SD.SessionCart, count);
             return RedirectToAction(nameof(Index));
         }
@@ -287,26 +290,20 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             {
                 _unitOfWork.ShoppingCart.Remove(cart);
                 _unitOfWork.Save();
-                // int count = _unitOfWork.ShoppingCart.GetAll(
-                //     u => u.ApplicationUserId == cart.ApplicationUserId
-                // ).ToList().Count;
                 int count = _unitOfWork.ShoppingCart.GetAll(
                     u => u.ApplicationUserId == cart.ApplicationUserId
                 ).Select(u => u.Count).Sum();
-                Console.WriteLine($"The user {cart.ApplicationUserId} has {count} items in the cart after clear product {cartId}.");
+                _logger.LogInformation($"The user {cart.ApplicationUserId} has {count} items in the cart after clear product {cartId}.");
                 HttpContext.Session.SetInt32(SD.SessionCart, count);
             }
             else
             {
                 _unitOfWork.ShoppingCart.DecrementCount(cart, 1);
                 _unitOfWork.Save();
-                // int count = _unitOfWork.ShoppingCart.GetAll(
-                //     u => u.ApplicationUserId == cart.ApplicationUserId
-                // ).ToList().Count;
                 int count = _unitOfWork.ShoppingCart.GetAll(
                     u => u.ApplicationUserId == cart.ApplicationUserId
                 ).Select(u => u.Count).Sum();
-                Console.WriteLine($"The user {cart.ApplicationUserId} has {count} items in the cart after decrement product {cartId}.");
+                _logger.LogInformation($"The user {cart.ApplicationUserId} has {count} items in the cart after decrement product {cartId}.");
                 HttpContext.Session.SetInt32(SD.SessionCart, count);
             }
             return RedirectToAction(nameof(Index));
@@ -321,13 +318,10 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault(u => u.Id == cartId);
             _unitOfWork.ShoppingCart.Remove(cart);
             _unitOfWork.Save();
-            // int count = _unitOfWork.ShoppingCart.GetAll(
-            //     u => u.ApplicationUserId == cart.ApplicationUserId
-            // ).ToList().Count - 1;
             int count = _unitOfWork.ShoppingCart.GetAll(
                 u => u.ApplicationUserId == cart.ApplicationUserId
             ).Select(u => u.Count).Sum();
-            Console.WriteLine($"The user {cart.ApplicationUserId} has {count} items in the cart after remove.");
+            _logger.LogInformation($"The user {cart.ApplicationUserId} has {count} items in the cart after remove.");
             HttpContext.Session.SetInt32(SD.SessionCart, count);
             return RedirectToAction(nameof(Index));
         }

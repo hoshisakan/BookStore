@@ -1,29 +1,23 @@
-using HoshiBook.DataAccess;
 using HoshiBook.Models;
 using HoshiBook.DataAccess.Repository.IRepository;
 using HoshiBook.Utility;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
-
 
 
 namespace HoshiBookWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
-    
     public class CategoryController : Controller
     {
+        private readonly ILogger<CategoryController> _logger;
         private readonly IUnitOfWork _unitOfWork;
 
-        public CategoryController(IUnitOfWork unitOfWork)
+        public CategoryController(ILogger<CategoryController> logger, IUnitOfWork unitOfWork)
         {
+            _logger = logger;
             _unitOfWork = unitOfWork;
         }
 
@@ -67,7 +61,8 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             // var categoryFromDb = _unitOfWork.Category.Categories.FindAsync(id);
             var categoryFromDbFirst = _unitOfWork.Category.GetFirstOrDefault(u => u.Id == id);
             // var categoryFromDbSingle = _unitOfWork.Category.Categories.SingleOrDefaultAsync(u => u.Id == id);
-            if (categoryFromDbFirst == null) {
+            if (categoryFromDbFirst == null)
+            {
                 return NotFound();
             }
             return View(categoryFromDbFirst);

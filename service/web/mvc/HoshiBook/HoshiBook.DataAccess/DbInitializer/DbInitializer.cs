@@ -1,26 +1,30 @@
 
 using HoshiBook.Models;
 using HoshiBook.Utility;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-
+using Microsoft.Extensions.Logging;
 
 namespace HoshiBook.DataAccess.DbInitializer
 {
     public class DbInitializer : IDbInitializer
     {
+        private readonly ILogger<DbInitializer> _logger;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ApplicationDbContext _db;
         private readonly Dictionary<string, string> _adminRoleConfig;
 
         public DbInitializer(
+            ILogger<DbInitializer> logger,
             IConfiguration _config,
             UserManager<IdentityUser> userManager,
             RoleManager<IdentityRole> roleManager,
             ApplicationDbContext db)
         {
+            _logger = logger;
             _roleManager = roleManager;
             _userManager = userManager;
             _db = db;
@@ -50,7 +54,9 @@ namespace HoshiBook.DataAccess.DbInitializer
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                // Console.WriteLine(ex.Message);
+                // _logger.LogError(ex.Message);
+                _logger.LogError($"Error while applying migrations: {ex.Message}");
             }
 
             try {
@@ -99,12 +105,14 @@ namespace HoshiBook.DataAccess.DbInitializer
                 else
                 {
                     tempUserCount = _db.ApplicationUsers.Select(u => u.Id).Count();
-                    Console.WriteLine($"Admin role already exists, real user count: {tempUserCount}");
+                    // Console.WriteLine($"Admin role already exists, real user count: {tempUserCount}");
+                    _logger.LogInformation($"Admin role already exists, real user count: {tempUserCount}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                // Console.WriteLine(ex.Message);
+                _logger.LogError(ex.Message);
             }
             return;
         }
