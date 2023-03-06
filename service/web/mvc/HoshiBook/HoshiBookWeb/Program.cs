@@ -1,3 +1,13 @@
+
+using HoshiBook.DataAccess;
+using HoshiBook.DataAccess.Repository;
+using HoshiBook.DataAccess.Repository.IRepository;
+using HoshiBook.Utility;
+using HoshiBook.DataAccess.DbInitializer;
+using HoshiBookWeb.QuartzPostgreSQLBackupScheduler;
+using HoshiBookWeb.Tools;
+using HoshiBookWeb.Tools.ProgramInitializerTool;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.AspNetCore.Identity;
@@ -9,13 +19,9 @@ using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationM
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
 using Serilog;
 using Serilog.Events;
+using Microsoft.Extensions.FileProviders;
 
-using HoshiBook.DataAccess;
-using HoshiBook.DataAccess.Repository;
-using HoshiBook.DataAccess.Repository.IRepository;
-using HoshiBook.Utility;
-using HoshiBook.DataAccess.DbInitializer;
-using HoshiBookWeb.QuartzPostgreSQLBackupScheduler;
+
 
 //TODO Use Serilog generate log file and write to console.
 //TODO 2023-03-04 Write to file and console successfully.
@@ -29,8 +35,6 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    Log.Information("Starting web application");
-
     var builder = WebApplication.CreateBuilder(args);
 
     //TODO Set serilog to write to console and file, read configuration from appsettings.json
@@ -95,6 +99,7 @@ try
     builder.Services.AddIdentity<IdentityUser,IdentityRole>().AddDefaultTokenProviders()
         .AddEntityFrameworkStores<ApplicationDbContext>();
     builder.Services.AddSingleton<IEmailSender, EmailSender>();
+    builder.Services.AddScoped<IProgramInitializer, ProgramInitializer>();
     builder.Services.AddScoped<IDbInitializer, DbInitializer>();
     builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
     builder.Services.ConfigureApplicationCookie(options =>
@@ -127,7 +132,6 @@ try
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     });
 
-
     builder.Services.AddQuartz(q =>
     {
         q.UseMicrosoftDependencyInjectionJobFactory();
@@ -151,7 +155,8 @@ try
             )
             .WithCronSchedule(
                 builder.Configuration.GetSection(
-                    "Quartz:MainDatabaseBackupJob:Schedule:WeekendCronExpression"
+                    // "Quartz:MainDatabaseBackupJob:Schedule:WeekendCronExpression"
+                    "Quartz:MainDatabaseBackupJob:Schedule:WeekdaysCronExpression"
                 ).Get<string>()
             )
         );
@@ -169,7 +174,8 @@ try
             )
             .WithCronSchedule(
                 builder.Configuration.GetSection(
-                    "Quartz:SecondaryDatabaseBackupJob:Schedule:WeekendCronExpression"
+                    // "Quartz:SecondaryDatabaseBackupJob:Schedule:WeekendCronExpression"
+                    "Quartz:SecondaryDatabaseBackupJob:Schedule:WeekdaysCronExpression"
                 ).Get<string>()
             )
         );
@@ -201,6 +207,25 @@ try
     app.UseAuthentication();;
     app.UseAuthorization();
     app.UseSession();
+
+    string staticFilesPath = string.Empty;
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var programInitializer = scope.ServiceProvider.GetRequiredService<IProgramInitializer>();
+        staticFilesPath = programInitializer.GetStaticFileStoragePath();
+    }
+
+    if (!FileTool.CheckDirExists(staticFilesPath))
+    {
+        FileTool.CreateDirectory(staticFilesPath);
+    }
+
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(staticFilesPath),
+        RequestPath = "/staticfiles"
+    });
 
     app.MapRazorPages();
     app.MapControllerRoute(

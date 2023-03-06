@@ -2,11 +2,13 @@ using HoshiBook.DataAccess.Repository.IRepository;
 using HoshiBookWeb.Tools;
 using HoshiBook.Utility;
 using HoshiBook.Models.ViewModels;
+using HoshiBookWeb.Tools.CommonTool;
+
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
-
+using Microsoft.Extensions.Configuration;
 
 namespace HoshiBookWeb.Areas.Admin.Controllers
 {
@@ -17,15 +19,17 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         private readonly ILogger<ProductController> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly IConfiguration _config;
 
         public ProductController(
-            ILogger<ProductController> logger, IUnitOfWork unitOfWork, 
-            IWebHostEnvironment hostEnvironment
+            ILogger<ProductController> logger, IUnitOfWork unitOfWork,
+            IWebHostEnvironment hostEnvironment, IConfiguration config
         )
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _hostEnvironment = hostEnvironment;
+            _config = config;
         }
 
         public IActionResult Index()
@@ -79,10 +83,16 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     string wwwRootPath = _hostEnvironment.WebRootPath;
                     if (file != null)
                     {
+                        var _common = new Common(_config);
+                        string? uploads = "";
                         string filename = Guid.NewGuid().ToString();
-                        string? uploads = Path.Combine(wwwRootPath, @"images\products");
+
+                        uploads = _common.GetProductImageStoragePath();
+                        _logger.LogInformation("uploads: {0}", uploads);
+
                         string? extension = Path.GetExtension(file.FileName);
                         string? storagePath = Path.Combine(uploads, filename + extension);
+                        _logger.LogInformation("storagePath: {0}", storagePath);
 
                         // TODO If storage path does not exist, then create it.
                         FileTool.CheckAndCreateDirectory(uploads);
@@ -99,7 +109,9 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                         {
                             file.CopyTo(fileStreams);
                         }
-                        obj.Product.ImageUrl = @"images\products\" + filename + extension;
+                        // obj.Product.ImageUrl = @"images\products\" + filename + extension;
+                        obj.Product.ImageUrl = @"staticfiles\images\products\" + filename + extension;
+                        // obj.Product.ImageUrl = @"staticfiles/images/products/" + filename + extension;
                     }
 
                     if (obj.Product.Id == 0)
