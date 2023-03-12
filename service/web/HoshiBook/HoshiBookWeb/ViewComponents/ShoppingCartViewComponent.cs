@@ -29,43 +29,25 @@ namespace HoshiBookWeb.ViewComponents
             if (claim != null)
             {
                 _logger.LogInformation("ShoppingCartViewComponent.InvokeAsync: claim isn't null");
-                int? temp = 0;
-                // if (_cache.GetString(SD.SessionCart) != null)
-                // {
-                //     return View(_cache.GetString(SD.SessionCart));
-                // }
-                // else
-                // {
-                //     int count = _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == claim.Value).Select(u => u.Count).Sum();
-                //     // _cache.SetString(SD.SessionCart, count.ToString());
-                //     _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
-                //     return View(_cache.GetString(SD.SessionCart));
-                // }
-                if (HttpContext.Session.GetInt32(SD.SessionCart) != null)
+                int? tempCacheCartCount = 0;
+                if (_cache.GetString(SD.SessionCart) != null)
                 {
-                    temp = HttpContext.Session.GetInt32(SD.SessionCart);
-                    _logger.LogInformation("ShoppingCartViewComponent.InvokeAsync: tempA = " + temp.ToString());
-                    return View(HttpContext.Session.GetInt32(SD.SessionCart));
+                    tempCacheCartCount = JsonSerializer.Deserialize<int>(_cache.GetString(SD.SessionCart));
+                    _logger.LogInformation($"tempCacheCartCount: {tempCacheCartCount}");
+                    return View(tempCacheCartCount);
                 }
                 else
                 {
-                    HttpContext.Session.SetInt32(
-                        SD.SessionCart,
-                        _unitOfWork.ShoppingCart.GetAll(
-                            u => u.ApplicationUserId == claim.Value
-                        ).Select(u => u.Count).Sum()
-                    );
-                    temp = HttpContext.Session.GetInt32(SD.SessionCart);
-                    _logger.LogInformation("ShoppingCartViewComponent.InvokeAsync: tempB = " + temp.ToString());
-                    return View(HttpContext.Session.GetInt32(SD.SessionCart));
-                    // return View(1);
+                    tempCacheCartCount = _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == claim.Value).Select(u => u.Count).Sum();
+                    _logger.LogInformation($"tempCacheCartCount: {tempCacheCartCount}");
+                    _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(tempCacheCartCount));
+                    return View(tempCacheCartCount);
                 }
             }
             else
             {
                 _logger.LogInformation("ShoppingCartViewComponent.InvokeAsync: claim is null");
-                HttpContext.Session.Clear();
-                // _cache.Remove(SD.SessionCart);
+                _cache.Remove(SD.SessionCart);
                 return View(0);
             }
         }

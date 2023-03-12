@@ -102,11 +102,12 @@ try
         )
     );
     //TODO add redis cache service
-    // builder.Services.AddStackExchangeRedisCache(options =>
-    // {
-    //     options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
-    //     options.InstanceName = "HoshiBook_";
-    // });
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
+        // options.InstanceName = builder.Configuration.GetSection("Redis:Deployment:InstanceName").Get<string>();
+        options.InstanceName = builder.Configuration.GetSection("Redis:LocalTest:InstanceName").Get<string>();
+    });
 
     builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
     builder.Services.AddIdentity<ApplicationUser,ApplicationRole>().AddDefaultTokenProviders()
@@ -131,7 +132,7 @@ try
         // ).Get<string>();
     });
     //TODO Add session service.
-    // builder.Services.AddDistributedMemoryCache();
+    builder.Services.AddDistributedMemoryCache();
     builder.Services.AddSession(options =>
     {
         options.IdleTimeout = TimeSpan.FromMinutes(

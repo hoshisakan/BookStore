@@ -11,7 +11,6 @@ using Stripe.Checkout;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
-using System.Text;
 
 
 namespace HoshiBookWeb.Areas.Customer.Controllers
@@ -261,8 +260,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart.GetAll(
                 u => u.ApplicationUserId == orderHeader.ApplicationUserId
             ).ToList();
-            HttpContext.Session.Clear();
-            // _cache.Remove(SD.SessionCart);
+            _cache.Remove(SD.SessionCart);
             _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
             _unitOfWork.Save();
             return View(id);
@@ -281,8 +279,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                 u => u.ApplicationUserId == cart.ApplicationUserId
             ).Select(u => u.Count).Sum();
             _logger.LogInformation($"The user {cart.ApplicationUserId} has {count} items in the cart after increment product {cartId}.");
-            HttpContext.Session.SetInt32(SD.SessionCart, count);
-            // _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
+            _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
             return RedirectToAction(nameof(Index));
         }
 
@@ -301,8 +298,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     u => u.ApplicationUserId == cart.ApplicationUserId
                 ).Select(u => u.Count).Sum();
                 _logger.LogInformation($"The user {cart.ApplicationUserId} has {count} items in the cart after clear product {cartId}.");
-                HttpContext.Session.SetInt32(SD.SessionCart, count);
-                // _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
+                _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
             }
             else
             {
@@ -312,8 +308,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     u => u.ApplicationUserId == cart.ApplicationUserId
                 ).Select(u => u.Count).Sum();
                 _logger.LogInformation($"The user {cart.ApplicationUserId} has {count} items in the cart after decrement product {cartId}.");
-                HttpContext.Session.SetInt32(SD.SessionCart, count);
-                // _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
+                _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
             }
             return RedirectToAction(nameof(Index));
         }
@@ -331,8 +326,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                 u => u.ApplicationUserId == cart.ApplicationUserId
             ).Select(u => u.Count).Sum();
             _logger.LogInformation($"The user {cart.ApplicationUserId} has {count} items in the cart after remove.");
-            HttpContext.Session.SetInt32(SD.SessionCart, count);
-            // _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
+            _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
             return RedirectToAction(nameof(Index));
         }
 

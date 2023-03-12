@@ -91,7 +91,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 options.LineItems.Add(sessionLineItem);
             }
 
-            Console.WriteLine($"options.LineItems.Count: {options.LineItems.Count}");
+            _logger.LogInformation($"options.LineItems.Count: {options.LineItems.Count}");
 
             var service = new SessionService();
             Session session = service.Create(options);
@@ -117,8 +117,8 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 //check the stripe status
                 if(session.PaymentStatus.ToLower() == "paid")
                 {
-                    Console.WriteLine($"session id: {orderHeader.SessionId ?? "Unknown"}");
-                    Console.WriteLine($"session paymentIntentId: {session.PaymentIntentId}");
+                    _logger.LogInformation($"session id: {orderHeader.SessionId ?? "Unknown"}");
+                    _logger.LogInformation($"session paymentIntentId: {session.PaymentIntentId}");
 
                     _unitOfWork.OrderHeader.UpdateStripePaymentID(
                         orderHeaderid, orderHeader.SessionId ?? "", session.PaymentIntentId
@@ -262,7 +262,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             {
                 var claimsIdentity = (ClaimsIdentity?)User.Identity;
                 var claim = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier);
-                // Console.WriteLine($"Claim: {claim?.Value}");
+                // _logger.LogInformation($"Claim: {claim?.Value}");
                 orderHeaders = _unitOfWork.OrderHeader.GetAll(
                     u => u.ApplicationUserId == claim.Value,
                     includeProperties: "ApplicationUser"

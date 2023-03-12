@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
-using System.Text;
 
 
 
@@ -19,7 +18,6 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IDistributedCache _cache;
-        
         private readonly IUnitOfWork _unitOfWork;
 
         public HomeController(
@@ -86,7 +84,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     int count = _unitOfWork.ShoppingCart.GetAll(
                         u => u.ApplicationUserId == claim.Value
                     ).Select(u => u.Count).Sum();
-                    HttpContext.Session.SetInt32(SD.SessionCart, count);
+                    _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
                 }
             }
             else
@@ -105,7 +103,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     int count = _unitOfWork.ShoppingCart.GetAll(
                         u => u.ApplicationUserId == claim.Value
                     ).Select(u => u.Count).Sum();
-                    HttpContext.Session.SetInt32(SD.SessionCart, count);
+                    _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
                 }
             }
             return RedirectToAction(nameof(Index));
