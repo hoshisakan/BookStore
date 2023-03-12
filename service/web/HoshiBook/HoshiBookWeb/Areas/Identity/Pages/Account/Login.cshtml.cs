@@ -112,16 +112,23 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
             returnUrl ??= Url.Content("~/");
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-
+ 
             if (ModelState.IsValid)
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                var info = await _signInManager.GetExternalLoginInfoAsync();
+
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User logged in.");
+                    // throw new Exception("Disable any login");
+                    ExternalLogins = new List<AuthenticationScheme>();
+                    var hasExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).Any();
+                    _logger.LogInformation($"hasExternalLogins: {hasExternalLogins}");
+                    _logger.LogInformation($"Normal Logins: {ExternalLogins.Count}");
+                    _logger.LogInformation("User logged in");
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)

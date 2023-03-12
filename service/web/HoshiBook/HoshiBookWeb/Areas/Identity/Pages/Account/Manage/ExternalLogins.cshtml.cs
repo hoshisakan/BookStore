@@ -120,6 +120,7 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account.Manage
             }
 
             var userId = await _userManager.GetUserIdAsync(user);
+
             var info = await _signInManager.GetExternalLoginInfoAsync(userId);
             if (info == null)
             {

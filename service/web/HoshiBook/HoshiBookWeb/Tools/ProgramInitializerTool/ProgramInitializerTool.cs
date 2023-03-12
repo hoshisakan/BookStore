@@ -4,6 +4,7 @@ namespace HoshiBookWeb.Tools.ProgramInitializerTool
     {
         private readonly ILogger<ProgramInitializer>? _logger;
         private readonly IConfiguration? _config;
+        private readonly int _osPlatform;
         
         public ProgramInitializer(
             ILogger<ProgramInitializer> logger, IConfiguration config
@@ -11,6 +12,7 @@ namespace HoshiBookWeb.Tools.ProgramInitializerTool
         {
             _logger = logger;
             _config = config;
+            _osPlatform = new RuntimeInfoTool.RuntimeInfo().GetEnvironmentOSPlatform();
         }
 
         public string GetStaticFileStoragePath()
@@ -22,9 +24,10 @@ namespace HoshiBookWeb.Tools.ProgramInitializerTool
                 throw new Exception("Configuration of ProgramInitializer class is null");
             }
 
-            var runtimeInfo = new RuntimeInfoTool.RuntimeInfo();
+            // var runtimeInfo = new RuntimeInfoTool.RuntimeInfo();
+            // switch (runtimeInfo.GetEnvironmentOSPlatform())
 
-            switch (runtimeInfo.GetEnvironmentOSPlatform())
+            switch (_osPlatform)
             {
                 case 0:
                     _logger?.LogInformation("OS Platform: Windows");

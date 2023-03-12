@@ -220,7 +220,6 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
         {
             try
             {
-                // return Activator.CreateInstance<ApplicationUser>();
                 return Activator.CreateInstance<ApplicationUser>();
             }
             catch

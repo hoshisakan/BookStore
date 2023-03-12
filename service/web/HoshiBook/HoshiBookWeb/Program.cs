@@ -104,7 +104,6 @@ try
     //TODO add redis cache service
     // builder.Services.AddStackExchangeRedisCache(options =>
     // {
-    //     // options.Configuration = "localhost:6379";
     //     options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
     //     options.InstanceName = "HoshiBook_";
     // });
@@ -172,9 +171,9 @@ try
             )
             .WithCronSchedule(
                 builder.Configuration.GetSection(
-                    // "Quartz:MainDatabaseBackupJob:Schedule:WeekendCronExpression"
+                    "Quartz:MainDatabaseBackupJob:Schedule:WeekendCronExpression"
                     // "Quartz:MainDatabaseBackupJob:Schedule:WeekdaysCronExpression"
-                    "Quartz:MainDatabaseBackupJob:Schedule:LocalTestCronExpression"
+                    // "Quartz:MainDatabaseBackupJob:Schedule:LocalTestCronExpression"
                 ).Get<string>()
             )
         );
@@ -192,9 +191,9 @@ try
             )
             .WithCronSchedule(
                 builder.Configuration.GetSection(
-                    // "Quartz:SecondaryDatabaseBackupJob:Schedule:WeekendCronExpression"
+                    "Quartz:SecondaryDatabaseBackupJob:Schedule:WeekendCronExpression"
                     // "Quartz:SecondaryDatabaseBackupJob:Schedule:WeekdaysCronExpression"
-                    "Quartz:SecondaryDatabaseBackupJob:Schedule:LocalTestCronExpression"
+                    // "Quartz:SecondaryDatabaseBackupJob:Schedule:LocalTestCronExpression"
                 ).Get<string>()
             )
         );
@@ -268,7 +267,6 @@ try
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"An error occurred while starting the application: {ex.Message}");
-    Log.Error(ex, ex.Message);
+    Log.Error($"An error occurred while starting the application: {ex.Message}");
 }
 Log.CloseAndFlush();

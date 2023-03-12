@@ -150,12 +150,6 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
                     Value = i.Id.ToString()
                 }),
             };
-
-            // foreach (var role in Input.RoleList)
-            // {
-            //     _logger.LogInformation($"Role val: {role.Value}, Role text: {role.Text}");
-            // }
-
             _logger.LogInformation($"Is Admin: {Input._isAdmin}");
         }
 
@@ -202,7 +196,7 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
                         else
                         {
                             string userRole = _roleManager.Roles.SingleOrDefault
-                                            (u => u.RoleNumber == selectRoleId).Name;
+                                        (u => u.RoleNumber == selectRoleId).Name;
                             await _userManager.AddToRoleAsync(user, userRole);
                         }
 

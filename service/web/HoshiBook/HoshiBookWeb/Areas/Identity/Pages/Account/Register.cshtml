@@ -6,7 +6,6 @@
     bool isAdmin = @Model.Input._isAdmin;
 }
 
-@* @if (User.IsInRole(SD.Role_Admin)) *@
 @if (isAdmin)
 {
     <h1 class="pt-4">Register – ADMIN PORTAL</h1>
