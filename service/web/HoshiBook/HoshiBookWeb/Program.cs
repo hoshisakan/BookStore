@@ -109,8 +109,6 @@ try
     // });
 
     builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
-    // builder.Services.AddIdentity<IdentityUser,IdentityRole>().AddDefaultTokenProviders()
-    //     .AddEntityFrameworkStores<ApplicationDbContext>();
     builder.Services.AddIdentity<ApplicationUser,ApplicationRole>().AddDefaultTokenProviders()
         .AddEntityFrameworkStores<ApplicationDbContext>();
     builder.Services.AddSingleton<IEmailSender, EmailSender>();
@@ -132,6 +130,7 @@ try
         //     "Authentication:Application:Cookie:Name"
         // ).Get<string>();
     });
+    //TODO Add session service.
     // builder.Services.AddDistributedMemoryCache();
     builder.Services.AddSession(options =>
     {
