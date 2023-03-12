@@ -1,0 +1,228 @@
+﻿@page
+@using HoshiBook.Utility
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+    bool isAdmin = @Model.Input._isAdmin;
+}
+
+@* @if (User.IsInRole(SD.Role_Admin)) *@
+@if (isAdmin)
+{
+    <h1 class="pt-4">Register – ADMIN PORTAL</h1>
+}
+else
+{
+    <h1 class="pt-4">@ViewData["Title"]</h1>
+}
+
+<div class="row pt-4">
+    <div class="col-md-7">
+        <form id="registerForm" class="row" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            <input id="loginUserRole" type="hidden" asp-for="Input._isAdmin" />
+            <h2>Create a new account.</h2>
+            <hr />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-floating py-2 col-12">
+                <input asp-for="Input.Email" class="form-control" autocomplete="email" aria-required="true" />
+                <label asp-for="Input.Email"></label>
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+            <div class="form-floating py-2 col-6">
+                <input asp-for="Input.Name" class="form-control" autocomplete="username" aria-required="true" />
+                <label asp-for="Input.Name"></label>
+                <span asp-validation-for="Input.Name" class="text-danger"></span>
+            </div>
+            <div class="form-floating py-2 col-6">
+                <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="tel" aria-required="true" />
+                <label asp-for="Input.PhoneNumber"></label>
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="form-floating py-2 col-6">
+                <input asp-for="Input.StreetAddress" class="form-control" autocomplete="street-address" aria-required="true" />
+                <label asp-for="Input.StreetAddress"></label>
+                <span asp-validation-for="Input.StreetAddress" class="text-danger"></span>
+            </div>
+            <div class="form-floating py-2 col-6">
+                <input asp-for="Input.City" class="form-control" autocomplete="home city" aria-required="true" />
+                <label asp-for="Input.City"></label>
+                <span asp-validation-for="Input.City" class="text-danger"></span>
+            </div>
+            <div class="form-floating py-2 col-6">
+                <input asp-for="Input.State" class="form-control" autocomplete="address-level1" aria-required="true" />
+                <label asp-for="Input.State"></label>
+                <span asp-validation-for="Input.State" class="text-danger"></span>
+            </div>
+            <div class="form-floating py-2 col-6">
+                <input asp-for="Input.PostalCode" class="form-control" autocomplete="postal-code" aria-required="true" />
+                <label asp-for="Input.PostalCode"></label>
+                <span asp-validation-for="Input.PostalCode" class="text-danger"></span>
+            </div>
+            <div class="form-floating py-2 col-6">
+                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" />
+                <label asp-for="Input.Password"></label>
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+            <div class="form-floating py-2 col-6">
+                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
+                <label asp-for="Input.ConfirmPassword"></label>
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            </div>
+            @if(isAdmin){
+                <div class="form-floating py-2 col-6">
+                    <select asp-for="Input.Role" asp-items="@Model.Input.RoleList" class="form-select">
+                        <option value="0" disabled selected>-Select Role-</option>
+                    </select>
+                    <span asp-validation-for="Input.Role" class="text-danger"></span>
+                </div>
+                <div class="form-floating py-2 col-6">
+                    <select asp-for="Input.CompanyId" style="display: none;" asp-items="@Model.Input.CompanyList" class="form-select">
+                        <option value="0" disabled selected>-Select Company-</option>
+                    </select>
+                    <span asp-validation-for="Input.CompanyId" class="text-danger"></span>
+                </div>
+            } 
+            <button id="registerSubmit" type="submit" class="w-100 btn btn-primary">Register</button>
+        </form>
+    </div>
+    @if (!User.IsInRole(SD.Role_Admin))
+    {
+        <div class="col-md-5 col-md-offset-2">
+            <section>
+                <h3>Use another service to register.</h3>
+                <hr />
+                @{
+                    if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                    {
+                        <div>
+                            <p>
+                                There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
+                                about setting up this ASP.NET application to support logging in via external services</a>.
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                            <div>
+                                <p>
+                                    @foreach (var provider in Model.ExternalLogins)
+                                    {
+                                        <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                                    }
+                                </p>
+                            </div>
+                        </form>
+                    }
+                }
+            </section>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        var selectedCompany = 0;
+        var selectedRole = 0;
+        var selectedCompanyText = "";
+        var selectedRoleText = "";
+        var roleDropdownListEnabled = false;
+        var companyDropdownListEnabled = false;
+        var currentRoleIsAdmin = false;
+
+
+
+        function checkRoleDropdownListEnabled() {
+            var roleDisplay = $("#Input_Role").css("display");
+
+            if (roleDisplay != "none" && roleDisplay != undefined) {
+                roleDropdownListEnabled = true;
+            }
+            else
+            {
+                roleDropdownListEnabled = false;
+            }
+        }
+
+        function checkCompanyDropdownListEnabled() {
+            var companyDisplay = $("#Input_CompanyId").css("display");
+
+            if (companyDisplay != "none" && companyDisplay != undefined) {
+                companyDropdownListEnabled = true;
+            }
+            else
+            {
+                companyDropdownListEnabled = false;
+            }
+        }
+
+        function initilizeRole()
+        {
+            var currentRoleIsAdmin = ($("#loginUserRole").val()?.toLowerCase() === 'true');
+
+            if (!currentRoleIsAdmin) {
+                $('#Input_Role').css("display", "none");
+            }
+            else
+            {
+                $('#Input_Role').css("display", "black");
+                checkCompanyDropdownListEnabled();
+            }
+            checkRoleDropdownListEnabled();
+            @* showMessage("Register", "Role Dropdown List is enabled: " + roleDropdownListEnabled); *@
+        }
+
+        $('#Input_Role').change(function(){
+            selectedRoleText = $('#Input_Role Option:Selected').text();
+            selectedRole = $('#Input_Role Option:Selected').val();
+
+            if (selectedRoleText != 'Company')
+            {
+                companyDropdownListEnabled = false;
+                $('#Input_CompanyId').val("0");
+                selectedCompany = $('#Input_CompanyId Option:Selected').val();
+                $('#Input_CompanyId Option:Selected').text = "";
+                selectedCompanyText = $('#Input_CompanyId Option:Selected').text();
+                $('#Input_CompanyId').css("display", "none");
+            }
+            else
+            {
+                companyDropdownListEnabled = true;
+                $('#Input_CompanyId').css("display", "block");
+            }
+        });
+
+        $('#Input_CompanyId').change(function(){
+            selectedCompany = $('#Input_CompanyId Option:Selected').val();
+            selectedCompanyText = $('#Input_CompanyId Option:Selected').text();
+            companyDropdownListEnabled = true;
+        });
+
+        $('#registerSubmit').click(function(){
+            @* console.log("roleDropdownListEnabled: " + roleDropdownListEnabled);
+            console.log("companyDropdownListEnabled: " + companyDropdownListEnabled); *@
+            if (roleDropdownListEnabled && selectedRole == 0)
+            {
+                showMessage("Register Page", "Please select a role.");
+                return false;
+            }
+            if (companyDropdownListEnabled && selectedCompany == 0)
+            {
+                showMessage("Register Page", "Please select a company.");
+                return false;
+            }
+            
+            @* console.log("selectedRoleText: " + selectedRoleText);
+            console.log("selectedCompanyText: " + selectedCompanyText);
+            console.log("selectedRole: " + selectedRole);
+            console.log("selectedCompany: " + selectedCompany); *@
+
+            return true;
+        });
+
+        $(document).ready(function(){
+            initilizeRole();
+        });
+    </script>
+}
