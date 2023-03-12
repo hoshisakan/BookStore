@@ -56,7 +56,8 @@ try
             ValidationAlgorithm = ValidationAlgorithm.HMACSHA256
         }
     );
-
+    
+    //TODO Add Kestrel server runtime dotnet core project in linux environment.
     builder.WebHost.UseKestrel(options =>
     {
         options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Http:Port").Get<int>());

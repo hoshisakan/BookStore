@@ -49,7 +49,12 @@ namespace HoshiBook.DataAccess.DbInitializer
             {
                 if (_db.Database.GetPendingMigrations().Count() > 0)
                 {
+                    _logger.LogInformation($"Applying migrations.");
                     _db.Database.Migrate();
+                }
+                else
+                {
+                    _logger.LogInformation("No migrations to apply.");
                 }
             }
             catch (Exception ex)
@@ -62,6 +67,7 @@ namespace HoshiBook.DataAccess.DbInitializer
                 //TODO create roles if they are not created
                 if (!_roleManager.RoleExistsAsync(SD.Role_Admin).GetAwaiter().GetResult())
                 {
+                    _logger.LogInformation("Admin role not found, creating it");
                     List<ApplicationRole> roles = new List<ApplicationRole>()
                     {
                         new ApplicationRole
