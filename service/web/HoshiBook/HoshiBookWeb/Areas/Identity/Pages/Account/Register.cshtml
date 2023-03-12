@@ -199,8 +199,10 @@ else
         });
 
         $('#registerSubmit').click(function(){
-            @* console.log("roleDropdownListEnabled: " + roleDropdownListEnabled);
-            console.log("companyDropdownListEnabled: " + companyDropdownListEnabled); *@
+            /*
+            console.log("roleDropdownListEnabled: " + roleDropdownListEnabled);
+            console.log("companyDropdownListEnabled: " + companyDropdownListEnabled);
+            */
             if (roleDropdownListEnabled && selectedRole == 0)
             {
                 showMessage("Register Page", "Please select a role.");
@@ -212,10 +214,12 @@ else
                 return false;
             }
             
-            @* console.log("selectedRoleText: " + selectedRoleText);
+            /*
+            console.log("selectedRoleText: " + selectedRoleText);
             console.log("selectedCompanyText: " + selectedCompanyText);
             console.log("selectedRole: " + selectedRole);
-            console.log("selectedCompany: " + selectedCompany); *@
+            console.log("selectedCompany: " + selectedCompany);
+            */
 
             return true;
         });
