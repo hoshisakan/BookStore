@@ -58,17 +58,17 @@ try
     );
     
     //TODO Add Kestrel server runtime dotnet core project in linux environment.
-    builder.WebHost.UseKestrel(options =>
-    {
-        options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Http:Port").Get<int>());
-        options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Https:Port").Get<int>(), listenOptions =>
-        {
-            listenOptions.UseHttps(
-                builder.Configuration["Deployment:Kestrel:Https:Certificate:Path"],
-                builder.Configuration["Deployment:Kestrel:Https:Certificate:Password"]
-            );
-        });
-    });
+    // builder.WebHost.UseKestrel(options =>
+    // {
+    //     options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Http:Port").Get<int>());
+    //     options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Https:Port").Get<int>(), listenOptions =>
+    //     {
+    //         listenOptions.UseHttps(
+    //             builder.Configuration["Deployment:Kestrel:Https:Certificate:Path"],
+    //             builder.Configuration["Deployment:Kestrel:Https:Certificate:Password"]
+    //         );
+    //     });
+    // });
 
     // Add services to the container.
     builder.Services.AddControllersWithViews();
@@ -94,8 +94,8 @@ try
     //TODO Add PostgreSQL database context and connection settting and change default migration save table from 'public' to 'bootstore'.
     builder.Services.AddDbContext<ApplicationDbContext>(
         options => options.UseNpgsql(
-            builder.Configuration.GetConnectionString("DefaultConnection"),
-            // builder.Configuration.GetConnectionString("LocalDebugConnecton"),
+            // builder.Configuration.GetConnectionString("DefaultConnection"),
+            builder.Configuration.GetConnectionString("LocalDebugConnecton"),
             x => x.MigrationsHistoryTable(
                 HistoryRepository.DefaultTableName,
                 builder.Configuration.GetSection("PostgreSQLConfigure:Schema").Get<string>()
@@ -106,8 +106,8 @@ try
     builder.Services.AddStackExchangeRedisCache(options =>
     {
         options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
-        options.InstanceName = builder.Configuration.GetSection("RedisConfigure:Deployment:InstanceName").Get<string>();
-        // options.InstanceName = builder.Configuration.GetSection("RedisConfigure:LocalTest:InstanceName").Get<string>();
+        // options.InstanceName = builder.Configuration.GetSection("RedisConfigure:Deployment:InstanceName").Get<string>();
+        options.InstanceName = builder.Configuration.GetSection("RedisConfigure:LocalTest:InstanceName").Get<string>();
     });
 
     builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));

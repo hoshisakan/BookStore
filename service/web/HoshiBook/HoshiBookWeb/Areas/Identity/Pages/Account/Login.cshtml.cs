@@ -123,12 +123,12 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
-                    // throw new Exception("Disable any login");
+                    _logger.LogInformation($"RememberMe: {Input.RememberMe}");
                     ExternalLogins = new List<AuthenticationScheme>();
                     var hasExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).Any();
-                    _logger.LogInformation($"hasExternalLogins: {hasExternalLogins}");
-                    _logger.LogInformation($"Normal Logins: {ExternalLogins.Count}");
-                    _logger.LogInformation("User logged in");
+                    // _logger.LogInformation($"hasExternalLogins: {hasExternalLogins}");
+                    // _logger.LogInformation($"Normal Logins: {ExternalLogins.Count}");
+                    // _logger.LogInformation("User logged in");
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
