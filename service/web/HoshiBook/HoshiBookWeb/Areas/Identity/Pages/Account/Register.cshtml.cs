@@ -174,7 +174,7 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
 
                     int? selectRoleId = Input.Role == null ? -1 : Convert.ToInt32(Input.Role);
 
-                    if (selectRoleId == 1)
+                    if (selectRoleId == 4)
                     {
                         user.CompanyId = Input.CompanyId;
                     }

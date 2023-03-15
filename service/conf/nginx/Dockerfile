@@ -22,7 +22,6 @@ RUN ln -sf /usr/share/zoneinfo/${NGINX_TIME_ZONE} /etc/localtime
 RUN dpkg-reconfigure -f noninteractive tzdata
 
 # Set locale to specified language
-# RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 RUN localedef -i ${NGINX_LANG_INPUTFILE} -c -f ${NGINX_LANG_CHARMAP} -A /usr/share/locale/locale.alias ${NGINX_LANG_NAME}
 
 # Clear package lists

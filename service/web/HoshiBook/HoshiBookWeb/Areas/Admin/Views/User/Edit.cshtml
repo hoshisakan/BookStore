@@ -1,0 +1,79 @@
+@model UserEditVM
+
+@{
+    @* ViewData["Title"] = "Upsert"; *@
+}
+
+<form method="post" asp-action="Edit" enctype="multipart/form-data">
+    <input type="hidden" asp-for="ApplicationUser.Id" />
+    
+    <div class="row">
+        <div class="col-10">
+            <div class="border p-3 mt-4 row">
+                <div class="mb-3">
+                    <label asp-for="ApplicationUser.Email"></label>
+                    <input asp-for="ApplicationUser.Email" class="form-control" />
+                    <span asp-validation-for="ApplicationUser.Email" class="text-danger"></span>
+                </div>
+                <div class="mb-3 col-6">
+                    <label asp-for="ApplicationUser.Name"></label>
+                    <input asp-for="ApplicationUser.Name" class="form-control" />
+                    <span asp-validation-for="ApplicationUser.Name" class="text-danger"></span>
+                </div>
+                <div class="mb-3 col-6">
+                    <label asp-for="ApplicationUser.PhoneNumber"></label>
+                    <input asp-for="ApplicationUser.PhoneNumber" class="form-control" />
+                    <span asp-validation-for="ApplicationUser.PhoneNumber" class="text-danger"></span>
+                </div>
+                <div class="mb-3 col-6">
+                    <label asp-for="ApplicationUser.StreetAddress"></label>
+                    <input asp-for="ApplicationUser.StreetAddress" class="form-control" />
+                    <span asp-validation-for="ApplicationUser.StreetAddress" class="text-danger"></span>
+                </div>
+                <div class="mb-3 col-6">
+                    <label asp-for="ApplicationUser.City"></label>
+                    <input asp-for="ApplicationUser.City" class="form-control" />
+                    <span asp-validation-for="ApplicationUser.City" class="text-danger"></span>
+                </div>
+                <div class="mb-3 col-6">
+                    <label asp-for="ApplicationUser.State"></label>
+                    <input asp-for="ApplicationUser.State" class="form-control" />
+                    <span asp-validation-for="ApplicationUser.State" class="text-danger"></span>
+                </div>
+                <div class="mb-3 col-6">
+                    <label asp-for="ApplicationUser.PostalCode"></label>
+                    <input asp-for="ApplicationUser.PostalCode" class="form-control" />
+                    <span asp-validation-for="ApplicationUser.PostalCode" class="text-danger"></span>
+                </div>
+                <div class="mb-3 col-6">
+                    <label asp-for="ApplicationRole.RoleNumber"></label>
+                    <select asp-for="ApplicationRole.RoleNumber" asp-items='@Model.RoleList' class="form-control">
+                        <option value="0" disabled>--Select RoleName--</option>
+                    </select>
+                    <span asp-validation-for="ApplicationRole.RoleNumber" class="text-danger"></span>
+                </div>
+                <div class="mb-3 col-6">
+                    <label asp-for="ApplicationUser.CompanyId"></label>
+                    <select asp-for="ApplicationUser.CompanyId" asp-items='@Model.CompanyList' class="form-control">
+                        <option value="0" disabled selected>--Select Company--</option>
+                    </select>
+                    <span asp-validation-for="ApplicationUser.CompanyId" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary" style="width:150px">Update</button>
+                    <a asp-controller="User" asp-action="Index" class="btn btn-secondary" style="width:150px">
+                        Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts{
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+    <script>
+    </script>
+}

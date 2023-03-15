@@ -1,49 +1,42 @@
 var dataTable
 
 $(document).ready(function () {
-    var url = window.location.search;
-    if (url.includes("inprocess")) {
-        loadDatatable("inprocess");
-    }
-    else if (url.includes("pending")) {
-        loadDatatable("pending");
-    }
-    else if (url.includes("completed")) {
-        loadDatatable("completed");
-    }
-    else if (url.includes("approved")) {
-        loadDatatable("approved");
-    }
-    else {
-        loadDatatable("all");
-    }
-});
+    loadDatatable()
+})
 
-function loadDatatable(status) {
+function loadDatatable() {
     dataTable = $('#tblData').DataTable({
         ajax: {
-            url: '/Admin/Order/GetAll?status=' + status,
+            url: '/Admin/User/GetAll',
         },
         columns: [
-            { data: 'id', width: '5%' },
-            { data: 'name', width: '25%' },
+            { data: 'name', width: '15%' },
+            { data: 'email', width: '15%' },
             { data: 'phoneNumber', width: '15%' },
-            { data: 'applicationUser.email', width: '15%' },
-            { data: 'orderStatus', width: '15%' },
-            { data: 'orderTotal', width: '15%' },
+            // { data: 'streetAddress', width: '15%' },
+            // { data: 'city', width: '15%' },
+            // { data: 'state', width: '15%' },
+            // { data: 'postalCode', width: '15%' },
+            { data: 'roleName', width: '15%' },
+            { data: 'companyName', width: '15%' },
             {
                 data: 'id',
                 render: function (data) {
                     return `
                         <div class="w-75 btn-group" role="group">
-                            <a href="/Admin/Order/Details?orderId=${data}"
+                            <a href="/Admin/User/Edit?uid=${data}"
                             class="btn btn-primary mx-2">
-                                <i class="bi bi-pencil-square"></i>
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </a>
+                            <a onClick=Delete('/Admin/User/Delete/${data}')
+                            class="btn btn-danger mx-2">
+                                <i class="bi bi-trash"> </i> Delete
                             </a>
                         </div>
                     `
+                    // return ``
                 },
-                width: '5%',
+                width: '15%',
             },
         ],
     })

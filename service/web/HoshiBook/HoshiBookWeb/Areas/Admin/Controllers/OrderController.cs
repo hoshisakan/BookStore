@@ -26,8 +26,8 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
-            // domain = _config.GetValue<string>("DomainList:Kestrel:LocalDebug:Domain:https");
-            domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:https");
+            domain = _config.GetValue<string>("DomainList:Kestrel:LocalDebug:Domain:https");
+            // domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:https");
             // domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:http");
         }
 
@@ -177,7 +177,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             var orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(
                 u => u.Id == OrderVM.OrderHeader.Id, tracked: false
             );
-            _unitOfWork.OrderHeader.UpdateStatus(OrderVM.OrderHeader.Id, SD.StatusInProgress);
+            _unitOfWork.OrderHeader.UpdateStatus(OrderVM.OrderHeader.Id, SD.StatusInProgress, SD.StatusInProgress);
             _unitOfWork.Save();
             TempData["Success"] = "Order Status Updated Successfully.";
             return RedirectToAction("Details", "Order", new { orderId = OrderVM.OrderHeader.Id });
@@ -197,7 +197,8 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             );
             orderHeader.TrackingNumber = OrderVM.OrderHeader.TrackingNumber;
             orderHeader.Carrier = OrderVM.OrderHeader.Carrier;
-            orderHeader.PaymentStatus = SD.PaymentStatusDelayed;
+            // orderHeader.PaymentStatus = SD.PaymentStatusDelayed;
+            orderHeader.PaymentStatus = SD.StatusShipped;
             orderHeader.OrderStatus = SD.StatusShipped;
             orderHeader.ShippingDate = DateTime.Now;
             if (orderHeader.PaymentStatus == SD.PaymentStatusDelayed)
@@ -254,6 +255,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         {
             List<OrderHeader> orderHeaders;
 
+            orderHeaders = _unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser");
             if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
             {
                 orderHeaders = _unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser");
@@ -272,26 +274,31 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             switch (status)
             {
                 case "pending":
+                    _logger.LogInformation($"Pending");
                     orderHeaders = orderHeaders.Where(
                         u => u.PaymentStatus == SD.PaymentStatusDelayed
                     ).ToList();
                     break;
                 case "inprocess":
+                    _logger.LogInformation($"In Process");
                     orderHeaders = orderHeaders.Where(
                         u => u.PaymentStatus == SD.StatusInProgress
                     ).ToList();
                     break;
                 case "completed":
+                    _logger.LogInformation($"Completed");
                     orderHeaders = orderHeaders.Where(
                         u => u.PaymentStatus == SD.StatusShipped
                     ).ToList();
                     break;
                 case "approved":
+                    _logger.LogInformation($"Approved");
                     orderHeaders = orderHeaders.Where(
                         u => u.PaymentStatus == SD.StatusApproved
                     ).ToList();
                     break;
                 default:
+                    _logger.LogInformation($"Other Status: {status}");
                     break;
             }
             return Json(new { data = orderHeaders });

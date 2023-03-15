@@ -2,7 +2,7 @@ using HoshiBook.DataAccess.Repository.IRepository;
 
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace HoshiBook.DataAccess.Repository
 {

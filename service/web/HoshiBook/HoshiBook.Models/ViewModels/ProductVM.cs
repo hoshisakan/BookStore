@@ -16,6 +16,5 @@ namespace HoshiBook.Models.ViewModels
         public IEnumerable<SelectListItem> CategoryList { get; set; } = default!;
         [ValidateNever]
         public IEnumerable<SelectListItem> CoverTypeList { get; set; } = default!;
-    
     }
 }
