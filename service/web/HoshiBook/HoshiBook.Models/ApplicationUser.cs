@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 namespace HoshiBook.Models
 {
     public class ApplicationUser : IdentityUser
-    {
+    {        
         [Required]
         public string Name { get; set; } = default!;
         public string? StreetAddress { get; set; }
@@ -17,5 +17,6 @@ namespace HoshiBook.Models
         [ForeignKey("CompanyId")]
         [ValidateNever]
         public Company Company { get; set; } = default!;
+        // public bool Disable { get; set; }
     }
 }

@@ -30,5 +30,16 @@ public class ApplicationDbContext: IdentityDbContext {
 
         //TODO Specify create table schema name.
         modelBuilder.HasDefaultSchema("bookstore");
+
+        //TODO Set up one-to-many relationship between ApplicationUser and Company.
+        modelBuilder.Entity<Company>(
+            builder =>
+            {
+                builder.HasMany(c => c.ApplicationUsers)
+                    .WithOne(u => u.Company)
+                    .HasForeignKey(u => u.CompanyId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            }
+        );
     }
 }

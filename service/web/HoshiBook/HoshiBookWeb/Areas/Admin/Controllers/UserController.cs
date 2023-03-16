@@ -150,7 +150,14 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     }
 
                     var oldUser = _userManager.FindByIdAsync(UID).Result;
-                    var oldUserHasRoleName = _userManager.GetRolesAsync(oldUser).Result.FirstOrDefault();
+
+                    // if (RoleNumber != 4 && oldUser.CompanyId != null)
+                    // {
+                    //     // CompanyId = 0;
+                    //     CompanyId = null;
+                    // }
+
+                                        var oldUserHasRoleName = _userManager.GetRolesAsync(oldUser).Result.FirstOrDefault();
                     var oldUserHasRoleId = (
                         from role in _roleManager.Roles
                         where role.Name == oldUserHasRoleName
@@ -191,19 +198,16 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     oldUser.City = City;
                     oldUser.State = State;
                     oldUser.PostalCode = PostalCode;
-                    // oldUser.CompanyId = CompanyId;
 
-                    // oldUser = new ApplicationUser {
-                    //     Email = Email,
-                    //     Name = Name,
-                    //     PhoneNumber = PhoneNumber,
-                    //     StreetAddress = StreetAddress,
-                    //     City = City,
-                    //     State = State,
-                    //     PostalCode = PostalCode,
-                    //     CompanyId = CompanyId,
-                    //     PasswordHash = oldUser2.PasswordHash,
-                    // };
+                    if (RoleNumber == 4 && CompanyId != 0)
+                    {
+                        oldUser.CompanyId = CompanyId;
+                    }
+                    else
+                    {
+                        oldUser.CompanyId = null;
+                    }
+
                     var userInfoUpdateResult = await _userManager.UpdateAsync(oldUser);
                     _logger.LogInformation("userInfoUpdateResult: {0}", userInfoUpdateResult);
 
