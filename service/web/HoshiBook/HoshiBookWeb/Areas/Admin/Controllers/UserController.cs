@@ -121,8 +121,6 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     string? City = obj.ApplicationUser.City;
                     string? State = obj.ApplicationUser.State;
                     string? PostalCode = obj.ApplicationUser.PostalCode;
-                    // string RoleId = obj.RoleId ?? "";
-                    // string CompanyId = obj.CompanyId ?? "";
                     int RoleNumber = obj.ApplicationRole.RoleNumber;
                     int? CompanyId = obj.ApplicationUser.CompanyId ?? 0;
 
@@ -151,13 +149,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
                     var oldUser = _userManager.FindByIdAsync(UID).Result;
 
-                    // if (RoleNumber != 4 && oldUser.CompanyId != null)
-                    // {
-                    //     // CompanyId = 0;
-                    //     CompanyId = null;
-                    // }
-
-                                        var oldUserHasRoleName = _userManager.GetRolesAsync(oldUser).Result.FirstOrDefault();
+                    var oldUserHasRoleName = _userManager.GetRolesAsync(oldUser).Result.FirstOrDefault();
                     var oldUserHasRoleId = (
                         from role in _roleManager.Roles
                         where role.Name == oldUserHasRoleName

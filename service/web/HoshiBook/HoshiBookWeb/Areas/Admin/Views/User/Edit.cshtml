@@ -47,20 +47,20 @@
                 </div>
                 <div class="mb-3 col-6">
                     <label asp-for="ApplicationRole.RoleNumber"></label>
-                    <select asp-for="ApplicationRole.RoleNumber" asp-items='@Model.RoleList' class="form-control">
+                    <select id="user_rolenumber" asp-for="ApplicationRole.RoleNumber" asp-items='@Model.RoleList' class="form-control">
                         <option value="0" disabled>--Select RoleName--</option>
                     </select>
                     <span asp-validation-for="ApplicationRole.RoleNumber" class="text-danger"></span>
                 </div>
                 <div class="mb-3 col-6">
                     <label asp-for="ApplicationUser.CompanyId"></label>
-                    <select asp-for="ApplicationUser.CompanyId" asp-items='@Model.CompanyList' class="form-control">
+                    <select id="user_companyId" asp-for="ApplicationUser.CompanyId" asp-items='@Model.CompanyList' class="form-control">
                         <option value="0" disabled selected>--Select Company--</option>
                     </select>
                     <span asp-validation-for="ApplicationUser.CompanyId" class="text-danger"></span>
                 </div>
                 <div class="col-12">
-                    <button type="submit" class="btn btn-primary" style="width:150px">Update</button>
+                    <button id="editUserInfo" type="submit" class="btn btn-primary" style="width:150px">Update</button>
                     <a asp-controller="User" asp-action="Index" class="btn btn-secondary" style="width:150px">
                         Back to List
                     </a>
@@ -75,5 +75,112 @@
         <partial name="_ValidationScriptsPartial" />
     }
     <script>
+        var selectedCompany = 0;
+        var selectedRole = 0;
+        var selectedCompanyText = "";
+        var selectedRoleText = "";
+        var roleDropdownListEnabled = false;
+        var companyDropdownListEnabled = false;
+
+        function checkRoleDropdownListEnabled() {
+            var roleDisplay = $("#user_rolenumber").css("display");
+
+            if (roleDisplay != "none" && roleDisplay != undefined) {
+                roleDropdownListEnabled = true;
+            }
+            else
+            {
+                roleDropdownListEnabled = false;
+            }
+        }
+
+        function checkCompanyDropdownListEnabled() {
+            var companyDisplay = $("#user_companyId").css("display");
+
+            if (companyDisplay != "none" && companyDisplay != undefined) {
+                companyDropdownListEnabled = true;
+            }
+            else
+            {
+                companyDropdownListEnabled = false;
+            }
+        }
+
+        function initilizeRole()
+        {
+            selectedRole = $('#user_rolenumber Option:Selected').val();
+            selectedRoleText = $('#user_rolenumber Option:Selected').text();
+            selectedCompany = $('#user_companyId Option:Selected').val();
+            selectedCompanyText = $('#user_companyId Option:Selected').text();
+
+            @* console.log("initilize selectedRoleText: " + selectedRoleText);
+            console.log("initilize selectedCompanyText: " + selectedCompanyText);
+            console.log("initilize selectedRole: " + selectedRole);
+            console.log("initilize selectedCompany: " + selectedCompany); *@
+
+            if (selectedRole == 4) {
+                $('#user_companyId').css("display", "black");
+            }
+            else
+            {
+                $('#user_companyId').css("display", "none");
+            }
+        }
+
+        $('#user_rolenumber').change(function(){
+            selectedRoleText = $('#user_rolenumber Option:Selected').text();
+            selectedRole = $('#user_rolenumber Option:Selected').val();
+
+            if (selectedRoleText != 'Company')
+            {
+                companyDropdownListEnabled = false;
+                $('#user_companyId').val("0");
+                selectedCompany = $('#user_companyId Option:Selected').val();
+                $('#user_companyId Option:Selected').text = "";
+                selectedCompanyText = $('#user_companyId Option:Selected').text();
+                $('#user_companyId').css("display", "none");
+            }
+            else
+            {
+                companyDropdownListEnabled = true;
+                $('#user_companyId').css("display", "block");
+            }
+            showMessage("Register Page", "selectedRoleText: " + selectedRoleText + " selectedRole: " + selectedRole)
+        });
+
+        $('#user_companyId').change(function(){
+            selectedCompany = $('#user_companyId Option:Selected').val();
+            selectedCompanyText = $('#user_companyId Option:Selected').text();
+            companyDropdownListEnabled = true;
+            showMessage("Register Page", "selectedCompanyText: " + selectedCompanyText + " selectedCompany: " + selectedCompany)
+        });
+
+        $('#editUserInfo').click(function(){
+            /*
+            console.log("roleDropdownListEnabled: " + roleDropdownListEnabled);
+            console.log("companyDropdownListEnabled: " + companyDropdownListEnabled);
+            */
+            if (roleDropdownListEnabled && selectedRole == 0)
+            {
+                showMessage("Register Page", "Please select a role.");
+                return false;
+            }
+            if (companyDropdownListEnabled && selectedCompany == 0)
+            {
+                showMessage("Register Page", "Please select a company.");
+                return false;
+            }
+
+            @* console.log("selectedRoleText: " + selectedRoleText);
+            console.log("selectedCompanyText: " + selectedCompanyText);
+            console.log("selectedRole: " + selectedRole);
+            console.log("selectedCompany: " + selectedCompany); *@
+
+            return true;
+        });
+
+        $(document).ready(function(){
+            initilizeRole();
+        });
     </script>
 }
