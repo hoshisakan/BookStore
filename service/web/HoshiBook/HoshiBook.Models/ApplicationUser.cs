@@ -17,6 +17,6 @@ namespace HoshiBook.Models
         [ForeignKey("CompanyId")]
         [ValidateNever]
         public Company Company { get; set; } = default!;
-        // public bool Disable { get; set; }
+        public bool Enable { get; set; }
     }
 }

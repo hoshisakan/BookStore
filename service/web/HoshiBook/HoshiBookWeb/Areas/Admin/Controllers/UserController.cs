@@ -1,7 +1,7 @@
 using HoshiBook.DataAccess.Repository.IRepository;
 using HoshiBookWeb.Tools;
 using HoshiBook.Utility;
-using HoshiBook.Models.ViewModels;
+using HoshiBook.Models.ViewModels.User;
 using HoshiBookWeb.Tools.CommonTool;
 using HoshiBook.Models;
 
@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using System.Linq;
+using System.Text;
+using Microsoft.AspNetCore.WebUtilities;
+
 
 namespace HoshiBookWeb.Areas.Admin.Controllers
 {
@@ -210,7 +213,92 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                TempData["error"] = "User updated failed.";
+                TempData["error"] = "User details updated failed.";
+            }
+            return View(obj);
+        }
+
+        public async Task<IActionResult> ResetPassword(string? uid)
+        {
+            if (uid == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                var user = await _userManager.FindByIdAsync(uid);
+                
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    UserResetPasswordVM userResetPasswordVM = new();
+                    userResetPasswordVM.UID = uid;
+                    var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                    userResetPasswordVM.Code = code;
+
+                    return View(userResetPasswordVM);
+                }
+            }
+        }
+
+        //POST
+        //TODO Add ValidateAntiForgeryToken to avoid CORS attack
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(UserResetPasswordVM obj)
+        {
+            try {
+                if (ModelState.IsValid)
+                {
+                    string UID = obj.UID;
+                    string Code = obj.Code;
+                    string Password = obj.Password;
+                    string ConfirmPassword = obj.ConfirmPassword;
+
+                    _logger.LogInformation("UID: {0}", UID);
+                    _logger.LogInformation("Code: {0}", Code);
+                    _logger.LogInformation("Password: {0}", Password);
+                    _logger.LogInformation("ConfirmPassword: {0}", ConfirmPassword);
+
+                    if (Code == null)
+                    {
+                        TempData["error"] = "Code is null.";
+                        return View(obj);
+                    }
+
+                    Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
+
+                    // if (Password != ConfirmPassword)
+                    // {
+                    //     TempData["error"] = "Password and Confirm Password do not match.";
+                    //     return View(obj);
+                    // }
+
+                    var user = await _userManager.FindByIdAsync(UID);
+                    if (user == null)
+                    {
+                        TempData["error"] = "User not found.";
+                        return View(obj);
+                    }
+                    else
+                    {
+                        var result = await _userManager.ResetPasswordAsync(user, Code, Password);
+                        if (result.Succeeded)
+                        {
+                            TempData["success"] = "User password updated successfully!";
+                            return RedirectToAction("Index");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                TempData["error"] = "User password updated failed.";
             }
             return View(obj);
         }
@@ -238,7 +326,8 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     user.City,
                     user.State,
                     user.PostalCode,
-                    CompanyName = b == null ? "" : b.Name
+                    CompanyName = b == null ? "" : b.Name,
+                    user.Enable
                 }
             );
 
@@ -258,7 +347,8 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     State = user.State,
                     PostalCode = user.PostalCode,
                     RoleName = currentUserRole.FirstOrDefault() ?? "",
-                    CompanyName = user.CompanyName
+                    CompanyName = user.CompanyName,
+                    Enabled = user.Enable ? "Enabled" : "Disabled"
                 });
 
                 // _logger.LogInformation("user.Id: {0}", user.Id);
@@ -276,33 +366,57 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             return Json(new { data = userDetails });
         }
 
-        //POST
+        //DELETE
         //TODO Add ValidateAntiForgeryToken to avoid CORS attack
         [HttpDelete]
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(string? id)
         {
-            var obj = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == id);
-
-            if (obj == null)
+            if (id == null)
             {
-                return Json(
-                    new {success = false, message = "Error while deleting"}
-                );
+                return Json(new { success = false, message = "Error while deleting, uid cannot be empty." });
+            }
+            _logger.LogInformation("Delete account uid: {0}", id);
+
+            var oldUser = _userManager.FindByIdAsync(id).Result;
+
+            if (oldUser == null)
+            {
+                return Json(new { success = false, message = $"Error while deleting, unknown uid {id}." });
             }
 
-            string? oldImagePath = Path.Combine(_hostEnvironment.WebRootPath, obj.ImageUrl.TrimStart('\\'));
-            // TODO Check product image URL does exists.
-            if (obj.ImageUrl != null)
-            {
-                // TODO If does exists, then obtain full storage path.
-                FileTool.CheckFileExistsAndRemove(oldImagePath);
-            }
-            
-            _unitOfWork.Product.Remove(obj);
-            _unitOfWork.Save();
+            var userInfoRemoveResult = await _userManager.DeleteAsync(oldUser);
+            _logger.LogInformation("userInfoRemoveResult: {0}", userInfoRemoveResult);
 
             return Json(
-                new {success = true, message = "Delete Successful"}
+                new {success = true, message = "Delete Account Successful"}
+            );
+        }
+
+        //POST
+        //TODO Add ValidateAntiForgeryToken to avoid CORS attack
+        [HttpPost]
+        public async Task<IActionResult> Disabled(string? id)
+        {
+            if (id == null)
+            {
+                return Json(new { success = false, message = "Error while disabling, uid cannot be empty." });
+            }
+            _logger.LogInformation("Disabled account uid: {0}", id);
+
+            var oldUser = _userManager.FindByIdAsync(id).Result;
+
+            if (oldUser == null)
+            {
+                return Json(new { success = false, message = $"Error while disabling, unknown uid {id}." });
+            }
+
+            oldUser.Enable = false;
+
+            var userInfoUpdateResult = await _userManager.UpdateAsync(oldUser);
+            _logger.LogInformation("userInfoUpdateResult: {0}", userInfoUpdateResult);
+
+            return Json(
+                new {success = true, message = "Disabled Account Successful"}
             );
         }
         #endregion

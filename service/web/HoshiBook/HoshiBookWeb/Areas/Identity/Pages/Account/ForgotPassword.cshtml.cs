@@ -16,17 +16,23 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 
+
 namespace HoshiBookWeb.Areas.Identity.Pages.Account
 {
     public class ForgotPasswordModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly ILogger<LoginModel> _logger;
 
-        public ForgotPasswordModel(UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+        public ForgotPasswordModel(
+            UserManager<ApplicationUser> userManager, IEmailSender emailSender,
+            ILogger<LoginModel> logger
+        )
         {
             _userManager = userManager;
             _emailSender = emailSender;
+            _logger = logger;
         }
 
         /// <summary>
@@ -56,8 +62,13 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(Input.Email);
-                if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
-                {
+
+                var emailIsConfirmed = await _userManager.IsEmailConfirmedAsync(user);
+
+                _logger.LogInformation("emailIsConfirmed: " + emailIsConfirmed);
+
+                if (user == null || !emailIsConfirmed)
+                {   
                     // Don't reveal that the user does not exist or is not confirmed
                     return RedirectToPage("./ForgotPasswordConfirmation");
                 }
@@ -79,7 +90,6 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
 
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }
-
             return Page();
         }
     }

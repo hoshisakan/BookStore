@@ -10,7 +10,7 @@
 # sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh AddOrderHeaderAndDetailToDb
 # sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ExtendIdentityRoleToDb
 # sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh UpdateApplicationUserCompanyIdForeignKeyToOnDeleteSetNullDb
-sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh RemoveIdentityUserUserIdToDb
-# sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ExtendIdentityUserDisabledToDb
+# sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh RemoveIdentityUserUserIdToDb
+# sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ExtendIdentityUserEnableFieldToDb
 
 
