@@ -63,7 +63,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             else
             {
                 var editUser = await _userManager.FindByIdAsync(uid);
-                bool checkUserlocked = editUser.Enable == false;
+                bool checkUserlocked = editUser.IsLockedOut;
 
                 if (checkUserlocked)
                 {
@@ -247,7 +247,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 }
                 else
                 {
-                    bool checkUserlocked = user.Enable == false;
+                    bool checkUserlocked = user.IsLockedOut;
                     if (checkUserlocked)
                     {
                         TempData["error"] = "This user is locked";
@@ -330,7 +330,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 join company in userCompany
                 on user.CompanyId equals company.Id
                 into groupjoin from b in groupjoin.DefaultIfEmpty()
-                where user.Enable == true
+                where !user.IsLockedOut
                 select new
                 {
                     user.Id,
@@ -342,7 +342,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     user.State,
                     user.PostalCode,
                     CompanyName = b == null ? "" : b.Name,
-                    user.Enable
+                    user.IsLockedOut
                 }
             );
 
@@ -363,7 +363,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     PostalCode = user.PostalCode,
                     RoleName = currentUserRole.FirstOrDefault() ?? "",
                     CompanyName = user.CompanyName,
-                    Enabled = user.Enable ? "Locked" : "Unlocked"
+                    IsLockedOut = user.IsLockedOut ? "Locked" : "Unlocked"
                 });
 
                 // _logger.LogInformation("user.Id: {0}", user.Id);
@@ -392,7 +392,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 join company in userCompany
                 on user.CompanyId equals company.Id
                 into groupjoin from b in groupjoin.DefaultIfEmpty()
-                where user.Enable == false
+                where user.IsLockedOut
                 select new
                 {
                     user.Id,
@@ -404,7 +404,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     user.State,
                     user.PostalCode,
                     CompanyName = b == null ? "" : b.Name,
-                    user.Enable
+                    user.IsLockedOut
                 }
             );
 
@@ -425,7 +425,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     PostalCode = user.PostalCode,
                     RoleName = currentUserRole.FirstOrDefault() ?? "",
                     CompanyName = user.CompanyName,
-                    Enabled = user.Enable ? "Locked" : "Unlocked"
+                    IsLockedOut = user.IsLockedOut ? "Locked" : "Unlocked"
                 });
 
                 // _logger.LogInformation("user.Id: {0}", user.Id);
@@ -460,7 +460,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 return Json(new { success = false, message = $"Error while deleting, unknown uid {id}." });
             }
 
-            bool checkUserlocked = oldUser.Enable == false;
+            bool checkUserlocked = oldUser.IsLockedOut;
             if (checkUserlocked)
             {
                 return Json(new { success = false, message = $"Error while deleting, uid {id} account has been locked." });
@@ -492,7 +492,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 return Json(new { success = false, message = $"Error while locking, unknown uid {id}." });
             }
 
-            oldUser.Enable = false;
+            oldUser.IsLockedOut = true;
 
             var userInfoUpdateResult = await _userManager.UpdateAsync(oldUser);
             _logger.LogInformation("userInfoUpdateResult: {0}", userInfoUpdateResult);
@@ -520,7 +520,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 return Json(new { success = false, message = $"Error while unlocking, unknown uid {id}." });
             }
 
-            oldUser.Enable = true;
+            oldUser.IsLockedOut = false;
 
             var userInfoUpdateResult = await _userManager.UpdateAsync(oldUser);
             _logger.LogInformation("userInfoUpdateResult: {0}", userInfoUpdateResult);

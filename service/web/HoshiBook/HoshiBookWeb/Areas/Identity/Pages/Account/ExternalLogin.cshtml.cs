@@ -132,18 +132,24 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
 
             string loginUserEmail = info.Principal.FindFirstValue(ClaimTypes.Email);
             var loginUser = await _userManager.FindByEmailAsync(loginUserEmail);
-            _logger.LogInformation($"User: {loginUser.UserName} - {loginUser.Email} - {loginUser.Id}- {loginUser.Enable}");
-            bool checkUserLocked = loginUser.Enable;
+            _logger.LogInformation($"User: {loginUser.UserName} - {loginUser.Email} - {loginUser.Id}- {loginUser.IsLockedOut}");
+            bool _IsLockedOut = loginUser.IsLockedOut;
+
+            if (_IsLockedOut)
+            {
+                _logger.LogWarning("User account locked out.");
+                return RedirectToPage("./Lockout");
+            }
 
             // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
 
-            if (result.Succeeded && checkUserLocked)
+            if (result.Succeeded)
             {
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
                 return LocalRedirect(returnUrl);
             }
-            if (result.IsLockedOut || !checkUserLocked)
+            if (result.IsLockedOut)
             {
                 _logger.LogWarning("User account locked out.");
                 return RedirectToPage("./Lockout");

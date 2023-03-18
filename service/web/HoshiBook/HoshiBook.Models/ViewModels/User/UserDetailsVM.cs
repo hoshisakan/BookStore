@@ -21,6 +21,6 @@ namespace HoshiBook.Models.ViewModels.User
         public string PostalCode { get; set; } = default!;
         public string RoleName { get; set; } = default!;
         public string CompanyName { get; set; } = default!;
-        public string Enabled { get; set; } = default!;
+        public string IsLockedOut { get; set; } = default!;
     }
 }

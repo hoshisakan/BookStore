@@ -12,5 +12,6 @@
 # sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh UpdateApplicationUserCompanyIdForeignKeyToOnDeleteSetNullDb
 # sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh RemoveIdentityUserUserIdToDb
 # sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ExtendIdentityUserEnableFieldToDb
+sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ChangeIdentityUserEnableToIsLockedOutToDb
 
 

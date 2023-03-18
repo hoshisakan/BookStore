@@ -122,6 +122,16 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
  
             if (ModelState.IsValid)
             {
+                var loginUser = await _userManager.FindByEmailAsync(Input.Email);
+                _logger.LogInformation($"User: {loginUser.UserName} - {loginUser.Email} - {loginUser.Id}- {loginUser.IsLockedOut}");
+                bool _IsLockedOut = loginUser.IsLockedOut;
+
+                if (_IsLockedOut)
+                {
+                    _logger.LogWarning("User account locked out.");
+                    return RedirectToPage("./Lockout");
+                }
+
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
@@ -133,11 +143,7 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
 
                 _logger.LogInformation($"Normal Login RemoteIpAddress: {remoteIpAddress}");
 
-                var loginUser = await _userManager.FindByEmailAsync(Input.Email);
-                _logger.LogInformation($"User: {loginUser.UserName} - {loginUser.Email} - {loginUser.Id}- {loginUser.Enable}");
-                bool checkUserLocked = loginUser.Enable;
-
-                if (result.Succeeded && checkUserLocked)
+                if (result.Succeeded)
                 {
                     _logger.LogInformation($"RememberMe: {Input.RememberMe}");
                     ExternalLogins = new List<AuthenticationScheme>();
@@ -148,17 +154,12 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
                     return LocalRedirect(returnUrl);
                 }
 
-                if (result.RequiresTwoFactor && checkUserLocked)
+                if (result.RequiresTwoFactor)
                 {
                     return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
                 }
-                else if (result.RequiresTwoFactor && !checkUserLocked)
-                {
-                    _logger.LogWarning("User account locked out.");
-                    return RedirectToPage("./Lockout");
-                }
 
-                if (result.IsLockedOut || !checkUserLocked)
+                if (result.IsLockedOut)
                 {
                     _logger.LogWarning("User account locked out.");
                     return RedirectToPage("./Lockout");

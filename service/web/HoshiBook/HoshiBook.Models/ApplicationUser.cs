@@ -17,6 +17,9 @@ namespace HoshiBook.Models
         [ForeignKey("CompanyId")]
         [ValidateNever]
         public Company Company { get; set; } = default!;
-        public bool Enable { get; set; }
+        public bool IsLockedOut { get; set; }
+        // public string LoginIPv4Address { get; set; } = default!;
+        // public string LoginIPv6Address { get; set; } = default!;
+        // public DateTime LastLoginTime { get; set; }
     }
 }

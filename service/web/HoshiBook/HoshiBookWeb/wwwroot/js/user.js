@@ -19,7 +19,7 @@ function loadDatatable() {
             // { data: 'postalCode', width: '15%' },
             { data: 'roleName', width: '15%' },
             { data: 'companyName', width: '15%' },
-            { data: 'enabled', width: '15%' },
+            { data: 'isLockedOut', width: '15%' },
             {
                 data: 'id',
                 render: function (data) {
