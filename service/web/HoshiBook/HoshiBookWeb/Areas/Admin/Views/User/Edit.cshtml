@@ -1,7 +1,7 @@
 @model UserEditVM
 
 @{
-    @* ViewData["Title"] = "Upsert"; *@
+    @* ViewData["Title"] = "User Edit"; *@
 }
 
 <form method="post" asp-action="Edit" enctype="multipart/form-data">
@@ -46,14 +46,14 @@
                     <span asp-validation-for="ApplicationUser.PostalCode" class="text-danger"></span>
                 </div>
                 <div class="mb-3 col-6">
-                    <label asp-for="ApplicationRole.RoleNumber"></label>
+                    <label id="label_rolenumber" asp-for="ApplicationRole.RoleNumber"></label>
                     <select id="user_rolenumber" asp-for="ApplicationRole.RoleNumber" asp-items='@Model.RoleList' class="form-control">
                         <option value="0" disabled>--Select RoleName--</option>
                     </select>
                     <span asp-validation-for="ApplicationRole.RoleNumber" class="text-danger"></span>
                 </div>
                 <div class="mb-3 col-6">
-                    <label asp-for="ApplicationUser.CompanyId"></label>
+                    <label id="label_companyId" asp-for="ApplicationUser.CompanyId"></label>
                     <select id="user_companyId" asp-for="ApplicationUser.CompanyId" asp-items='@Model.CompanyList' class="form-control">
                         <option value="0" disabled selected>--Select Company--</option>
                     </select>
@@ -120,10 +120,12 @@
 
             if (selectedRole == 4) {
                 $('#user_companyId').css("display", "black");
+                $('#label_companyId').show();
             }
             else
             {
                 $('#user_companyId').css("display", "none");
+                $('#label_companyId').hide();
             }
         }
 
@@ -139,20 +141,22 @@
                 $('#user_companyId Option:Selected').text = "";
                 selectedCompanyText = $('#user_companyId Option:Selected').text();
                 $('#user_companyId').css("display", "none");
+                $('#label_companyId').hide();
             }
             else
             {
                 companyDropdownListEnabled = true;
                 $('#user_companyId').css("display", "block");
+                $('#label_companyId').show();
             }
-            showMessage("Register Page", "selectedRoleText: " + selectedRoleText + " selectedRole: " + selectedRole)
+            @* showMessage("User Edit Page", "selectedRoleText: " + selectedRoleText + " selectedRole: " + selectedRole) *@
         });
 
         $('#user_companyId').change(function(){
             selectedCompany = $('#user_companyId Option:Selected').val();
             selectedCompanyText = $('#user_companyId Option:Selected').text();
             companyDropdownListEnabled = true;
-            showMessage("Register Page", "selectedCompanyText: " + selectedCompanyText + " selectedCompany: " + selectedCompany)
+            @* showMessage("User Edit Page", "selectedCompanyText: " + selectedCompanyText + " selectedCompany: " + selectedCompany) *@
         });
 
         $('#editUserInfo').click(function(){
@@ -160,14 +164,19 @@
             console.log("roleDropdownListEnabled: " + roleDropdownListEnabled);
             console.log("companyDropdownListEnabled: " + companyDropdownListEnabled);
             */
+            @* console.log("selectedRoleText: " + selectedRoleText);
+            console.log("selectedCompanyText: " + selectedCompanyText);
+            console.log("selectedRole: " + selectedRole);
+            console.log("selectedCompany: " + selectedCompany); *@
+
             if (roleDropdownListEnabled && selectedRole == 0)
             {
-                showMessage("Register Page", "Please select a role.");
+                showMessage("User Edit Page", "Please select a role.");
                 return false;
             }
             if (companyDropdownListEnabled && selectedCompany == 0)
             {
-                showMessage("Register Page", "Please select a company.");
+                showMessage("User Edit Page", "Please select a company.");
                 return false;
             }
 

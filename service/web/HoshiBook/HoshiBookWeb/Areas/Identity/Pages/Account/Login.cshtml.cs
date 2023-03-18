@@ -123,35 +123,63 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 var loginUser = await _userManager.FindByEmailAsync(Input.Email);
+
+                if (loginUser == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return Page();
+                }
+
                 _logger.LogInformation($"User: {loginUser.UserName} - {loginUser.Email} - {loginUser.Id}- {loginUser.IsLockedOut}");
                 bool _IsLockedOut = loginUser.IsLockedOut;
 
+                string remoteIPv4Address = HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+                if (Request.Headers.ContainsKey("X-Forwarded-For"))
+                {
+                    remoteIPv4Address = Request.Headers["X-Forwarded-For"];
+                }
+
+                _logger.LogInformation($"Normal Login remoteIPv4Address: {remoteIPv4Address}");
+
+                loginUser.LoginIPv4Address = remoteIPv4Address;
+                loginUser.LastTryLoginTime = DateTime.Now;
+
+                var updateLoginInfoResult = await _userManager.UpdateAsync(loginUser);
+                bool _IsUpdateLoginInfoResult = updateLoginInfoResult.Succeeded;
+                _logger.LogInformation($"Normal Login User LoginIPv4Address And LastLoginTime Update Result: {_IsUpdateLoginInfoResult}");
+
                 if (_IsLockedOut)
                 {
-                    _logger.LogWarning("User account locked out.");
-                    return RedirectToPage("./Lockout");
+                    _logger.LogWarning("User account locked out, because the account has been manager locked.");
+                    return RedirectToPage("./UserLockout");
                 }
 
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
                 var info = await _signInManager.GetExternalLoginInfoAsync();
-
-                string remoteIpAddress = HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
-                if (Request.Headers.ContainsKey("X-Forwarded-For"))
-                    remoteIpAddress = Request.Headers["X-Forwarded-For"];
-
-                _logger.LogInformation($"Normal Login RemoteIpAddress: {remoteIpAddress}");
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation($"RememberMe: {Input.RememberMe}");
+                    // _logger.LogInformation($"RememberMe: {Input.RememberMe}");
                     ExternalLogins = new List<AuthenticationScheme>();
                     var hasExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).Any();
                     // _logger.LogInformation($"hasExternalLogins: {hasExternalLogins}");
                     // _logger.LogInformation($"Normal Logins: {ExternalLogins.Count}");
-                    // _logger.LogInformation("User logged in");
+                    loginUser.LoginIPv4Address = remoteIPv4Address;
+                    loginUser.LastLoginTime = DateTime.Now;
+                    updateLoginInfoResult = await _userManager.UpdateAsync(loginUser);
+                    _IsUpdateLoginInfoResult = updateLoginInfoResult.Succeeded;
+                    _logger.LogInformation($"Normal Login User LoginIPv4Address And LastLoginTime Update Result: {_IsUpdateLoginInfoResult}");
                     return LocalRedirect(returnUrl);
+                }
+                else
+                {
+                    loginUser.LastTryLoginTime = DateTime.Now;
+                    _logger.LogInformation($"AccessFailedCount: {loginUser.AccessFailedCount}");
+                    updateLoginInfoResult = await _userManager.UpdateAsync(loginUser);
+                    _IsUpdateLoginInfoResult = updateLoginInfoResult.Succeeded;
+                    _logger.LogInformation($"Normal Login User LastTryLoginTime Update Result: {_IsUpdateLoginInfoResult}");
                 }
 
                 if (result.RequiresTwoFactor)
@@ -161,7 +189,7 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
 
                 if (result.IsLockedOut)
                 {
-                    _logger.LogWarning("User account locked out.");
+                    _logger.LogWarning("User account locked out, because login error times limit exceeded.");
                     return RedirectToPage("./Lockout");
                 }
                 else

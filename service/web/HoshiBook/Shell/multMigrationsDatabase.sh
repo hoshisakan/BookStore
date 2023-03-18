@@ -12,6 +12,12 @@
 # sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh UpdateApplicationUserCompanyIdForeignKeyToOnDeleteSetNullDb
 # sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh RemoveIdentityUserUserIdToDb
 # sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ExtendIdentityUserEnableFieldToDb
-sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ChangeIdentityUserEnableToIsLockedOutToDb
+# sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ChangeIdentityUserEnableToIsLockedOutToDb
+# sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ExtendIdentityUserIpAddressAndLastLoginTimeToDb
+# sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ChangeIdentityUserLoginIPv6AddressAllowNULLToDb
+# sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ModifyIdentityUserLoginIPv6AddressAllowNULLToDb
+# sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ModifyIdentityUserTryLastLoginTimeToDb
+# sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ModifyIdentityUserExtendFieldSetNULLAbleToDb
+sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ModifyIdentityUserExtendIsLockedOutDisableNULLToDb
 
 

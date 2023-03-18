@@ -12,7 +12,7 @@ function loadDatatable() {
         columns: [
             { data: 'name', width: '15%' },
             { data: 'email', width: '15%' },
-            { data: 'phoneNumber', width: '15%' },
+            // { data: 'phoneNumber', width: '15%' },
             // { data: 'streetAddress', width: '15%' },
             // { data: 'city', width: '15%' },
             // { data: 'state', width: '15%' },
@@ -27,7 +27,7 @@ function loadDatatable() {
                         <div class="w-75 btn-group" role="group">
                             <a onClick=UnLock('/Admin/User/Unlock/${data}')
                             class="btn btn-success mx-2">
-                                <i class="bi bi-unlock"></i> </i> Lock
+                                <i class="bi bi-unlock"></i> </i> Unlock
                             </a>
                         </div>
                     `

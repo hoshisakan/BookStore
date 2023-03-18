@@ -78,8 +78,12 @@ try
     builder.Services.Configure<IdentityOptions>(options =>
     {
         // Default Lockout settings.
-        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(
+            builder.Configuration.GetSection("AccountLockout:DefaultLockoutTimeSpan").Get<int>()
+        );
+        options.Lockout.MaxFailedAccessAttempts = builder.Configuration.GetSection(
+            "AccountLockout:MaxFailedAccessAttempts"
+        ).Get<int>();
         options.Lockout.AllowedForNewUsers = true;
     });
 
@@ -109,7 +113,7 @@ try
     builder.Services.AddDbContext<ApplicationDbContext>(
         options => options.UseNpgsql(
             // builder.Configuration.GetConnectionString("DefaultConnection"),
-            builder.Configuration.GetConnectionString("LocalDebugConnecton"),
+            builder.Configuration.GetConnectionString("LocalTestConnecton"),
             x => x.MigrationsHistoryTable(
                 HistoryRepository.DefaultTableName,
                 builder.Configuration.GetSection("PostgreSQLConfigure:Schema").Get<string>()

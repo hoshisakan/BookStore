@@ -19,7 +19,7 @@ using Microsoft.AspNetCore.WebUtilities;
 namespace HoshiBookWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
+    [Authorize(Roles = SD.Role_Admin)]
     public class UserController : Controller
     {
         private readonly ILogger<UserController> _logger;
@@ -54,6 +54,11 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             return View();
         }
 
+        public IActionResult Lockout()
+        {
+            return View();
+        }
+
         //GET
         public async Task<IActionResult> Edit(string? uid)
         {
@@ -63,6 +68,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             else
             {
                 var editUser = await _userManager.FindByIdAsync(uid);
+
                 bool checkUserlocked = editUser.IsLockedOut;
 
                 if (checkUserlocked)
@@ -70,7 +76,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     TempData["error"] = "This user is locked";
                     return RedirectToAction(nameof(Index));
                 }
-
+            
                 var editUserHasRole = await _userManager.GetRolesAsync(editUser);
                 var editUserHasRoleName = editUserHasRole.FirstOrDefault();
                 var editUserHasRoleId = (
@@ -129,6 +135,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             try {
                 if (ModelState.IsValid)
                 {
+                    _logger.LogInformation("obj.ApplicationUser.Id: {0}", obj.ApplicationUser.Id);
                     string? UID = obj.ApplicationUser.Id;
                     string? Email = obj.ApplicationUser.Email;
                     string? Name = obj.ApplicationUser.Name;
@@ -221,6 +228,10 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
                     TempData["success"] = "User updated successfully!";
                     return RedirectToAction("Index");
+                }
+                else
+                {
+                    TempData["error"] = "User details updated failed.";
                 }
             }
             catch (Exception ex)

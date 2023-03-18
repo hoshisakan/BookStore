@@ -124,38 +124,89 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
-            string remoteIpAddress = HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+            string remoteIPv4Address = HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
             if (Request.Headers.ContainsKey("X-Forwarded-For"))
-                remoteIpAddress = Request.Headers["X-Forwarded-For"];
-
-            _logger.LogInformation($"External Login RemoteIpAddress: {remoteIpAddress}");
+            {
+                remoteIPv4Address = Request.Headers["X-Forwarded-For"];
+            }
+            _logger.LogInformation($"External Login remoteIPv4Address: {remoteIPv4Address}");
 
             string loginUserEmail = info.Principal.FindFirstValue(ClaimTypes.Email);
             var loginUser = await _userManager.FindByEmailAsync(loginUserEmail);
-            _logger.LogInformation($"User: {loginUser.UserName} - {loginUser.Email} - {loginUser.Id}- {loginUser.IsLockedOut}");
-            bool _IsLockedOut = loginUser.IsLockedOut;
 
-            if (_IsLockedOut)
+            if (loginUser != null)
             {
-                _logger.LogWarning("User account locked out.");
-                return RedirectToPage("./Lockout");
+                bool _IsLockedOut = loginUser.IsLockedOut;
+                _logger.LogInformation($"User: {loginUser.UserName} - {loginUser.Email} - {loginUser.Id}- {_IsLockedOut}");
+                if (_IsLockedOut)
+                {
+                    _logger.LogInformation("User account locked out, because the account has been manager locked.");
+                    loginUser.LoginIPv4Address = remoteIPv4Address;
+                    loginUser.LastTryLoginTime = DateTime.Now;
+                    var updateLoginInfoResult = await _userManager.UpdateAsync(loginUser);
+                    bool _IsUpdateLoginInfoResult = updateLoginInfoResult.Succeeded;
+                    _logger.LogInformation($"External Login User LoginIPv4Address And LastLoginTime Update Result: {_IsUpdateLoginInfoResult}");
+                    return RedirectToPage("./UserLockout");
+                }
             }
 
             // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
 
+            //TODO If user has been created
             if (result.Succeeded)
             {
-                _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
+                _logger.LogInformation("Success, User logged in with {Name} provider.", info.LoginProvider);
+                
+                loginUser.LoginIPv4Address = remoteIPv4Address;
+                loginUser.LastLoginTime = DateTime.Now;
+                loginUser.AccessFailedCount = 0;
+
+                var updateLoginInfoResult = await _userManager.UpdateAsync(loginUser);
+                bool _IsUpdateLoginInfoResult = updateLoginInfoResult.Succeeded;
+                _logger.LogInformation($"External Login User LoginIPv4Address And LastLoginTime Update Result: {_IsUpdateLoginInfoResult}");
+
                 return LocalRedirect(returnUrl);
             }
+
+            // if (result.Succeeded)
+            // {
+            //     string loginUserEmail = info.Principal.FindFirstValue(ClaimTypes.Email);
+            //     var loginUser = await _userManager.FindByEmailAsync(loginUserEmail);
+
+            //     bool _IsLockedOut = loginUser.IsLockedOut;
+            //     _logger.LogInformation($"User: {loginUser.UserName} - {loginUser.Email} - {loginUser.Id}- {_IsLockedOut}");
+
+            //     loginUser.LoginIPv4Address = remoteIPv4Address;
+            //     loginUser.LastLoginTime = DateTime.Now;
+            //     loginUser.AccessFailedCount = 0;
+
+            //     var updateLoginInfoResult = await _userManager.UpdateAsync(loginUser);
+            //     bool _IsUpdateLoginInfoResult = updateLoginInfoResult.Succeeded;
+            //     _logger.LogInformation($"External Login User LoginIPv4Address And LastLoginTime Update Result: {_IsUpdateLoginInfoResult}");
+
+            //     _logger.LogInformation("Success, User logged in with {Name} provider.", info.LoginProvider);
+            //     return LocalRedirect(returnUrl);
+            // }
+
+            //TODO If user has been created
             if (result.IsLockedOut)
             {
-                _logger.LogWarning("User account locked out.");
+                loginUserEmail = info.Principal.FindFirstValue(ClaimTypes.Email);
+                loginUser = await _userManager.FindByEmailAsync(loginUserEmail);
+                loginUser.LoginIPv4Address = remoteIPv4Address;
+                loginUser.LastTryLoginTime = DateTime.Now;
+
+                var updateLoginInfoResult = await _userManager.UpdateAsync(loginUser);
+                bool _IsUpdateLoginInfoResult = updateLoginInfoResult.Succeeded;
+                _logger.LogInformation($"External Login User LoginIPv4Address And LastLoginTime Update Result: {_IsUpdateLoginInfoResult}");
+
+                _logger.LogInformation("User account locked out, because login error times limit exceeded.");
                 return RedirectToPage("./Lockout");
             }
             else
             {
+                _logger.LogInformation("User does not have an account, so ask the user to create an account.");
                 // If the user does not have an account, then ask the user to create an account.
                 ReturnUrl = returnUrl;
                 ProviderDisplayName = info.ProviderDisplayName;
@@ -194,6 +245,7 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
                 user.PostalCode = Input.PostalCode;
                 user.Name = Input.Name;
                 user.PhoneNumber = Input.PhoneNumber;
+                user.IsLockedOut = false;
 
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
@@ -205,6 +257,22 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
                         var userId = await _userManager.GetUserIdAsync(user);
+
+                        string remoteIPv4Address = HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+                        if (Request.Headers.ContainsKey("X-Forwarded-For"))
+                        {
+                            remoteIPv4Address = Request.Headers["X-Forwarded-For"];
+                        }
+                        _logger.LogInformation($"External Login remoteIPv4Address: {remoteIPv4Address}");
+
+                        var loginUser = await _userManager.FindByIdAsync(userId);
+                        loginUser.LoginIPv4Address = remoteIPv4Address;
+                        loginUser.LastLoginTime = DateTime.Now;
+
+                        var updateLoginInfoResult = await _userManager.UpdateAsync(loginUser);
+                        bool _IsUpdateLoginInfoResult = updateLoginInfoResult.Succeeded;
+                        _logger.LogInformation($"External Login Created User, Records User LoginIPv4Address And LastLoginTime Update Result: {_IsUpdateLoginInfoResult}");
+
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                         var callbackUrl = Url.Page(

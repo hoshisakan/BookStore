@@ -107,7 +107,8 @@ namespace HoshiBook.DataAccess.DbInitializer
                         StreetAddress = _adminRoleConfig["StreetAddress"],
                         State = _adminRoleConfig["State"],
                         PostalCode = _adminRoleConfig["PostalCode"],
-                        City = _adminRoleConfig["City"]
+                        City = _adminRoleConfig["City"],
+                        IsLockedOut = false
                     }, _adminRoleConfig["Password"]);
 
                     if (result.Result.Succeeded)

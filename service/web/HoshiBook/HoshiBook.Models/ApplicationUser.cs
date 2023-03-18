@@ -18,8 +18,9 @@ namespace HoshiBook.Models
         [ValidateNever]
         public Company Company { get; set; } = default!;
         public bool IsLockedOut { get; set; }
-        // public string LoginIPv4Address { get; set; } = default!;
-        // public string LoginIPv6Address { get; set; } = default!;
-        // public DateTime LastLoginTime { get; set; }
+        public string? LoginIPv4Address { get; set; }
+        public string? LoginIPv6Address { get; set; }
+        public DateTime? LastLoginTime { get; set; }
+        public DateTime? LastTryLoginTime { get; set; }
     }
 }
