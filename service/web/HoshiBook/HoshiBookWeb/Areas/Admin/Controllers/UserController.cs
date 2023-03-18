@@ -49,6 +49,11 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             return View();
         }
 
+        public IActionResult Lock()
+        {
+            return View();
+        }
+
         //GET
         public async Task<IActionResult> Edit(string? uid)
         {
@@ -58,6 +63,14 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             else
             {
                 var editUser = await _userManager.FindByIdAsync(uid);
+                bool checkUserlocked = editUser.Enable == false;
+
+                if (checkUserlocked)
+                {
+                    TempData["error"] = "This user is locked";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 var editUserHasRole = await _userManager.GetRolesAsync(editUser);
                 var editUserHasRoleName = editUserHasRole.FirstOrDefault();
                 var editUserHasRoleId = (
@@ -234,6 +247,13 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 }
                 else
                 {
+                    bool checkUserlocked = user.Enable == false;
+                    if (checkUserlocked)
+                    {
+                        TempData["error"] = "This user is locked";
+                        return RedirectToAction(nameof(Index));
+                    }
+
                     UserResetPasswordVM userResetPasswordVM = new();
                     userResetPasswordVM.UID = uid;
                     var code = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -267,22 +287,16 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     if (Code == null)
                     {
                         TempData["error"] = "Code is null.";
-                        return View(obj);
+                        return RedirectToAction("Index");
                     }
 
                     Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
-
-                    // if (Password != ConfirmPassword)
-                    // {
-                    //     TempData["error"] = "Password and Confirm Password do not match.";
-                    //     return View(obj);
-                    // }
 
                     var user = await _userManager.FindByIdAsync(UID);
                     if (user == null)
                     {
                         TempData["error"] = "User not found.";
-                        return View(obj);
+                        return RedirectToAction("Index");
                     }
                     else
                     {
@@ -316,6 +330,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 join company in userCompany
                 on user.CompanyId equals company.Id
                 into groupjoin from b in groupjoin.DefaultIfEmpty()
+                where user.Enable == true
                 select new
                 {
                     user.Id,
@@ -348,7 +363,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     PostalCode = user.PostalCode,
                     RoleName = currentUserRole.FirstOrDefault() ?? "",
                     CompanyName = user.CompanyName,
-                    Enabled = user.Enable ? "Enabled" : "Disabled"
+                    Enabled = user.Enable ? "Locked" : "Unlocked"
                 });
 
                 // _logger.LogInformation("user.Id: {0}", user.Id);
@@ -362,7 +377,68 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 // _logger.LogInformation("user.RoleName: {0}", currentUserRole.FirstOrDefault() ?? "Nan");
                 // _logger.LogInformation("user.CompanyName: {0}", user.CompanyName);
             }
+            return Json(new { data = userDetails });
+        }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllLocked()
+        {
+            var userList = _unitOfWork.ApplicationUser.GetAll();
+            var userCompany = _unitOfWork.Company.GetAll();
+            List<UserDetailsVM> userDetails = new();
+
+            var userInfoFilter = (
+                from user in userList
+                join company in userCompany
+                on user.CompanyId equals company.Id
+                into groupjoin from b in groupjoin.DefaultIfEmpty()
+                where user.Enable == false
+                select new
+                {
+                    user.Id,
+                    user.Name,
+                    user.Email,
+                    user.PhoneNumber,
+                    user.StreetAddress,
+                    user.City,
+                    user.State,
+                    user.PostalCode,
+                    CompanyName = b == null ? "" : b.Name,
+                    user.Enable
+                }
+            );
+
+            foreach (var user in userInfoFilter)
+            {
+                var currentUser = await _userManager.FindByIdAsync(user.Id);
+                var currentUserRole = await _userManager.GetRolesAsync(currentUser);
+                
+                userDetails.Add(new UserDetailsVM
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    StreetAddress = user.StreetAddress,
+                    City = user.City,
+                    State = user.State,
+                    PostalCode = user.PostalCode,
+                    RoleName = currentUserRole.FirstOrDefault() ?? "",
+                    CompanyName = user.CompanyName,
+                    Enabled = user.Enable ? "Locked" : "Unlocked"
+                });
+
+                // _logger.LogInformation("user.Id: {0}", user.Id);
+                // _logger.LogInformation("user.Name: {0}", user.Name);
+                // _logger.LogInformation("user.Email: {0}", user.Email);
+                // _logger.LogInformation("user.PhoneNumber: {0}", user.PhoneNumber);
+                // _logger.LogInformation("user.StreetAddress: {0}", user.StreetAddress);
+                // _logger.LogInformation("user.City: {0}", user.City);
+                // _logger.LogInformation("user.State: {0}", user.State);
+                // _logger.LogInformation("user.PostalCode: {0}", user.PostalCode);
+                // _logger.LogInformation("user.RoleName: {0}", currentUserRole.FirstOrDefault() ?? "Nan");
+                // _logger.LogInformation("user.CompanyName: {0}", user.CompanyName);
+            }
             return Json(new { data = userDetails });
         }
 
@@ -384,6 +460,12 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 return Json(new { success = false, message = $"Error while deleting, unknown uid {id}." });
             }
 
+            bool checkUserlocked = oldUser.Enable == false;
+            if (checkUserlocked)
+            {
+                return Json(new { success = false, message = $"Error while deleting, uid {id} account has been locked." });
+            }
+
             var userInfoRemoveResult = await _userManager.DeleteAsync(oldUser);
             _logger.LogInformation("userInfoRemoveResult: {0}", userInfoRemoveResult);
 
@@ -395,19 +477,19 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         //POST
         //TODO Add ValidateAntiForgeryToken to avoid CORS attack
         [HttpPost]
-        public async Task<IActionResult> Disabled(string? id)
+        public async Task<IActionResult> Lock(string? id)
         {
             if (id == null)
             {
-                return Json(new { success = false, message = "Error while disabling, uid cannot be empty." });
+                return Json(new { success = false, message = "Error while locking, uid cannot be empty." });
             }
-            _logger.LogInformation("Disabled account uid: {0}", id);
+            _logger.LogInformation("Lock account uid: {0}", id);
 
             var oldUser = _userManager.FindByIdAsync(id).Result;
 
             if (oldUser == null)
             {
-                return Json(new { success = false, message = $"Error while disabling, unknown uid {id}." });
+                return Json(new { success = false, message = $"Error while locking, unknown uid {id}." });
             }
 
             oldUser.Enable = false;
@@ -416,7 +498,35 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             _logger.LogInformation("userInfoUpdateResult: {0}", userInfoUpdateResult);
 
             return Json(
-                new {success = true, message = "Disabled Account Successful"}
+                new {success = true, message = "Lock Account Successful"}
+            );
+        }
+
+        //POST
+        //TODO Add ValidateAntiForgeryToken to avoid CORS attack
+        [HttpPost]
+        public async Task<IActionResult> Unlock(string? id)
+        {
+            if (id == null)
+            {
+                return Json(new { success = false, message = "Error while unlocking, uid cannot be empty." });
+            }
+            _logger.LogInformation("Unlock account uid: {0}", id);
+
+            var oldUser = _userManager.FindByIdAsync(id).Result;
+
+            if (oldUser == null)
+            {
+                return Json(new { success = false, message = $"Error while unlocking, unknown uid {id}." });
+            }
+
+            oldUser.Enable = true;
+
+            var userInfoUpdateResult = await _userManager.UpdateAsync(oldUser);
+            _logger.LogInformation("userInfoUpdateResult: {0}", userInfoUpdateResult);
+
+            return Json(
+                new {success = true, message = "Unlock Account Successful"}
             );
         }
         #endregion
