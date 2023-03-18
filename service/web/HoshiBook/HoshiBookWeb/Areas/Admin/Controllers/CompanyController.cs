@@ -50,24 +50,32 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             try {
                 if (ModelState.IsValid)
                 {
+                    _logger.LogInformation("CompanyController.Upsert: ModelState is valid");
                     if (obj.Id == 0)
                     {
+                        _logger.LogInformation("CompanyController.Upsert: Create company {0}", obj.Id);
                         _unitOfWork.Company.Add(obj);
                         _unitOfWork.Save();
                         TempData["success"] = "Company created successfully";
                     }
                     else
                     {
+                        _logger.LogInformation("CompanyController.Upsert: Update company {0}", obj.Id);
                         _unitOfWork.Company.Update(obj);
                         _unitOfWork.Save();
                         TempData["success"] = "Company updated successfully";
                     }
                     return RedirectToAction("Index");
                 }
+                else
+                {
+                    _logger.LogInformation("CompanyController.Upsert: ModelState is invalid");
+                    return View(obj);
+                }
             }
             catch (Exception ex)
             {
-                ExceptionTool.CollectDetailMessage(ex);
+                _logger.LogError("CompanyController.Upsert: {0}", ex.Message);
             }
             return View(obj);
         }

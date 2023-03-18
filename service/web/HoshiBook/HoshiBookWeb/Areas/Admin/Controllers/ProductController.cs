@@ -129,7 +129,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                ExceptionTool.CollectDetailMessage(ex);
+                _logger.LogError("ProductController.Upsert: {0}", ex.Message);
             }
             return View(obj);
         }
