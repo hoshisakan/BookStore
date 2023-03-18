@@ -74,6 +74,20 @@ try
     builder.Services.AddControllersWithViews();
     // Add Razor Pages for auto refresh modify razor pages content.
     builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+
+    builder.Services.Configure<IdentityOptions>(options =>
+    {
+        // Default Lockout settings.
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.AllowedForNewUsers = true;
+    });
+
+    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
+    });
+
     builder.Services.AddAuthentication()
         .AddFacebook(options =>
         {

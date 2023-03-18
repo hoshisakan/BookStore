@@ -104,12 +104,14 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
             // Request a redirect to the external login provider.
             var redirectUrl = Url.Page("./ExternalLogin", pageHandler: "Callback", values: new { returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            
             return new ChallengeResult(provider, properties);
         }
 
         public async Task<IActionResult> OnGetCallbackAsync(string returnUrl = null, string remoteError = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
+
             if (remoteError != null)
             {
                 ErrorMessage = $"Error from external provider: {remoteError}";
@@ -122,15 +124,28 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
+            string remoteIpAddress = HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+            if (Request.Headers.ContainsKey("X-Forwarded-For"))
+                remoteIpAddress = Request.Headers["X-Forwarded-For"];
+
+            _logger.LogInformation($"External Login RemoteIpAddress: {remoteIpAddress}");
+
+            string loginUserEmail = info.Principal.FindFirstValue(ClaimTypes.Email);
+            var loginUser = await _userManager.FindByEmailAsync(loginUserEmail);
+            _logger.LogInformation($"User: {loginUser.UserName} - {loginUser.Email} - {loginUser.Id}- {loginUser.Enable}");
+            bool checkUserLocked = loginUser.Enable;
+
             // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
-            if (result.Succeeded)
+
+            if (result.Succeeded && checkUserLocked)
             {
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
                 return LocalRedirect(returnUrl);
             }
-            if (result.IsLockedOut)
+            if (result.IsLockedOut || !checkUserLocked)
             {
+                _logger.LogWarning("User account locked out.");
                 return RedirectToPage("./Lockout");
             }
             else

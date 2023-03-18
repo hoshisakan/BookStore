@@ -17,7 +17,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace HoshiBookWeb.Areas.Identity.Pages.Account
 {
@@ -25,12 +25,19 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager, ILogger<LoginModel> logger)
+        public LoginModel(
+            SignInManager<ApplicationUser> signInManager,
+            RoleManager<ApplicationRole> roleManager,
+            UserManager<ApplicationUser> userManager,
+            ILogger<LoginModel> logger
+        )
         {
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _userManager = userManager;
             _logger = logger;
         }
 
@@ -120,8 +127,17 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 var info = await _signInManager.GetExternalLoginInfoAsync();
 
+                string remoteIpAddress = HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+                if (Request.Headers.ContainsKey("X-Forwarded-For"))
+                    remoteIpAddress = Request.Headers["X-Forwarded-For"];
 
-                if (result.Succeeded)
+                _logger.LogInformation($"Normal Login RemoteIpAddress: {remoteIpAddress}");
+
+                var loginUser = await _userManager.FindByEmailAsync(Input.Email);
+                _logger.LogInformation($"User: {loginUser.UserName} - {loginUser.Email} - {loginUser.Id}- {loginUser.Enable}");
+                bool checkUserLocked = loginUser.Enable;
+
+                if (result.Succeeded && checkUserLocked)
                 {
                     _logger.LogInformation($"RememberMe: {Input.RememberMe}");
                     ExternalLogins = new List<AuthenticationScheme>();
@@ -131,11 +147,18 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
                     // _logger.LogInformation("User logged in");
                     return LocalRedirect(returnUrl);
                 }
-                if (result.RequiresTwoFactor)
+
+                if (result.RequiresTwoFactor && checkUserLocked)
                 {
                     return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
                 }
-                if (result.IsLockedOut)
+                else if (result.RequiresTwoFactor && !checkUserLocked)
+                {
+                    _logger.LogWarning("User account locked out.");
+                    return RedirectToPage("./Lockout");
+                }
+
+                if (result.IsLockedOut || !checkUserLocked)
                 {
                     _logger.LogWarning("User account locked out.");
                     return RedirectToPage("./Lockout");
