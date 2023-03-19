@@ -85,10 +85,21 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     {
                         var _common = new Common(_config);
                         string? uploads = "";
-                        string filename = Guid.NewGuid().ToString();
+                        string newFileName = Guid.NewGuid().ToString();
+                        string oldFileName = Path.GetFileName(file.FileName);
+                        string fileExtension = '.' + oldFileName.Split('.').Last();
                         string? extension = Path.GetExtension(file.FileName);
                         uploads = _common.GetProductImageStoragePath();
+
                         _logger.LogInformation("Image upload path: {0}", uploads);
+                        _logger.LogInformation("File extension: {0}", fileExtension);
+                        
+                        bool _IsContainsExtension = FileUploadTool.IsContainsExtension(fileExtension, "image");
+                        
+                        if (!_IsContainsExtension)
+                        {
+                            throw new Exception("Upload file failed, because file extension is not allowed.");
+                        }
 
                         // TODO If storage path does not exist, then create it.
                         FileTool.CheckAndCreateDirectory(uploads);
@@ -102,9 +113,14 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                             FileTool.CheckFileExistsAndRemove(oldImagePath);
                         }
                         //TODO Storage user upload file to server
-                        FileUploadTool.UploadImage(file, filename, extension, uploads);
+                        bool _IsUploadSuccess = FileUploadTool.UploadImage(file, newFileName, extension, uploads);
 
-                        obj.Product.ImageUrl = @"staticfiles\images\products\" + filename + extension;
+                        if (!_IsUploadSuccess)
+                        {
+                            throw new Exception("Upload file failed, because save file to server local failed.");
+                        }
+
+                        obj.Product.ImageUrl = @"staticfiles\images\products\" + newFileName + extension;
                     }
 
                     if (obj.Product.Id == 0)
@@ -124,6 +140,8 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("ProductController.Upsert: {0}", ex.Message);
+                TempData["error"] = ex.Message;
+                return RedirectToAction("Index");
             }
             return View(obj);
         }
@@ -171,29 +189,72 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult BulkCreate(IFormFile uploadProductListFile)
         {
-            if (uploadProductListFile == null)
-            {
+            try {
+                if (uploadProductListFile == null)
+                {
+                    throw new Exception("Please select a file to upload.");
+                }
+
+                var _common = new Common(_config);
+                string? uploads = "";
+                uploads = _common.GetUploadFilesStoragePath();
+                _logger.LogInformation("Document upload path: {0}", uploads);
+                string newFileName = Guid.NewGuid().ToString();
+                string oldFileName = Path.GetFileName(uploadProductListFile.FileName);
+                string fileExtension = '.' + oldFileName.Split('.').Last();
+                string? extension = Path.GetExtension(uploadProductListFile.FileName);
+
+                _logger.LogInformation("File extension: {0}", fileExtension);
+                bool _IsContainsExtension = FileUploadTool.IsContainsExtension(fileExtension, "import");
+
+                if (!_IsContainsExtension)
+                {
+                    throw new Exception("Upload file failed, because file extension is not allowed.");
+                }
+
+                // TODO If storage path does not exist, then create it.
+                FileTool.CheckAndCreateDirectory(uploads);
+
+                //TODO Storage user upload file to server
+                bool _IsUploadSuccess = FileUploadTool.UploadImage(uploadProductListFile, newFileName, extension, uploads);
+
+                if (!_IsUploadSuccess)
+                {
+                    throw new Exception("Upload file failed, because save file to server local failed.");
+                }
+
+                List<List<Dictionary<string, object>>> Results = new List<List<Dictionary<string, object>>>();
+
+                string? filePath = Path.Combine(uploads, newFileName + extension);
+
+                if (filePath != null)
+                {
+                    Results = FileReadTool.ReadExcelFile(filePath);
+                    foreach (var sheet in Results)
+                    {
+                        foreach (var rows in sheet)
+                        {
+                            foreach (var item in rows)
+                            {
+                                _logger.LogInformation("Key: {0}, Value: {1}", item.Key, item.Value);
+                            }
+                        }
+                    }
+                }
+
                 return Json(
-                    new {success = false, message = "Error while bulk creating"}
+                    new {success = true, message = "Bulk create successful!"}
                 );
             }
-
-            var _common = new Common(_config);
-            string? uploads = "";
-            uploads = _common.GetUploadFilesStoragePath();
-            _logger.LogInformation("Document upload path: {0}", uploads);
-            string filename = Guid.NewGuid().ToString();
-            string? extension = Path.GetExtension(uploadProductListFile.FileName);
-
-            // TODO If storage path does not exist, then create it.
-            FileTool.CheckAndCreateDirectory(uploads);
-
-            //TODO Storage user upload file to server
-            FileUploadTool.UploadImage(uploadProductListFile, filename, extension, uploads);
-
-            return Json(
-                new {success = true, message = "Bulk create successful!"}
-            );
+            catch (Exception ex)
+            {
+                // _logger.LogError("ProductController.BulkCreate: {0}", ex.Message);
+                _logger.LogError("ProductController.BulkCreate: {0}", ex.Message);
+                _logger.LogError("ProductController.BulkCreate: {0}", ex.StackTrace);
+                return Json(
+                    new {success = false, message = ex.Message}
+                );
+            }
         }
         #endregion
     }
