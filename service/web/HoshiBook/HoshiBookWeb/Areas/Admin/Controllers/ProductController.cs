@@ -86,13 +86,9 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                         var _common = new Common(_config);
                         string? uploads = "";
                         string filename = Guid.NewGuid().ToString();
-
-                        uploads = _common.GetProductImageStoragePath();
-                        _logger.LogInformation("uploads: {0}", uploads);
-
                         string? extension = Path.GetExtension(file.FileName);
-                        string? storagePath = Path.Combine(uploads, filename + extension);
-                        _logger.LogInformation("storagePath: {0}", storagePath);
+                        uploads = _common.GetProductImageStoragePath();
+                        _logger.LogInformation("Image upload path: {0}", uploads);
 
                         // TODO If storage path does not exist, then create it.
                         FileTool.CheckAndCreateDirectory(uploads);
@@ -105,11 +101,9 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                             _logger.LogInformation("oldImagePath: {0}", oldImagePath);
                             FileTool.CheckFileExistsAndRemove(oldImagePath);
                         }
+                        //TODO Storage user upload file to server
+                        FileUploadTool.UploadImage(file, filename, extension, uploads);
 
-                        using (var fileStreams = new FileStream(storagePath, FileMode.Create))
-                        {
-                            file.CopyTo(fileStreams);
-                        }
                         obj.Product.ImageUrl = @"staticfiles\images\products\" + filename + extension;
                     }
 
@@ -168,7 +162,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             _unitOfWork.Save();
 
             return Json(
-                new {success = true, message = "Delete Successful"}
+                new {success = true, message = "Delete Successful!"}
             );
         }
         
@@ -184,28 +178,21 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 );
             }
 
-            string wwwRootPath = _hostEnvironment.WebRootPath;
             var _common = new Common(_config);
             string? uploads = "";
-            string filename = Guid.NewGuid().ToString();
-
             uploads = _common.GetUploadFilesStoragePath();
-            _logger.LogInformation("uploads: {0}", uploads);
+            _logger.LogInformation("Document upload path: {0}", uploads);
+            string filename = Guid.NewGuid().ToString();
             string? extension = Path.GetExtension(uploadProductListFile.FileName);
-            string? storagePath = Path.Combine(uploads, filename + extension);
-            _logger.LogInformation("storagePath: {0}", storagePath);
 
             // TODO If storage path does not exist, then create it.
             FileTool.CheckAndCreateDirectory(uploads);
 
-            // TODO Create file.
-            using (var fileStreams = new FileStream(storagePath, FileMode.Create))
-            {
-                uploadProductListFile.CopyTo(fileStreams);
-            }
+            //TODO Storage user upload file to server
+            FileUploadTool.UploadImage(uploadProductListFile, filename, extension, uploads);
 
             return Json(
-                new {success = true, message = "Error while bulk creating"}
+                new {success = true, message = "Bulk create successful!"}
             );
         }
         #endregion

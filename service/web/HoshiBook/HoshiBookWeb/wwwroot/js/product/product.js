@@ -91,6 +91,12 @@ function handleRevertClick() {
     // showMessage('onClick', 'productRevertBtn')
 }
 
+function handleResetClick() {
+    handleRevertClick()
+    $('#productListFileUpload').val('')
+    // showMessage('onClick', 'productResetBtn')
+}
+
 function handleSendClick() {
     var getUploadFile = document.getElementById('productListFileUpload')
 
@@ -109,6 +115,7 @@ function handleSendClick() {
         processData: false,
         success: function (data) {
             if (data.success) {
+                handleResetClick()
                 dataTable.ajax.reload()
                 toastr.success(data.message)
             } else {
