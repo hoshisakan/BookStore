@@ -11,9 +11,15 @@
             <h2 class="text-primary">Company List</h2>
         </div>
         <div class="col-6 text-end">
-            <a asp-controller="Company" asp-action="Upsert" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> &nbsp; Create New Company
-            </a>
+            <div>
+                <a asp-controller="Company" asp-action="Upsert" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> &nbsp; Create New Company
+                </a>
+                @* <button class="btn btn-success">
+                    <i class="bi bi-file-arrow-up"></i> &nbsp; Bulk Create Company
+                </button>
+                <input id="formCompanyListFile" type="file" size="60"> *@
+            </div>
         </div>
     </div>
     <br/><br/>
@@ -32,5 +38,5 @@
 </div>
 
 @section Scripts{
-    <script src="~/js/Company.js"></script>
+    <script src="~/js/company/company.js"></script>
 }

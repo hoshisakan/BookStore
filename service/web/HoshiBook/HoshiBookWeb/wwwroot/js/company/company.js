@@ -24,7 +24,7 @@ function loadDatatable() {
                             class="btn btn-primary mx-2">
                                 <i class="bi bi-pencil-square"></i> Edit
                             </a>
-                            <a onClick=Delete('/Admin/Company/Delete/${data}')
+                            <a onclick=Delete('/Admin/Company/Delete/${data}')
                             class="btn btn-danger mx-2">
                                 <i class="bi bi-trash"> </i> Delete
                             </a>

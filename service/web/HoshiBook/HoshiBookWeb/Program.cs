@@ -112,8 +112,8 @@ try
     //TODO Add PostgreSQL database context and connection settting and change default migration save table from 'public' to 'bootstore'.
     builder.Services.AddDbContext<ApplicationDbContext>(
         options => options.UseNpgsql(
-            builder.Configuration.GetConnectionString("DefaultConnection"),
-            // builder.Configuration.GetConnectionString("LocalTestConnecton"),
+            // builder.Configuration.GetConnectionString("DefaultConnection"),
+            builder.Configuration.GetConnectionString("LocalTestConnecton"),
             x => x.MigrationsHistoryTable(
                 HistoryRepository.DefaultTableName,
                 builder.Configuration.GetSection("PostgreSQLConfigure:Schema").Get<string>()

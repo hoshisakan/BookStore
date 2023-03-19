@@ -142,7 +142,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             return Json(new { data = productList });
         }
 
-        //POST
+        //DELETE
         //TODO Add ValidateAntiForgeryToken to avoid CORS attack
         [HttpDelete]
         public IActionResult Delete(int? id)
@@ -169,6 +169,43 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
             return Json(
                 new {success = true, message = "Delete Successful"}
+            );
+        }
+        
+        //POST
+        //TODO Add ValidateAntiForgeryToken to avoid CORS attack
+        [HttpPost]
+        public IActionResult BulkCreate(IFormFile uploadProductListFile)
+        {
+            if (uploadProductListFile == null)
+            {
+                return Json(
+                    new {success = false, message = "Error while bulk creating"}
+                );
+            }
+
+            string wwwRootPath = _hostEnvironment.WebRootPath;
+            var _common = new Common(_config);
+            string? uploads = "";
+            string filename = Guid.NewGuid().ToString();
+
+            uploads = _common.GetUploadFilesStoragePath();
+            _logger.LogInformation("uploads: {0}", uploads);
+            string? extension = Path.GetExtension(uploadProductListFile.FileName);
+            string? storagePath = Path.Combine(uploads, filename + extension);
+            _logger.LogInformation("storagePath: {0}", storagePath);
+
+            // TODO If storage path does not exist, then create it.
+            FileTool.CheckAndCreateDirectory(uploads);
+
+            // TODO Create file.
+            using (var fileStreams = new FileStream(storagePath, FileMode.Create))
+            {
+                uploadProductListFile.CopyTo(fileStreams);
+            }
+
+            return Json(
+                new {success = true, message = "Error while bulk creating"}
             );
         }
         #endregion

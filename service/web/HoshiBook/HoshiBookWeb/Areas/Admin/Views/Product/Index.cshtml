@@ -1,21 +1,35 @@
 @model List<Product>
 @{
-    @* ViewData["Title"] = "Index"; *@
+    // ViewData["Title"] = "Index";
 }
 
-@* <partial name="../Shared/_Notification" /> *@
-
-<div class="container p-3">
+<div id="contaier" class="container p-3">
     <div class="row pt-4">
         <div class="col-6">
             <h2 class="text-primary">Product List</h2>
         </div>
         <div class="col-6 text-end">
-            <a asp-controller="Product" asp-action="Upsert" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> &nbsp; Create New Product
-            </a>
+            <div>
+                <a id="productSingleCreateBtn" asp-controller="Product" asp-action="Upsert" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> &nbsp; Create New Product
+                </a>
+                <button id="productBulkCreateBtn" class="btn btn-success" onclick="handleBulkCreateClick()">
+                    <i class="bi bi-filetype-xlsx"></i> &nbsp; Bulk Create Product
+                </button>
+            </div>
         </div>
     </div>
+    <form id="productListImportForm" method="post" asp-action="BulkCreate" enctype="multipart/form-data">
+        <div class="text-top">
+            <input id="productListFileUpload" type="file" name="uploadProductListFile" width="250">
+            <button id="productSendBtn" type="button" class="btn btn-primary" onclick="handleSendClick()">
+                <i class="bi bi-send"></i> &nbsp; Send
+            </button>
+            <button id="productRevertBtn" type="button" class="btn btn-danger" onclick="handleRevertClick()">
+                <i class="bi bi-backspace-reverse"></i> &nbsp; Revert
+            </button>
+        </div>
+    </form>
     <br/><br/>
     <table id="tblData" class="table table-bordered table-striped" style="width: 100%;">
         <thead>
@@ -32,5 +46,6 @@
 </div>
 
 @section Scripts{
-    <script src="~/js/product.js"></script>
+    <script src="~/js/product/product.js">
+    </script>
 }
