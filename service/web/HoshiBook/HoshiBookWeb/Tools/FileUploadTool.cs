@@ -75,5 +75,16 @@ namespace HoshiBookWeb.Tools
             }
             return FileTool.CheckFileExists(storagePath);
         }
+
+        public static bool UploadImage(IFormFile file, string filename, string uploads)
+        {
+            string? storagePath = Path.Combine(uploads, filename);
+
+            using (var fileStream = new FileStream(storagePath, FileMode.Create))
+            {
+                file.CopyTo(fileStream);
+            }
+            return FileTool.CheckFileExists(storagePath);
+        }
     }
 }

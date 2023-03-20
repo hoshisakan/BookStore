@@ -264,7 +264,7 @@ try
     app.UseStaticFiles(new StaticFileOptions
     {
         FileProvider = new PhysicalFileProvider(staticFilesPath),
-        RequestPath = "/staticfiles"
+        RequestPath = '/' + builder.Configuration.GetSection("StaticFiles:RequestPath").Get<string>()
     });
 
     app.MapRazorPages();

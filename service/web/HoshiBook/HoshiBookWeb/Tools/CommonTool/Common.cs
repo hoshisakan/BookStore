@@ -25,10 +25,10 @@ namespace HoshiBookWeb.Tools.CommonTool
             switch (runtimeInfo.GetEnvironmentOSPlatform())
             {
                 case 0:
-                    productImageStoragePath = Path.Combine(_config["StaticFiles:LocalTest:Path"], @"staticfiles\images\products");
+                    productImageStoragePath = Path.Combine(_config["StaticFiles:StoragePath:LocalTest:Path"], @$"{_config["StaticFiles:RequestPath"]}\images\products");
                     break;
                 case 1:
-                    productImageStoragePath = Path.Combine(_config["StaticFiles:Deployment:Path"], @"staticfiles/images/products");
+                    productImageStoragePath = Path.Combine(_config["StaticFiles:StoragePath:Deployment:Path"], @$"{_config["StaticFiles:RequestPath"]}/images/products");
                     break;
                 case 2:
                     throw new Exception("Not Support OS Platform 'OSX'");
@@ -52,10 +52,10 @@ namespace HoshiBookWeb.Tools.CommonTool
             switch (runtimeInfo.GetEnvironmentOSPlatform())
             {
                 case 0:
-                    productImageStoragePath = Path.Combine(_config["StaticFiles:LocalTest:Path"], @"staticfiles\images\upload_files");
+                    productImageStoragePath = Path.Combine(_config["StaticFiles:StoragePath:LocalTest:Path"], @$"{_config["StaticFiles:RequestPath"]}\images\upload_files");
                     break;
                 case 1:
-                    productImageStoragePath = Path.Combine(_config["StaticFiles:Deployment:Path"], @"staticfiles/images/upload_files");
+                    productImageStoragePath = Path.Combine(_config["StaticFiles:StoragePath:LocalTest:Path"], @$"{_config["StaticFiles:RequestPath"]}/images/upload_files");
                     break;
                 case 2:
                     throw new Exception("Not Support OS Platform 'OSX'");

@@ -5,27 +5,41 @@
 
 <div id="contaier" class="container p-3">
     <div class="row pt-4">
-        <div class="col-6">
+        <div class="col-4">
             <h2 class="text-primary">Product List</h2>
         </div>
-        <div class="col-6 text-end">
+        <div class="col-8 text-end">
             <div>
-                <a id="productSingleCreateBtn" asp-controller="Product" asp-action="Upsert" class="btn btn-primary">
+                <a id="singleCreateBtn" asp-controller="Product" asp-action="Upsert" class="btn btn-primary">
                     <i class="bi bi-plus-circle"></i> &nbsp; Create New Product
                 </a>
-                <button id="productBulkCreateBtn" class="btn btn-success" onclick="handleBulkCreateClick()">
-                    <i class="bi bi-filetype-xlsx"></i> &nbsp; Bulk Create Product
+                <button id="bulkCreateBtn" class="btn btn-success" onclick="handleBulkCreateClick()">
+                    <i class="bi bi-filetype-xlsx"></i> &nbsp; Bulk Create Products
+                </button>
+                <button id="importImageBtn" class="btn btn-warning" onclick="handleImportImageClick()">
+                    <i class="bi bi-filetype-xlsx"></i> &nbsp; Upload Images
                 </button>
             </div>
         </div>
     </div>
     <form id="productListImportForm" method="post" asp-action="BulkCreate" enctype="multipart/form-data">
         <div class="text-top">
-            <input id="productListFileUpload" type="file" name="uploadProductListFile" width="250">
-            <button id="productSendBtn" type="button" class="btn btn-primary" onclick="handleSendClick()">
+            <input id="fileUpload" type="file" name="uploadProductListFile" width="250">
+            <button id="sendFileBtn" type="button" class="btn btn-primary" onclick="handleSendFileClick()">
                 <i class="bi bi-send"></i> &nbsp; Send
             </button>
-            <button id="productRevertBtn" type="button" class="btn btn-danger" onclick="handleRevertClick()">
+            <button id="revertFileBtn" type="button" class="btn btn-danger" onclick="handleRevertFileClick()">
+                <i class="bi bi-backspace-reverse"></i> &nbsp; Revert
+            </button>
+        </div>
+    </form>
+    <form id="productImageImportForm" method="post" asp-action="UploadImages" enctype="multipart/form-data">
+        <div class="text-top">
+            <input id="imageUpload" type="file" name="uploadProductImages" multiple width="250">
+            <button id="sendImageBtn" type="button" class="btn btn-primary" onclick="handleSendImageClick()">
+                <i class="bi bi-send"></i> &nbsp; Send
+            </button>
+            <button id="revertImageBtn" type="button" class="btn btn-danger" onclick="handleRevertImageClick()">
                 <i class="bi bi-backspace-reverse"></i> &nbsp; Revert
             </button>
         </div>

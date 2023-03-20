@@ -5,12 +5,66 @@ $(document).ready(function () {
     loadDatatable()
 })
 
+function changeMainFeatureBtnStatus(isShow)
+{
+    if (isShow)
+    {
+        $('#singleCreateBtn').show()
+        $('#bulkCreateBtn').show()
+        $('#importImageBtn').show()
+    }
+    else
+    {
+        $('#singleCreateBtn').hide()
+        $('#bulkCreateBtn').hide()
+        $('#importImageBtn').hide()
+    }
+}
+
+function changeFileUploadFeatureBtnStatus(isShow)
+{
+    if (isShow)
+    {
+        $('#fileUpload').show()
+        $('#sendFileBtn').show()
+        $('#revertFileBtn').show()
+    }
+    else
+    {
+        $('#fileUpload').hide()
+        $('#sendFileBtn').hide()
+        $('#revertFileBtn').hide()
+    }
+}
+
+function changeImageUploadFeatureBtnStatus(isShow)
+{
+    if (isShow)
+    {
+        $('#imageUpload').show()
+        $('#sendImageBtn').show()
+        $('#revertImageBtn').show()
+    }
+    else
+    {
+        $('#imageUpload').hide()
+        $('#sendImageBtn').hide()
+        $('#revertImageBtn').hide()
+    }
+}
+
+function handleResetFileUpload() {
+    $('#fileUpload').val('')
+}
+
+function handleResetImagesUpload() {
+    $('#imageUpload').val('')
+}
+
 function initialize() {
-    $('#productSingleCreateBtn').show()
-    $('#productBulkCreateBtn').show()
-    $('#productSendBtn').hide()
-    $('#productRevertBtn').hide()
-    $('#productListFileUpload').hide()
+    changeMainFeatureBtnStatus(true);
+    changeFileUploadFeatureBtnStatus(false);
+    changeImageUploadFeatureBtnStatus(false);
 }
 
 function loadDatatable() {
@@ -74,31 +128,41 @@ function Delete(url) {
 }
 
 function handleBulkCreateClick() {
-    $('#productSingleCreateBtn').hide()
-    $('#productBulkCreateBtn').hide()
-    $('#productSendBtn').show()
-    $('#productRevertBtn').show()
-    $('#productListFileUpload').show()
-    // showMessage('onClick', 'productBulkCreateBtn')
+    changeMainFeatureBtnStatus(false)
+    changeFileUploadFeatureBtnStatus(true)
+    changeImageUploadFeatureBtnStatus(false)
+    handleResetFileUpload();
 }
 
-function handleRevertClick() {
-    $('#productSingleCreateBtn').show()
-    $('#productBulkCreateBtn').show()
-    $('#productSendBtn').hide()
-    $('#productRevertBtn').hide()
-    $('#productListFileUpload').hide()
-    // showMessage('onClick', 'productRevertBtn')
+function handleImportImageClick() {
+    changeMainFeatureBtnStatus(false);
+    changeFileUploadFeatureBtnStatus(false)
+    changeImageUploadFeatureBtnStatus(true)
+    handleResetImagesUpload()
 }
 
-function handleResetClick() {
-    handleRevertClick()
-    $('#productListFileUpload').val('')
-    // showMessage('onClick', 'productResetBtn')
+function handleRevertFileClick() {
+    changeMainFeatureBtnStatus(true)
+    changeFileUploadFeatureBtnStatus(false)
 }
 
-function handleSendClick() {
-    var getUploadFile = document.getElementById('productListFileUpload')
+function handleRevertImageClick() {
+    changeMainFeatureBtnStatus(true)
+    changeImageUploadFeatureBtnStatus(false)
+}
+
+function handleResetFile() {
+    handleRevertFileClick()
+    handleResetFileUpload()
+}
+
+function handleResetImage() {
+    handleRevertImageClick()
+    handleResetImagesUpload()
+}
+
+function handleSendFileClick() {
+    var getUploadFile = document.getElementById('fileUpload')
 
     if (getUploadFile.files.length === 0) {
         showMessage('Upload File', 'Please select a file to upload')
@@ -115,7 +179,35 @@ function handleSendClick() {
         processData: false,
         success: function (data) {
             if (data.success) {
-                handleResetClick()
+                handleResetFile()
+                dataTable.ajax.reload()
+                toastr.success(data.message)
+            } else {
+                toastr.error(data.message)
+            }
+        },
+    })
+}
+
+function handleSendImageClick() {
+    var getUploadFile = document.getElementById('imageUpload')
+
+    if (getUploadFile.files.length === 0) {
+        showMessage('Upload File', 'Please select images file to upload')
+        return false
+    }
+
+    var form = $('#productImageImportForm')[0]
+    var data = new FormData(form)
+    $.ajax({
+        url: '/Admin/Product/UploadImages',
+        type: 'POST',
+        data: data,
+        contentType: false,
+        processData: false,
+        success: function (data) {
+            if (data.success) {
+                handleResetImage()
                 dataTable.ajax.reload()
                 toastr.success(data.message)
             } else {

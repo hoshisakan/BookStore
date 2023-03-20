@@ -32,15 +32,15 @@ namespace HoshiBookWeb.Tools.ProgramInitializerTool
                 case 0:
                     _logger?.LogInformation("OS Platform: Windows");
                     staticFilesPath = Path.Combine(
-                        _config.GetSection("StaticFiles:LocalTest:Path").Get<string>(),
-                        "staticfiles"
+                        _config.GetSection("StaticFiles:StoragePath:LocalTest:Path").Get<string>(),
+                        _config.GetSection("StaticFiles:RequestPath").Get<string>()
                     );
                     break;
                 case 1:
                     _logger?.LogInformation("OS Platform: Linux");
                     staticFilesPath = Path.Combine(
-                        _config.GetSection("StaticFiles:Deployment:Path").Get<string>(),
-                        "staticfiles"
+                        _config.GetSection("StaticFiles:StoragePath:Deployment:Path").Get<string>(),
+                        _config.GetSection("StaticFiles:RequestPath").Get<string>()
                     );
                     break;
                 case 2:

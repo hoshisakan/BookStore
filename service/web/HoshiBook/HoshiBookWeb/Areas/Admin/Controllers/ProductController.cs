@@ -3,6 +3,7 @@ using HoshiBookWeb.Tools;
 using HoshiBook.Utility;
 using HoshiBook.Models.ViewModels;
 using HoshiBookWeb.Tools.CommonTool;
+using HoshiBook.Models;
 
 
 using Microsoft.AspNetCore.Mvc;
@@ -119,8 +120,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                         {
                             throw new Exception("Upload file failed, because save file to server local failed.");
                         }
-
-                        obj.Product.ImageUrl = @"staticfiles\images\products\" + newFileName + extension;
+                        obj.Product.ImageUrl = @$"{_config["StaticFiles:RequestPath"]}\images\products\" + newFileName + extension;
                     }
 
                     if (obj.Product.Id == 0)
@@ -183,6 +183,61 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 new {success = true, message = "Delete Successful!"}
             );
         }
+
+        //POST
+        //TODO Add ValidateAntiForgeryToken to avoid CORS attack
+        [HttpPost]
+        public IActionResult UploadImages(List<IFormFile> uploadProductImages)
+        {
+            try {
+                if (uploadProductImages == null)
+                {
+                    throw new Exception("Please select a file to upload.");
+                }
+
+                var _common = new Common(_config);
+                string? uploads = "";
+                uploads = _common.GetProductImageStoragePath();
+                _logger.LogInformation("Image upload path: {0}", uploads);
+
+                foreach (var file in uploadProductImages)
+                {
+                    string imageFileName = Path.GetFileName(file.FileName);
+                    string fileExtension = '.' + imageFileName.Split('.').Last();
+                    string? extension = Path.GetExtension(file.FileName);
+
+                    _logger.LogInformation("Received Image File extension: {0}", fileExtension);
+                    bool _IsContainsExtension = FileUploadTool.IsContainsExtension(fileExtension, "image");
+
+                    if (!_IsContainsExtension)
+                    {
+                        throw new Exception("Upload file failed, because file extension is not allowed.");
+                    }
+
+                    // TODO If storage path does not exist, then create it.
+                    FileTool.CheckAndCreateDirectory(uploads);
+
+                    //TODO Storage user upload file to server
+                    bool _IsUploadSuccess = FileUploadTool.UploadImage(file, imageFileName, uploads);
+
+                    if (!_IsUploadSuccess)
+                    {
+                        throw new Exception("Upload file failed, because save file to server local failed.");
+                    }
+                }
+                return Json(
+                    new {success = true, message = "Upload images successful!"}
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("ProductController.BulkImportImages: {0}", ex.Message);
+                TempData["error"] = ex.Message;
+                return Json(
+                    new {success = false, message = ex.Message}
+                );
+            }
+        }
         
         //POST
         //TODO Add ValidateAntiForgeryToken to avoid CORS attack
@@ -204,7 +259,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 string fileExtension = '.' + oldFileName.Split('.').Last();
                 string? extension = Path.GetExtension(uploadProductListFile.FileName);
 
-                _logger.LogInformation("File extension: {0}", fileExtension);
+                _logger.LogInformation("Received Document File extension: {0}", fileExtension);
                 bool _IsContainsExtension = FileUploadTool.IsContainsExtension(fileExtension, "import");
 
                 if (!_IsContainsExtension)
@@ -229,28 +284,90 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
                 if (filePath != null)
                 {
-                    Results = FileReadTool.ReadExcelFile(filePath);
+                    Results = FileReadTool.ReadExcelFile(filePath, false, 3);
                     foreach (var sheet in Results)
                     {
                         foreach (var rows in sheet)
                         {
-                            foreach (var item in rows)
+                            _logger.LogInformation("Column1: {0}", rows["Column1"]);
+                            _logger.LogInformation("Column2: {0}", rows["Column2"]);
+                            _logger.LogInformation("Column3: {0}", rows["Column3"]);
+                            _logger.LogInformation("Column4: {0}", rows["Column4"]);
+                            _logger.LogInformation("Column5: {0}", rows["Column5"]);
+                            _logger.LogInformation("Column6: {0}", rows["Column6"]);
+                            _logger.LogInformation("Column7: {0}", rows["Column7"]);
+                            _logger.LogInformation("Column8: {0}", rows["Column8"]);
+                            _logger.LogInformation("Column9: {0}", rows["Column9"]);
+                            _logger.LogInformation("Column10: {0}", rows["Column10"]);
+                            _logger.LogInformation("Column11: {0}", rows["Column11"]);
+                            Product product = new Product();
+                            product.Title = rows["Column1"].ToString() ?? "";
+                            product.Description = rows["Column2"].ToString() ?? "";
+                            product.ISBN = rows["Column3"].ToString() ?? "";
+                            product.Author = rows["Column4"].ToString() ?? "";
+                            product.ListPrice = Convert.ToDouble(rows["Column5"].ToString() ?? "0");
+                            product.Price = Convert.ToDouble(rows["Column6"].ToString() ?? "0");
+                            product.Price50 = Convert.ToDouble(rows["Column7"].ToString() ?? "0");
+                            product.Price100 = Convert.ToDouble(rows["Column8"].ToString() ?? "0");
+                            product.ImageUrl = @$"{_config["StaticFiles:RequestPath"]}\images\products\" + rows["Column9"].ToString() ?? "";
+                            string Category = rows["Column10"].ToString() ?? "";
+                            string CoverType = rows["Column11"].ToString() ?? "";
+
+                            if (Category != "")
                             {
-                                _logger.LogInformation("Key: {0}, Value: {1}", item.Key, item.Value);
+                                var category = _unitOfWork.Category.GetFirstOrDefault(c => c.Name == Category);
+                                if (category != null)
+                                {
+                                    product.CategoryId = category.Id;
+                                }
+                                else
+                                {
+                                    throw new Exception("Category does not exists.");
+                                }
                             }
+                            else
+                            {
+                                throw new Exception("Category is required.");
+                            }
+
+                            if (CoverType != "")
+                            {
+                                var coverType = _unitOfWork.CoverType.GetFirstOrDefault(c => c.Name == CoverType);
+                                if (coverType != null)
+                                {
+                                    product.CoverTypeId = coverType.Id;
+                                }
+                                else
+                                {
+                                    throw new Exception("CoverType does not exists.");
+                                }
+                            }
+                            else
+                            {
+                                throw new Exception("CoverType is required.");
+                            }
+
+                            _unitOfWork.Product.Add(product);
+                            _unitOfWork.Save();
+
+                            _logger.LogInformation(
+                                "Title: {0}, Description: {1}, Price: {2}, CoverTypeId: {3}, CategoryId: {4}, ImageUrl: {5}",
+                                product.Title, product.Description, product.Price,
+                                product.CoverTypeId, product.CategoryId, product.ImageUrl
+                            );
                         }
                     }
                 }
 
+                _logger.LogInformation("ProductController.BulkCreate: {0}", "Bulk create successful!");
                 return Json(
                     new {success = true, message = "Bulk create successful!"}
                 );
             }
             catch (Exception ex)
             {
-                // _logger.LogError("ProductController.BulkCreate: {0}", ex.Message);
-                _logger.LogError("ProductController.BulkCreate: {0}", ex.Message);
-                _logger.LogError("ProductController.BulkCreate: {0}", ex.StackTrace);
+                _logger.LogError("ProductController.BulkCreate Message: {0}", ex.Message);
+                _logger.LogError("ProductController.BulkCreate StackTrace: {0}", ex.StackTrace);
                 return Json(
                     new {success = false, message = ex.Message}
                 );
