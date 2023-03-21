@@ -51,15 +51,15 @@ namespace HoshiBook.DataAccess.Repository
             }
         }
 
-        // public List<Product> GetExistsOrderDetailsProducts(int id)
-        // {
-        //     return (
-        //         from p in _db.Products
-        //         join o in _db.OrderDetails
-        //         on p.Id equals o.ProductId
-        //         where p.Id == id
-        //         select p
-        //     ).ToList();
-        // }
+        public List<Product> GetExistsOrderDetailsProducts(int id)
+        {
+            return (
+                from p in _db.Products
+                join o in _db.OrderDetails
+                on p.Id equals o.ProductId
+                where p.Id == id
+                select p
+            ).ToList();
+        }
     }
 }

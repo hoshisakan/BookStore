@@ -189,13 +189,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 );
             }
 
-            List<Product> productList = (
-                from p in _unitOfWork.Product.GetAll()
-                join o in _unitOfWork.OrderDetail.GetAll()
-                on p.Id equals o.ProductId
-                where p.Id == id
-                select p
-            ).ToList();
+            List<Product> productList = _unitOfWork.Product.GetExistsOrderDetailsProducts(obj.Id);
             int _ProductIsExistsUserOrder = productList.Count;
 
             if (_ProductIsExistsUserOrder > 0)
@@ -421,9 +415,6 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                                 throw new Exception("ISBN is exists.");
                             }
 
-                            // _unitOfWork.Product.Add(product);
-                            // _unitOfWork.Save();
-
                             productList.Add(product);
 
                             _logger.LogInformation(
@@ -433,9 +424,6 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                             );
                         }
                     }
-                
-                    // _unitOfWork.Product.AddRange(productList);
-                    // _unitOfWork.Save();
                     //TODO Bulk add products, it is faster than add one by one. don't need to save after each add.
                     _unitOfWork.Product.BulkAdd(productList);
                 }

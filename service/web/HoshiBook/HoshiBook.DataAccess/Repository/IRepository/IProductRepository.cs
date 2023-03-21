@@ -13,6 +13,6 @@ namespace HoshiBook.DataAccess.Repository.IRepository
     {
         void Update(Product obj);
         bool IsExists(string includeProperties, string value);
-        // List<Product> GetExistsOrderDetailsProducts(int id);
+        List<Product> GetExistsOrderDetailsProducts(int id);
     }
 }
