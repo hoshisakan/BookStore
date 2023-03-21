@@ -33,7 +33,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             _config = config;
         }
 
-        public IActionResult Index()
+        public ActionResult Index()
         {
             return View();
         }
@@ -41,17 +41,20 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         //GET
         public IActionResult Upsert(int? id)
         {
+            List<Category> categoryList = _unitOfWork.Category.GetAll();
+            List<CoverType> coverTypeList = _unitOfWork.CoverType.GetAll();
+
             ProductVM productVM = new()
             {
                 Product = new(),
-                CategoryList = _unitOfWork.Category.GetAll().Select(
+                CategoryList = categoryList.Select(
                     u => new SelectListItem
                     {
                         Text = u.Name,
                         Value = u.Id.ToString()
                     }
                 ),
-                CoverTypeList = _unitOfWork.CoverType.GetAll().Select(
+                CoverTypeList = coverTypeList.Select(
                     u => new SelectListItem
                     {
                         Text = u.Name,
@@ -242,7 +245,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         //POST
         //TODO Add ValidateAntiForgeryToken to avoid CORS attack
         [HttpPost]
-        public IActionResult BulkCreate(IFormFile uploadProductListFile)
+        public IActionResult BulkCreateAsync(IFormFile uploadProductListFile)
         {
             try {
                 if (uploadProductListFile == null)
@@ -285,21 +288,18 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 if (filePath != null)
                 {
                     Results = FileReadTool.ReadExcelFile(filePath, false, 3);
+
+                    if (Results.Count == 0)
+                    {
+                        throw new Exception("Upload file failed, because read file content failed.");
+                    }
+
+                    List<Product> productList = new List<Product>();
+
                     foreach (var sheet in Results)
                     {
                         foreach (var rows in sheet)
                         {
-                            _logger.LogInformation("Column1: {0}", rows["Column1"]);
-                            _logger.LogInformation("Column2: {0}", rows["Column2"]);
-                            _logger.LogInformation("Column3: {0}", rows["Column3"]);
-                            _logger.LogInformation("Column4: {0}", rows["Column4"]);
-                            _logger.LogInformation("Column5: {0}", rows["Column5"]);
-                            _logger.LogInformation("Column6: {0}", rows["Column6"]);
-                            _logger.LogInformation("Column7: {0}", rows["Column7"]);
-                            _logger.LogInformation("Column8: {0}", rows["Column8"]);
-                            _logger.LogInformation("Column9: {0}", rows["Column9"]);
-                            _logger.LogInformation("Column10: {0}", rows["Column10"]);
-                            _logger.LogInformation("Column11: {0}", rows["Column11"]);
                             Product product = new Product();
                             product.Title = rows["Column1"].ToString() ?? "";
                             product.Description = rows["Column2"].ToString() ?? "";
@@ -347,8 +347,10 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                                 throw new Exception("CoverType is required.");
                             }
 
-                            _unitOfWork.Product.Add(product);
-                            _unitOfWork.Save();
+                            // _unitOfWork.Product.Add(product);
+                            // _unitOfWork.Save();
+
+                            productList.Add(product);
 
                             _logger.LogInformation(
                                 "Title: {0}, Description: {1}, Price: {2}, CoverTypeId: {3}, CategoryId: {4}, ImageUrl: {5}",
@@ -357,6 +359,11 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                             );
                         }
                     }
+                
+                    // _unitOfWork.Product.AddRange(productList);
+                    // _unitOfWork.Save();
+                    //TODO Bulk add products, it is faster than add one by one. don't need to save after each add.
+                    _unitOfWork.Product.BulkAdd(productList);
                 }
 
                 _logger.LogInformation("ProductController.BulkCreate: {0}", "Bulk create successful!");

@@ -14,6 +14,8 @@ namespace HoshiBook.DataAccess.Repository.IRepository
         T GetFirstOrDefault(Expression<Func<T, bool>> filter, string? includeProperties = null, bool tracked = true);
         List<T> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null);
         void Add(T entity);
+        void AddRange(List<T> entity);
+        void BulkAdd(List<T> entity);
         void Remove(T entity);
         void RemoveRange(List<T> entity);
     }

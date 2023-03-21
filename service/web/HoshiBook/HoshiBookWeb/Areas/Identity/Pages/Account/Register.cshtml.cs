@@ -137,6 +137,8 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
+            List<Company> companyList = _unitOfWork.Company.GetAll();
+
             Input = new InputModel() {
                 _isAdmin = User.IsInRole(SD.Role_Admin),
                 RoleList = _roleManager.Roles.ToList().Select(i => new SelectListItem
@@ -144,7 +146,7 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
                     Text = i.Name,
                     Value = i.RoleNumber.ToString()
                 }),
-                CompanyList = _unitOfWork.Company.GetAll().Select(i => new SelectListItem
+                CompanyList = companyList.Select(i => new SelectListItem
                 {
                     Text = i.Name,
                     Value = i.Id.ToString()

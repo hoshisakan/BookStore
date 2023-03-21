@@ -44,17 +44,17 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             _roleManager = roleManager;
         }
 
-        public IActionResult Index()
+        public ActionResult Index()
         {
             return View();
         }
 
-        public IActionResult Lock()
+        public ActionResult Lock()
         {
             return View();
         }
 
-        public IActionResult Lockout()
+        public ActionResult Lockout()
         {
             return View();
         }
@@ -101,10 +101,12 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
                 _logger.LogInformation("editUserHasCompanyId: {0}", editUser.CompanyId);
 
+                List<Company> companyList = _unitOfWork.Company.GetAll();
+
                 UserEditVM userEditVM = new()
                 {
                     ApplicationUser = new(),
-                    CompanyList = _unitOfWork.Company.GetAll().Select(
+                    CompanyList = companyList.Select(
                         u => new SelectListItem
                         {
                             Text = u.Name,

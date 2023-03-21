@@ -3,6 +3,7 @@ using HoshiBook.DataAccess.Repository.IRepository;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using EFCore.BulkExtensions;
 
 namespace HoshiBook.DataAccess.Repository
 {
@@ -20,6 +21,16 @@ namespace HoshiBook.DataAccess.Repository
         public void Add(T entity)
         {
             dbSet.Add(entity);
+        }
+
+        public void AddRange(List<T> entity)
+        {
+            dbSet.AddRange(entity);
+        }
+
+        public void BulkAdd(List<T> entity)
+        {
+            _db.BulkInsert(entity);
         }
 
         //includeProp - "Category,CoverType

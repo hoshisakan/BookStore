@@ -30,7 +30,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        public IActionResult Index()
+        public ActionResult Index()
         {
             List<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category,CoverType");
             return View(productList);
@@ -81,9 +81,10 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     _unitOfWork.ShoppingCart.Add(shoppingCart);
                     _unitOfWork.Save();
                     //TODO Get the count of the single product in the cart.
-                    int count = _unitOfWork.ShoppingCart.GetAll(
+                    List<ShoppingCart> cartList = _unitOfWork.ShoppingCart.GetAll(
                         u => u.ApplicationUserId == claim.Value
-                    ).Select(u => u.Count).Sum();
+                    );
+                    int count = cartList.Select(u => u.Count).Sum();
                     _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
                 }
             }
@@ -100,9 +101,10 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     _unitOfWork.ShoppingCart.IncrementCount(cartFromDb, shoppingCart.Count);
                     _unitOfWork.Save();
                     //TODO Get the count of the single product in the cart.
-                    int count = _unitOfWork.ShoppingCart.GetAll(
+                    List<ShoppingCart> cartList = _unitOfWork.ShoppingCart.GetAll(
                         u => u.ApplicationUserId == claim.Value
-                    ).Select(u => u.Count).Sum();
+                    );
+                    int count = cartList.Select(u => u.Count).Sum();
                     _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
                 }
             }

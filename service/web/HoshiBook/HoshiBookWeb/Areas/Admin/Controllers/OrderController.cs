@@ -43,7 +43,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 OrderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(
                     u => u.Id == orderId, includeProperties: "ApplicationUser"
                 ),
-                OrderDetail = _unitOfWork.OrderDetail.GetAll(
+                OrderDetail =_unitOfWork.OrderDetail.GetAll(
                     u => u.OrderId == orderId, includeProperties: "Product"
                 )
             };

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 using System.Text;
+using HoshiBook.Models;
 
 namespace HoshiBookWeb.ViewComponents
 {
@@ -38,7 +39,10 @@ namespace HoshiBookWeb.ViewComponents
                 }
                 else
                 {
-                    tempCacheCartCount = _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == claim.Value).Select(u => u.Count).Sum();
+                    List<ShoppingCart> shoppingCartList = _unitOfWork.ShoppingCart.GetAll(
+                        u => u.ApplicationUserId == claim.Value
+                    );
+                    tempCacheCartCount = shoppingCartList.Select(u => u.Count).Sum();
                     _logger.LogInformation($"tempCacheCartCount: {tempCacheCartCount}");
                     _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(tempCacheCartCount));
                     return View(tempCacheCartCount);

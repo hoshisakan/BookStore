@@ -50,7 +50,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
 
             ShoppingCartVM = new ShoppingCartVM()
             {
-                ListCart =_unitOfWork.ShoppingCart.GetAll(
+                ListCart = _unitOfWork.ShoppingCart.GetAll(
                     u => u.ApplicationUserId == claim.Value,
                     includeProperties: "Product"),
                 OrderHeader = new ()
@@ -80,7 +80,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
 
             ShoppingCartVM = new ShoppingCartVM()
             {
-                ListCart =_unitOfWork.ShoppingCart.GetAll(
+                ListCart = _unitOfWork.ShoppingCart.GetAll(
                     u => u.ApplicationUserId == claim.Value,
                     includeProperties: "Product"),
                     OrderHeader = new ()
@@ -225,7 +225,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
         }
 
         //TODO Maybe can be added 'lastUpdateTime' to OrderHeader table for record the payment data last update time
-        public IActionResult OrderConfirmation(int id)
+        public async Task<IActionResult> OrderConfirmation(int id)
         {
             OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(
                 u => u.Id == id,
@@ -252,14 +252,14 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                 }
             }
             _logger.LogInformation($"orderHeader.ApplicationUser.Email: {orderHeader.ApplicationUser.Email}");
-            _emailSender.SendEmailAsync(
+            await _emailSender.SendEmailAsync(
                 orderHeader.ApplicationUser.Email,
                 "New Order - Hoshi Book",
                 "<p>New Order Created</p>"
             );
             List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart.GetAll(
                 u => u.ApplicationUserId == orderHeader.ApplicationUserId
-            ).ToList();
+            );
             _cache.Remove(SD.SessionCart);
             _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
             _unitOfWork.Save();
@@ -275,9 +275,10 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault(u => u.Id == cartId);
             _unitOfWork.ShoppingCart.IncrementCount(cart, 1);
             _unitOfWork.Save();
-            int count = _unitOfWork.ShoppingCart.GetAll(
+            List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart.GetAll(
                 u => u.ApplicationUserId == cart.ApplicationUserId
-            ).Select(u => u.Count).Sum();
+            );
+            int count = shoppingCarts.Select(u => u.Count).Sum();
             _logger.LogInformation($"The user {cart.ApplicationUserId} has {count} items in the cart after increment product {cartId}.");
             _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
             return RedirectToAction(nameof(Index));
@@ -294,9 +295,10 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             {
                 _unitOfWork.ShoppingCart.Remove(cart);
                 _unitOfWork.Save();
-                int count = _unitOfWork.ShoppingCart.GetAll(
+                List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart.GetAll(
                     u => u.ApplicationUserId == cart.ApplicationUserId
-                ).Select(u => u.Count).Sum();
+                );
+                int count = shoppingCarts.Select(u => u.Count).Sum();
                 _logger.LogInformation($"The user {cart.ApplicationUserId} has {count} items in the cart after clear product {cartId}.");
                 _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
             }
@@ -304,9 +306,10 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             {
                 _unitOfWork.ShoppingCart.DecrementCount(cart, 1);
                 _unitOfWork.Save();
-                int count = _unitOfWork.ShoppingCart.GetAll(
+                List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart.GetAll(
                     u => u.ApplicationUserId == cart.ApplicationUserId
-                ).Select(u => u.Count).Sum();
+                );
+                int count = shoppingCarts.Select(u => u.Count).Sum();
                 _logger.LogInformation($"The user {cart.ApplicationUserId} has {count} items in the cart after decrement product {cartId}.");
                 _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
             }
@@ -322,9 +325,10 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault(u => u.Id == cartId);
             _unitOfWork.ShoppingCart.Remove(cart);
             _unitOfWork.Save();
-            int count = _unitOfWork.ShoppingCart.GetAll(
-                u => u.ApplicationUserId == cart.ApplicationUserId
-            ).Select(u => u.Count).Sum();
+            List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart.GetAll(
+                    u => u.ApplicationUserId == cart.ApplicationUserId
+                );
+            int count = shoppingCarts.Select(u => u.Count).Sum();
             _logger.LogInformation($"The user {cart.ApplicationUserId} has {count} items in the cart after remove.");
             _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
             return RedirectToAction(nameof(Index));
