@@ -84,7 +84,25 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             try {
                 if (ModelState.IsValid)
                 {
+                    bool _TitleIsExists = _unitOfWork.Product.IsExists(
+                        includeProperties: "Title", obj.Product.Title
+                    );
+                    bool _ISBNIsExists = _unitOfWork.Product.IsExists(
+                        includeProperties: "ISBN", obj.Product.ISBN
+                    );
+
+                    if (_TitleIsExists)
+                    {
+                        throw new Exception("Title is exists.");
+                    }
+
+                    if (_ISBNIsExists)
+                    {
+                        throw new Exception("ISBN is exists.");
+                    }
+
                     string wwwRootPath = _hostEnvironment.WebRootPath;
+
                     if (file != null)
                     {
                         var _common = new Common(_config);
@@ -171,6 +189,25 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 );
             }
 
+            List<Product> productList = (
+                from p in _unitOfWork.Product.GetAll()
+                join o in _unitOfWork.OrderDetail.GetAll()
+                on p.Id equals o.ProductId
+                where p.Id == id
+                select p
+            ).ToList();
+            int _ProductIsExistsUserOrder = productList.Count;
+
+            if (_ProductIsExistsUserOrder > 0)
+            {
+                return Json(
+                    new {
+                            success = false,
+                            message = $"Product is already used in order, count: {_ProductIsExistsUserOrder}."
+                        }
+                );
+            }
+
             string? oldImagePath = Path.Combine(_hostEnvironment.WebRootPath, obj.ImageUrl.TrimStart('\\'));
             // TODO Check product image URL does exists.
             if (obj.ImageUrl != null)
@@ -245,7 +282,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         //POST
         //TODO Add ValidateAntiForgeryToken to avoid CORS attack
         [HttpPost]
-        public IActionResult BulkCreateAsync(IFormFile uploadProductListFile)
+        public IActionResult BulkCreate(IFormFile uploadProductListFile)
         {
             try {
                 if (uploadProductListFile == null)
@@ -313,6 +350,26 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                             string Category = rows["Column10"].ToString() ?? "";
                             string CoverType = rows["Column11"].ToString() ?? "";
 
+                            if (product.Title == "")
+                            {
+                                throw new Exception("Title is required.");
+                            }
+
+                            if (product.Description == "")
+                            {
+                                throw new Exception("Description is required.");
+                            }
+
+                            if (product.ISBN == "")
+                            {
+                                throw new Exception("ISBN is required.");
+                            }
+
+                            if (product.Author == "")
+                            {
+                                throw new Exception("Author is required.");
+                            }
+
                             if (Category != "")
                             {
                                 var category = _unitOfWork.Category.GetFirstOrDefault(c => c.Name == Category);
@@ -345,6 +402,23 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                             else
                             {
                                 throw new Exception("CoverType is required.");
+                            }
+
+                            bool _TitleIsExists = _unitOfWork.Product.IsExists(
+                                includeProperties: "Title", product.Title
+                            );
+                            bool _ISBNIsExists = _unitOfWork.Product.IsExists(
+                                includeProperties: "ISBN", product.ISBN
+                            );
+
+                            if (_TitleIsExists)
+                            {
+                                throw new Exception("Title is exists.");
+                            }
+
+                            if (_ISBNIsExists)
+                            {
+                                throw new Exception("ISBN is exists.");
                             }
 
                             // _unitOfWork.Product.Add(product);

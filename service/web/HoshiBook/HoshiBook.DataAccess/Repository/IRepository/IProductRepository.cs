@@ -12,5 +12,7 @@ namespace HoshiBook.DataAccess.Repository.IRepository
     public interface IProductRepository : IRepository<Product>
     {
         void Update(Product obj);
+        bool IsExists(string includeProperties, string value);
+        // List<Product> GetExistsOrderDetailsProducts(int id);
     }
 }

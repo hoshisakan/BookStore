@@ -34,5 +34,32 @@ namespace HoshiBook.DataAccess.Repository
                 _db.Products.Update(objFromDb);
             }
         }
+
+        public bool IsExists(string includeProperties, string value)
+        {
+            if (includeProperties == "Title")
+            {
+                return _db.Products.Any(u => u.Title == value);
+            }
+            else if (includeProperties == "ISBN")
+            {
+                return _db.Products.Any(u => u.ISBN == value);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        // public List<Product> GetExistsOrderDetailsProducts(int id)
+        // {
+        //     return (
+        //         from p in _db.Products
+        //         join o in _db.OrderDetails
+        //         on p.Id equals o.ProductId
+        //         where p.Id == id
+        //         select p
+        //     ).ToList();
+        // }
     }
 }
