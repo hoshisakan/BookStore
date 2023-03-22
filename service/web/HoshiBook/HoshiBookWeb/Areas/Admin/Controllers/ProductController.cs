@@ -459,7 +459,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 DataSet ds = new DataSet();
                 ds = _unitOfWork.Product.ConvertToDataSet(productList);
 
-                string fileName = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss") + "ProductDetails.xlsx";
+                string fileName = DateTime.Now.ToString("yyyy_MM_dd_hh_mm_ss") + "_ProductDetails.xlsx";
                 // return Json(
                 //     new {success = true, message = "Export successful!"}
                 // );
