@@ -8,6 +8,7 @@
 * Redis 6.2.5
 
 ## Browse the web application
+### Customer
 ※ Product list aren't for sale and commercial, just for demo
 * Open the browser and enter the URL: https://localhost
 * You will see the following user login page
@@ -43,9 +44,29 @@
 * You will see the order status is "Approved" after the payment is successful
 ![alt text](https://imgur.com/VrzoiTH.png)
 
-
 * Click the "Order History" button to view the order history
 ![alt text](https://imgur.com/HF9UGCy.png)
+
+### Admin
+* Enter the user name and password to login
+![alt text](https://imgur.com/J6XK0aM.png)
+
+* You will see the following page
+![alt text](https://imgur.com/sHQw0bi.png)
+
+* Click the "Content Management" -> "Category" button to view the dashboard
+![alt text](https://imgur.com/i4aCJ8Z.png)
+
+* Click the "Cover Type Management" -> "Category" button to view the dashboard
+![alt text](https://imgur.com/waojUx7.png)
+
+* Click the "Product Management" -> "Category" button to view the dashboard
+![alt text](https://imgur.com/5zevr3m.png)
+
+* Click the "User Management" button to view the user management page
+![alt text](.png)
+
+
 
 ## Build the Docker services
 ### Reverse Proxy Server
