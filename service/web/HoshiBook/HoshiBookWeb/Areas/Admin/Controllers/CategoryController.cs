@@ -4,7 +4,9 @@ using HoshiBook.Utility;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-
+using System.Data;
+using HoshiBookWeb.Tools;
+using HoshiBookWeb.Tools.CommonTool;
 
 namespace HoshiBookWeb.Areas.Admin.Controllers
 {
@@ -14,17 +16,22 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
     {
         private readonly ILogger<CategoryController> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IConfiguration _config;
 
-        public CategoryController(ILogger<CategoryController> logger, IUnitOfWork unitOfWork)
+
+        public CategoryController(
+            ILogger<CategoryController> logger, IUnitOfWork unitOfWork,
+            IConfiguration config
+        )
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
+            _config = config;
         }
 
         public ActionResult Index()
         {
-            List<Category> objCategoryList = _unitOfWork.Category.GetAll();
-            return View(objCategoryList);
+            return View();
         }
 
         //GET
@@ -87,37 +94,237 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             return View(obj);
         }
 
-        //GET
-        public IActionResult Delete(int? id)
+        // //GET
+        // public IActionResult Delete(int? id)
+        // {
+        //     if (id == null || id == 0) {
+        //         return NotFound();
+        //     }
+        //     // var categoryFromDb = _unitOfWork.Category.Categories.FindAsync(id);
+        //     var categoryFromDbFirst = _unitOfWork.Category.GetFirstOrDefault(u => u.Id == id);
+        //     // var categoryFromDbSingle = _unitOfWork.Category.Categories.SingleOrDefaultAsync(u => u.Id == id);
+        //     if (categoryFromDbFirst == null) {
+        //         return NotFound();
+        //     }
+        //     return View(categoryFromDbFirst);
+        // }
+
+        // //POST
+        // //TODO Add ValidateAntiForgeryToken to avoid CORS attack
+        // [HttpPost,ActionName("Delete")]
+        // [ValidateAntiForgeryToken]
+        // public IActionResult DeletePOST(int? id)
+        // {
+        //     var obj = _unitOfWork.Category.GetFirstOrDefault(u => u.Id == id);
+
+        //     if (obj == null) {
+        //         return NotFound();
+        //     }
+
+        //     int _CategoryIsExistsProducts = _unitOfWork.Category.GetExistsProductsCategoriesCount(obj.Id);
+
+        //     if (_CategoryIsExistsProducts > 0)
+        //     {
+        //         _logger.LogWarning("Category cannot be deleted because it is associated with products.");
+        //         TempData["error"] = "Category cannot be deleted because it is associated with products.";
+        //         return RedirectToAction("Index");
+        //     }
+
+        //     _unitOfWork.Category.Remove(obj);
+        //     _unitOfWork.Save();
+        //     _logger.LogInformation("Category deleted successfully");
+        //     TempData["success"] = "Category deleted successfully";
+
+        //     return RedirectToAction("Index");
+        // }
+
+        #region API CALLS
+        [HttpGet]
+        public IActionResult GetAll()
         {
-            if (id == null || id == 0) {
-                return NotFound();
-            }
-            // var categoryFromDb = _unitOfWork.Category.Categories.FindAsync(id);
-            var categoryFromDbFirst = _unitOfWork.Category.GetFirstOrDefault(u => u.Id == id);
-            // var categoryFromDbSingle = _unitOfWork.Category.Categories.SingleOrDefaultAsync(u => u.Id == id);
-            if (categoryFromDbFirst == null) {
-                return NotFound();
-            }
-            return View(categoryFromDbFirst);
+            var objCategoryList = _unitOfWork.Category.GetAll().ToList();
+            _logger.LogInformation("Category list: {0}", objCategoryList);
+            return Json(new { data = objCategoryList });
         }
 
-        //POST
-        //TODO Add ValidateAntiForgeryToken to avoid CORS attack
-        [HttpPost,ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public IActionResult DeletePOST(int? id)
+        //DELETE
+        [HttpDelete]
+        public IActionResult Delete(int? id)
         {
             var obj = _unitOfWork.Category.GetFirstOrDefault(u => u.Id == id);
 
             if (obj == null) {
                 return NotFound();
             }
+
+            int _CategoryIsExistsProducts = _unitOfWork.Category.GetExistsProductsCategoriesCount(obj.Id);
+
+            if (_CategoryIsExistsProducts > 0)
+            {
+                return Json(
+                    new {
+                            success = false,
+                            message = $"Category is already used in products, count: {_CategoryIsExistsProducts}."
+                        }
+                );
+            }
+
             _unitOfWork.Category.Remove(obj);
             _unitOfWork.Save();
-            TempData["success"] = "Category deleted successfully";
 
-            return RedirectToAction("Index");
+            return Json(
+                new {
+                    success = true,
+                    message = "Category deleted successfully."
+                }
+            );
         }
+
+        //POST
+        //TODO Add ValidateAntiForgeryToken to avoid CORS attack
+        [HttpPost]
+        public IActionResult BulkCreate(IFormFile uploadFile)
+        {
+            try {
+                if (uploadFile == null)
+                {
+                    throw new Exception("Please select a file to upload.");
+                }
+
+                var _common = new Common(_config);
+                string? uploads = "";
+                uploads = _common.GetUploadFilesStoragePath();
+                _logger.LogInformation("Document upload path: {0}", uploads);
+                string newFileName = Guid.NewGuid().ToString();
+                string oldFileName = Path.GetFileName(uploadFile.FileName);
+                string fileExtension = '.' + oldFileName.Split('.').Last();
+                string? extension = Path.GetExtension(uploadFile.FileName);
+
+                _logger.LogInformation("Received Document File extension: {0}", fileExtension);
+                bool _IsContainsExtension = FileUploadTool.IsContainsExtension(fileExtension, "import");
+
+                if (!_IsContainsExtension)
+                {
+                    throw new Exception("Upload file failed, because file extension is not allowed.");
+                }
+
+                // TODO If storage path does not exist, then create it.
+                FileTool.CheckAndCreateDirectory(uploads);
+
+                //TODO Storage user upload file to server
+                bool _IsUploadSuccess = FileUploadTool.UploadImage(uploadFile, newFileName, extension, uploads);
+
+                if (!_IsUploadSuccess)
+                {
+                    throw new Exception("Upload file failed, because save file to server local failed.");
+                }
+
+                List<List<Dictionary<string, object>>> Results = new List<List<Dictionary<string, object>>>();
+
+                string? filePath = Path.Combine(uploads, newFileName + extension);
+
+                if (filePath != null)
+                {
+                    Results = FileReadTool.ReadExcelFile(filePath, false, 3);
+
+                    if (Results.Count == 0)
+                    {
+                        throw new Exception("Upload file failed, because read file content failed.");
+                    }
+
+                    List<Category> categoryList = new List<Category>();
+
+                    foreach (var sheet in Results)
+                    {
+                        foreach (var rows in sheet)
+                        {
+                            Category category = new Category();
+                            category.Name = rows["Column0"].ToString() ?? "";
+                            category.DisplayOrder = Convert.ToInt32(rows["Column1"].ToString() ?? "0");
+
+                            if (category.Name == "")
+                            {
+                                throw new Exception("Title is required.");
+                            }
+
+                            if (category.DisplayOrder == 0)
+                            {
+                                throw new Exception("Description is required.");
+                            }
+
+                            bool _NameIsExists = _unitOfWork.Category.IsExists(
+                                includeProperties: "Name", category.Name
+                            );
+                            bool _DisplayOrderIsExists = _unitOfWork.Category.IsExists(
+                                includeProperties: "DisplayOrder", category.DisplayOrder.ToString()
+                            );
+
+                            if (_NameIsExists)
+                            {
+                                throw new Exception("Name is exists.");
+                            }
+
+                            if (_DisplayOrderIsExists)
+                            {
+                                throw new Exception("DisplayOrder is exists.");
+                            }
+
+                            categoryList.Add(category);
+
+                            _logger.LogInformation(
+                                "Name: {0}, DisplayOrder: {1}",
+                                category.Name, category.DisplayOrder
+                            );
+                        }
+                    }
+                    //TODO Bulk add categories, it is faster than add one by one. don't need to save after each add.
+                    _unitOfWork.Category.BulkAdd(categoryList);
+                }
+
+                _logger.LogInformation("CategoryController.BulkCreate: {0}", "Bulk create successful!");
+                return Json(
+                    new {success = true, message = "Bulk create successful!"}
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("CategoryController.BulkCreate Message: {0}", ex.Message);
+                _logger.LogError("CategoryController.BulkCreate StackTrace: {0}", ex.StackTrace);
+                return Json(
+                    new {success = false, message = ex.Message}
+                );
+            }
+        }
+
+        [HttpGet]
+        public IActionResult ExportDetails()
+        {
+            try
+            {
+                List<Category> categoryList = _unitOfWork.Category.GetAll().ToList();
+
+                if (categoryList.Count == 0)
+                {
+                    throw new Exception("No data to export.");
+                }
+
+                DataSet ds = new DataSet();
+                ds = _unitOfWork.Category.ConvertToDataSet(categoryList);
+
+                string fileName = DateTime.Now.ToString("yyyy_MM_dd_hh_mm_ss") + "_CategoriesDetails.xlsx";
+
+                return File(
+                    FileExportTool.ExportToExcelDownload(ds),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    fileName
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("CategoryController.ExportDetails: {0}", ex.Message);
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        #endregion
     }
 }

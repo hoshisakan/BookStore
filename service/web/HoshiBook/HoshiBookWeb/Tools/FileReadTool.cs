@@ -21,8 +21,11 @@ namespace HoshiBookWeb.Tools
                     DataSet excelInfo = reader.AsDataSet();
                     int allSheetsCount = excelInfo.Tables.Count;
 
-                    if (!readAllSheets && sheetIndex >= allSheetsCount) {
+                    if (!readAllSheets && sheetIndex >= allSheetsCount && allSheetsCount < 1) {
                         throw new Exception("Sheet index is out of range");
+                    }
+                    else if (!readAllSheets && sheetIndex >= allSheetsCount && allSheetsCount >= 1) {
+                        sheetIndex = 0;
                     }
 
                     sheetIndex = sheetIndex > 0 ? sheetIndex - 1 : sheetIndex;

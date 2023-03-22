@@ -1,6 +1,8 @@
-using System.Data;
 using HoshiBook.DataAccess.Repository.IRepository;
 using HoshiBook.Models;
+
+using System.Data;
+
 
 namespace HoshiBook.DataAccess.Repository
 {
@@ -52,17 +54,28 @@ namespace HoshiBook.DataAccess.Repository
             }
         }
 
-        public List<Product> GetExistsOrderDetailsProducts(int id)
+        public List<Product> GetExistsOrderDetailsProducts(int productId)
         {
             return (
                 from p in _db.Products
                 join o in _db.OrderDetails
                 on p.Id equals o.ProductId
-                where p.Id == id
+                where p.Id == productId
                 select p
             ).ToList();
         }
     
+        public int GetExistsOrderDetailsProductsCount(int productId)
+        {
+            return (
+                from p in _db.Products
+                join o in _db.OrderDetails
+                on p.Id equals o.ProductId
+                where p.Id == productId
+                select p
+            ).Count();
+        }
+
         public DataSet ConvertToDataSet(List<Product> data)
         {
             DataSet ds = new DataSet();
@@ -96,7 +109,7 @@ namespace HoshiBook.DataAccess.Repository
                 row[columnNames[5]] = product.Price;
                 row[columnNames[6]] = product.Price50;
                 row[columnNames[7]] = product.Price100;
-                row[columnNames[8]] = product.ImageUrl;
+                row[columnNames[8]] = product.ImageUrl.Split("\\").LastOrDefault()?.Replace(" ", "%20") ?? "default.png";
                 row[columnNames[9]] = product.Category.Name;
                 row[columnNames[10]] = product.CoverType.Name;
                 dt.Rows.Add(row);

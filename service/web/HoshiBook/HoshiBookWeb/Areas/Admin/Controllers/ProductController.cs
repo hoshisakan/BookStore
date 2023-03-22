@@ -177,7 +177,6 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         }
 
         //DELETE
-        //TODO Add ValidateAntiForgeryToken to avoid CORS attack
         [HttpDelete]
         public IActionResult Delete(int? id)
         {
@@ -190,8 +189,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 );
             }
 
-            List<Product> productList = _unitOfWork.Product.GetExistsOrderDetailsProducts(obj.Id);
-            int _ProductIsExistsUserOrder = productList.Count;
+            int _ProductIsExistsUserOrder = _unitOfWork.Product.GetExistsOrderDetailsProductsCount(obj.Id);
 
             if (_ProductIsExistsUserOrder > 0)
             {
@@ -277,10 +275,10 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         //POST
         //TODO Add ValidateAntiForgeryToken to avoid CORS attack
         [HttpPost]
-        public IActionResult BulkCreate(IFormFile uploadProductListFile)
+        public IActionResult BulkCreate(IFormFile uploadFile)
         {
             try {
-                if (uploadProductListFile == null)
+                if (uploadFile == null)
                 {
                     throw new Exception("Please select a file to upload.");
                 }
@@ -290,9 +288,9 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 uploads = _common.GetUploadFilesStoragePath();
                 _logger.LogInformation("Document upload path: {0}", uploads);
                 string newFileName = Guid.NewGuid().ToString();
-                string oldFileName = Path.GetFileName(uploadProductListFile.FileName);
+                string oldFileName = Path.GetFileName(uploadFile.FileName);
                 string fileExtension = '.' + oldFileName.Split('.').Last();
-                string? extension = Path.GetExtension(uploadProductListFile.FileName);
+                string? extension = Path.GetExtension(uploadFile.FileName);
 
                 _logger.LogInformation("Received Document File extension: {0}", fileExtension);
                 bool _IsContainsExtension = FileUploadTool.IsContainsExtension(fileExtension, "import");
@@ -306,7 +304,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 FileTool.CheckAndCreateDirectory(uploads);
 
                 //TODO Storage user upload file to server
-                bool _IsUploadSuccess = FileUploadTool.UploadImage(uploadProductListFile, newFileName, extension, uploads);
+                bool _IsUploadSuccess = FileUploadTool.UploadImage(uploadFile, newFileName, extension, uploads);
 
                 if (!_IsUploadSuccess)
                 {
@@ -333,17 +331,17 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                         foreach (var rows in sheet)
                         {
                             Product product = new Product();
-                            product.Title = rows["Column1"].ToString() ?? "";
-                            product.Description = rows["Column2"].ToString() ?? "";
-                            product.ISBN = rows["Column3"].ToString() ?? "";
-                            product.Author = rows["Column4"].ToString() ?? "";
-                            product.ListPrice = Convert.ToDouble(rows["Column5"].ToString() ?? "0");
-                            product.Price = Convert.ToDouble(rows["Column6"].ToString() ?? "0");
-                            product.Price50 = Convert.ToDouble(rows["Column7"].ToString() ?? "0");
-                            product.Price100 = Convert.ToDouble(rows["Column8"].ToString() ?? "0");
-                            product.ImageUrl = @$"{_config["StaticFiles:RequestPath"]}\images\products\" + rows["Column9"].ToString() ?? "";
-                            string Category = rows["Column10"].ToString() ?? "";
-                            string CoverType = rows["Column11"].ToString() ?? "";
+                            product.Title = rows["Column0"].ToString() ?? "";
+                            product.Description = rows["Column1"].ToString() ?? "";
+                            product.ISBN = rows["Column2"].ToString() ?? "";
+                            product.Author = rows["Column3"].ToString() ?? "";
+                            product.ListPrice = Convert.ToDouble(rows["Column4"].ToString() ?? "0");
+                            product.Price = Convert.ToDouble(rows["Column5"].ToString() ?? "0");
+                            product.Price50 = Convert.ToDouble(rows["Column6"].ToString() ?? "0");
+                            product.Price100 = Convert.ToDouble(rows["Column7"].ToString() ?? "0");
+                            product.ImageUrl = @$"{_config["StaticFiles:RequestPath"]}\images\products\" + rows["Column8"].ToString() ?? "";
+                            string Category = rows["Column9"].ToString() ?? "";
+                            string CoverType = rows["Column10"].ToString() ?? "";
 
                             if (product.Title == "")
                             {
