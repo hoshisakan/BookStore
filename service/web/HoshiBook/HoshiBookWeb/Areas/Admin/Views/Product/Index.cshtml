@@ -5,10 +5,10 @@
 
 <div id="contaier" class="container p-3">
     <div class="row pt-4">
-        <div class="col-4">
+        <div class="col-3">
             <h2 class="text-primary">Product List</h2>
         </div>
-        <div class="col-8 text-end">
+        <div class="col-9 text-end">
             <div>
                 <a id="singleCreateBtn" asp-controller="Product" asp-action="Upsert" class="btn btn-primary">
                     <i class="bi bi-plus-circle"></i> &nbsp; Create New Product
@@ -16,9 +16,12 @@
                 <button id="bulkCreateBtn" class="btn btn-success" onclick="handleBulkCreateClick()">
                     <i class="bi bi-filetype-xlsx"></i> &nbsp; Bulk Create Products
                 </button>
-                <button id="importImageBtn" class="btn btn-warning" onclick="handleImportImageClick()">
-                    <i class="bi bi-filetype-xlsx"></i> &nbsp; Upload Images
+                <button id="uploadImageBtn" class="btn btn-warning" onclick="handleUploadImageClick()">
+                    <i class="bi bi-upload"></i> &nbsp; Upload Images
                 </button>
+                <a id="exportDetailsBtn" asp-controller="Product" asp-action="ExportDetails" class="btn btn-info">
+                    <i class="bi bi-file-earmark-arrow-down"></i> &nbsp; Export Details
+                </a>
             </div>
         </div>
     </div>
@@ -48,6 +51,7 @@
     <table id="tblData" class="table table-bordered table-striped" style="width: 100%;">
         <thead>
             <tr>
+                <th>Id</th>
                 <th>Title</th>
                 <th>ISBN</th>
                 <th>Price</th>

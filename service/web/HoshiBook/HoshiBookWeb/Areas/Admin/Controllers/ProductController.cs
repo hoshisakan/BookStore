@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
+using System.Data;
 
 namespace HoshiBookWeb.Areas.Admin.Controllers
 {
@@ -440,6 +441,38 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 return Json(
                     new {success = false, message = ex.Message}
                 );
+            }
+        }
+        
+        [HttpGet]
+        public IActionResult ExportDetails()
+        {
+            try
+            {
+                List<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category,CoverType").ToList();
+
+                if (productList.Count == 0)
+                {
+                    throw new Exception("No data to export.");
+                }
+
+                DataSet ds = new DataSet();
+                ds = _unitOfWork.Product.ConvertToDataSet(productList);
+
+                string fileName = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss") + "ProductDetails.xlsx";
+                // return Json(
+                //     new {success = true, message = "Export successful!"}
+                // );
+                return File(
+                    FileExportTool.ExportToExcelDownload(ds),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    fileName
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("ProductController.ExportDetails: {0}", ex.Message);
+                return RedirectToAction(nameof(Index));
             }
         }
         #endregion

@@ -11,13 +11,15 @@ function changeMainFeatureBtnStatus(isShow)
     {
         $('#singleCreateBtn').show()
         $('#bulkCreateBtn').show()
-        $('#importImageBtn').show()
+        $('#uploadImageBtn').show()
+        $('#exportDetailsBtn').show()
     }
     else
     {
         $('#singleCreateBtn').hide()
         $('#bulkCreateBtn').hide()
-        $('#importImageBtn').hide()
+        $('#uploadImageBtn').hide()
+        $('#exportDetailsBtn').hide()
     }
 }
 
@@ -73,10 +75,11 @@ function loadDatatable() {
             url: '/Admin/Product/GetAll',
         },
         columns: [
+            { data: 'id', width: '10%' },
             { data: 'title', width: '15%' },
             { data: 'isbn', width: '15%' },
-            { data: 'price', width: '15%' },
-            { data: 'author', width: '15%' },
+            { data: 'price', width: '5%' },
+            { data: 'author', width: '10%' },
             { data: 'category.name', width: '15%' },
             {
                 data: 'id',
@@ -134,7 +137,7 @@ function handleBulkCreateClick() {
     handleResetFileUpload();
 }
 
-function handleImportImageClick() {
+function handleUploadImageClick() {
     changeMainFeatureBtnStatus(false);
     changeFileUploadFeatureBtnStatus(false)
     changeImageUploadFeatureBtnStatus(true)

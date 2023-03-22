@@ -334,32 +334,12 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var userList = _unitOfWork.ApplicationUser.GetAll();
-            var userCompany = _unitOfWork.Company.GetAll();
             List<UserDetailsVM> userDetails = new();
+            List<UserLockStatusVM> userLockStatusVMs = new();
 
-            var userInfoFilter = (
-                from user in userList
-                join company in userCompany
-                on user.CompanyId equals company.Id
-                into groupjoin from b in groupjoin.DefaultIfEmpty()
-                where !user.IsLockedOut
-                select new
-                {
-                    user.Id,
-                    user.Name,
-                    user.Email,
-                    user.PhoneNumber,
-                    user.StreetAddress,
-                    user.City,
-                    user.State,
-                    user.PostalCode,
-                    CompanyName = b == null ? "" : b.Name,
-                    user.IsLockedOut
-                }
-            );
+            userLockStatusVMs = _unitOfWork.ApplicationUser.GetUsersLockStatus(false);
 
-            foreach (var user in userInfoFilter)
+            foreach (var user in userLockStatusVMs)
             {
                 var currentUser = await _userManager.FindByIdAsync(user.Id);
                 var currentUserRole = await _userManager.GetRolesAsync(currentUser);
@@ -396,32 +376,12 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllLocked()
         {
-            var userList = _unitOfWork.ApplicationUser.GetAll();
-            var userCompany = _unitOfWork.Company.GetAll();
             List<UserDetailsVM> userDetails = new();
+            List<UserLockStatusVM> userLockStatusVMs = new();
 
-            var userInfoFilter = (
-                from user in userList
-                join company in userCompany
-                on user.CompanyId equals company.Id
-                into groupjoin from b in groupjoin.DefaultIfEmpty()
-                where user.IsLockedOut
-                select new
-                {
-                    user.Id,
-                    user.Name,
-                    user.Email,
-                    user.PhoneNumber,
-                    user.StreetAddress,
-                    user.City,
-                    user.State,
-                    user.PostalCode,
-                    CompanyName = b == null ? "" : b.Name,
-                    user.IsLockedOut
-                }
-            );
+            userLockStatusVMs = _unitOfWork.ApplicationUser.GetUsersLockStatus(true);
 
-            foreach (var user in userInfoFilter)
+            foreach (var user in userLockStatusVMs)
             {
                 var currentUser = await _userManager.FindByIdAsync(user.Id);
                 var currentUserRole = await _userManager.GetRolesAsync(currentUser);

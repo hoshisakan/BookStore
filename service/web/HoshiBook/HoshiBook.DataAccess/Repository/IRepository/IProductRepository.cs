@@ -1,6 +1,8 @@
 using HoshiBook.Models;
+
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -14,5 +16,6 @@ namespace HoshiBook.DataAccess.Repository.IRepository
         void Update(Product obj);
         bool IsExists(string includeProperties, string value);
         List<Product> GetExistsOrderDetailsProducts(int id);
+        DataSet ConvertToDataSet(List<Product> data);
     }
 }

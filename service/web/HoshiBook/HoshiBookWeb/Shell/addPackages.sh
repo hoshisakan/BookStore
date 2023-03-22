@@ -24,3 +24,4 @@ dotnet add package Serilog.AspNetCore --version 6.1.0
 dotnet add package Microsoft.Extensions.Caching.StackExchangeRedis --version 6.0.12
 dotnet add package ExcelDataReader --version 3.6.0
 dotnet add package ExcelDataReader.DataSet --version 3.6.0
+dotnet add package DocumentFormat.OpenXml --version 2.19.0

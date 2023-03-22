@@ -1,4 +1,6 @@
 using HoshiBook.Models;
+using HoshiBook.Models.ViewModels.User;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +13,6 @@ namespace HoshiBook.DataAccess.Repository.IRepository
 {
     public interface IApplicationUserRepository : IRepository<ApplicationUser>
     {
+        List<UserLockStatusVM> GetUsersLockStatus(bool isLockedOut);
     }
 }
