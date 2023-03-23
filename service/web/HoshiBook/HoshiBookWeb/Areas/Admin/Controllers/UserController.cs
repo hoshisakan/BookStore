@@ -49,15 +49,15 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             return View();
         }
 
-        public ActionResult Lock()
-        {
-            return View();
-        }
+        // public ActionResult Lock()
+        // {
+        //     return View();
+        // }
 
-        public ActionResult Lockout()
-        {
-            return View();
-        }
+        // public ActionResult Lockout()
+        // {
+        //     return View();
+        // }
 
         //GET
         public async Task<IActionResult> Edit(string? uid)
@@ -332,12 +332,16 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
         #region API CALLS
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(string status)
         {
             List<UserDetailsVM> userDetails = new();
             List<UserLockStatusVM> userLockStatusVMs = new();
 
-            userLockStatusVMs = _unitOfWork.ApplicationUser.GetUsersLockStatus(false);
+            _logger.LogInformation("status: {0}", status);
+
+            userLockStatusVMs = _unitOfWork.ApplicationUser.GetUsersLockStatus(status);
+
+            _logger.LogInformation("userLockStatusVMs.Count: {0}", userLockStatusVMs.Count);
 
             foreach (var user in userLockStatusVMs)
             {
@@ -369,49 +373,9 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 // _logger.LogInformation("user.PostalCode: {0}", user.PostalCode);
                 // _logger.LogInformation("user.RoleName: {0}", currentUserRole.FirstOrDefault() ?? "Nan");
                 // _logger.LogInformation("user.CompanyName: {0}", user.CompanyName);
+                // _logger.LogInformation("user.IsLockedOut: {0}", user.IsLockedOut);
             }
-            return Json(new { data = userDetails });
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAllLocked()
-        {
-            List<UserDetailsVM> userDetails = new();
-            List<UserLockStatusVM> userLockStatusVMs = new();
-
-            userLockStatusVMs = _unitOfWork.ApplicationUser.GetUsersLockStatus(true);
-
-            foreach (var user in userLockStatusVMs)
-            {
-                var currentUser = await _userManager.FindByIdAsync(user.Id);
-                var currentUserRole = await _userManager.GetRolesAsync(currentUser);
-                
-                userDetails.Add(new UserDetailsVM
-                {
-                    Id = user.Id,
-                    Name = user.Name,
-                    Email = user.Email,
-                    PhoneNumber = user.PhoneNumber,
-                    StreetAddress = user.StreetAddress,
-                    City = user.City,
-                    State = user.State,
-                    PostalCode = user.PostalCode,
-                    RoleName = currentUserRole.FirstOrDefault() ?? "",
-                    CompanyName = user.CompanyName,
-                    IsLockedOut = user.IsLockedOut ? "Locked" : "Unlocked"
-                });
-
-                // _logger.LogInformation("user.Id: {0}", user.Id);
-                // _logger.LogInformation("user.Name: {0}", user.Name);
-                // _logger.LogInformation("user.Email: {0}", user.Email);
-                // _logger.LogInformation("user.PhoneNumber: {0}", user.PhoneNumber);
-                // _logger.LogInformation("user.StreetAddress: {0}", user.StreetAddress);
-                // _logger.LogInformation("user.City: {0}", user.City);
-                // _logger.LogInformation("user.State: {0}", user.State);
-                // _logger.LogInformation("user.PostalCode: {0}", user.PostalCode);
-                // _logger.LogInformation("user.RoleName: {0}", currentUserRole.FirstOrDefault() ?? "Nan");
-                // _logger.LogInformation("user.CompanyName: {0}", user.CompanyName);
-            }
+            
             return Json(new { data = userDetails });
         }
 

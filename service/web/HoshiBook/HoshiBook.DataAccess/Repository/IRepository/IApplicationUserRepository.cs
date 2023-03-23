@@ -14,5 +14,6 @@ namespace HoshiBook.DataAccess.Repository.IRepository
     public interface IApplicationUserRepository : IRepository<ApplicationUser>
     {
         List<UserLockStatusVM> GetUsersLockStatus(bool isLockedOut);
+        List<UserLockStatusVM> GetUsersLockStatus(string status);
     }
 }

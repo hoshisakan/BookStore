@@ -1,53 +1,123 @@
 var dataTable
 
 $(document).ready(function () {
-    loadDatatable()
+    var url = window.location.search;
+    if (url.includes("unlocked"))
+    {
+        loadDatatable("unlocked");
+    }
+    else if (url.includes("locked"))
+    {
+        loadDatatable("locked");
+    }
+    else
+    {
+        loadDatatable("all");
+    }
 })
 
-function loadDatatable() {
-    dataTable = $('#tblData').DataTable({
-        ajax: {
-            url: '/Admin/User/GetAll',
-        },
-        columns: [
-            { data: 'name', width: '15%' },
-            { data: 'email', width: '15%' },
-            // { data: 'phoneNumber', width: '15%' },
-            // { data: 'streetAddress', width: '15%' },
-            // { data: 'city', width: '15%' },
-            // { data: 'state', width: '15%' },
-            // { data: 'postalCode', width: '15%' },
-            { data: 'roleName', width: '15%' },
-            { data: 'companyName', width: '15%' },
-            { data: 'isLockedOut', width: '15%' },
-            {
-                data: 'id',
-                render: function (data) {
-                    return `
-                        <div class="w-75 btn-group" role="group">
-                            <a href="/Admin/User/Edit?uid=${data}"
-                            class="btn btn-primary mx-2">
-                                <i class="bi bi-pencil-square"></i> Edit
-                            </a>
-                            <a onclick=Lock('/Admin/User/Lock/${data}')
-                            class="btn btn-warning mx-2">
-                                <i class="bi bi-lock"></i> </i> Lock
-                            </a>
-                            <a onclick=Delete('/Admin/User/Delete/${data}')
-                            class="btn btn-danger mx-2">
-                                <i class="bi bi-trash"> </i> Delete
-                            </a>
-                            <a href="/Admin/User/ResetPassword?uid=${data}"
-                            class="btn btn-info mx-2">
-                                <i class="bi bi-key"></i> Reset
-                            </a>
-                        </div>
-                    `
-                },
-                width: '15%',
+function loadDatatable(status) {
+    // showMessage("status", status)
+    if (status == "unlocked")
+    {
+        dataTable = $('#tblData').DataTable({
+            ajax: {
+                url: '/Admin/User/GetAll?status=' + status,
             },
-        ],
-    })
+            columns: [
+                { data: 'name', width: '15%' },
+                { data: 'email', width: '15%' },
+                // { data: 'phoneNumber', width: '15%' },
+                // { data: 'streetAddress', width: '15%' },
+                // { data: 'city', width: '15%' },
+                // { data: 'state', width: '15%' },
+                // { data: 'postalCode', width: '15%' },
+                { data: 'roleName', width: '15%' },
+                { data: 'companyName', width: '15%' },
+                { data: 'isLockedOut', width: '15%' },
+                {
+                    data: 'id',
+                    render: function (data) {
+                        return `
+                            <div class="w-75 btn-group" role="group">
+                                <a href="/Admin/User/Edit?uid=${data}"
+                                class="btn btn-primary mx-2">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </a>
+                                <a onclick=Lock('/Admin/User/Lock/${data}')
+                                class="btn btn-warning mx-2">
+                                    <i class="bi bi-lock"></i> </i> Lock
+                                </a>
+                                <a onclick=Delete('/Admin/User/Delete/${data}')
+                                class="btn btn-danger mx-2">
+                                    <i class="bi bi-trash"> </i> Delete
+                                </a>
+                                <a href="/Admin/User/ResetPassword?uid=${data}"
+                                class="btn btn-info mx-2">
+                                    <i class="bi bi-key"></i> Reset
+                                </a>
+                            </div>
+                        `
+                    },
+                    width: '15%',
+                },
+            ],
+        })
+    }
+    else if (status == "locked")
+    {
+        dataTable = $('#tblData').DataTable({
+            ajax: {
+                url: '/Admin/User/GetAll?status=' + status,
+            },
+            columns: [
+                { data: 'name', width: '20%' },
+                { data: 'email', width: '20%' },
+                // { data: 'phoneNumber', width: '15%' },
+                // { data: 'streetAddress', width: '15%' },
+                // { data: 'city', width: '15%' },
+                // { data: 'state', width: '15%' },
+                // { data: 'postalCode', width: '15%' },
+                { data: 'roleName', width: '20%' },
+                { data: 'companyName', width: '20%' },
+                { data: 'isLockedOut', width: '20%' },
+                {
+                    data: 'id',
+                    render: function (data) {
+                        return `
+                            <div class="w-75 btn-group" role="group">
+                                <a onclick=UnLock('/Admin/User/Unlock/${data}')
+                                class="btn btn-success mx-2">
+                                    <i class="bi bi-unlock"></i> </i> Unlock
+                                </a>
+                            </div>
+                        `
+                    },
+                    width: '15%',
+                },
+            ],
+        })
+    }
+    else
+    {
+        dataTable = $('#tblData').DataTable({
+            ajax: {
+                url: '/Admin/User/GetAll?status=' + status,
+            },
+            columns: [
+                { data: 'name', width: '15%' },
+                { data: 'email', width: '15%' },
+                // { data: 'phoneNumber', width: '15%' },
+                // { data: 'streetAddress', width: '15%' },
+                // { data: 'city', width: '15%' },
+                // { data: 'state', width: '15%' },
+                // { data: 'postalCode', width: '15%' },
+                { data: 'roleName', width: '15%' },
+                { data: 'companyName', width: '15%' },
+                { data: 'isLockedOut', width: '15%' }
+            ],
+        })
+    }
 }
 
 function Delete(url) {
@@ -87,6 +157,34 @@ function Lock(url) {
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
         confirmButtonText: 'Yes, locked it!',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: url,
+                type: 'POST',
+                success: function (data) {
+                    if (data.success) {
+                        dataTable.ajax.reload();
+                        toastr.success(data.message);
+                    }
+                    else {
+                        toastr.error(data.message);
+                    }
+                }
+            })
+        }
+    })
+}
+
+function UnLock(url) {
+    Swal.fire({
+        title: 'Are you sure unlock the user?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, unlocked it!',
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({

@@ -63,5 +63,77 @@ namespace HoshiBook.DataAccess.Repository
                 ).ToList();
             }
         }
+
+        public List<UserLockStatusVM> GetUsersLockStatus(string status)
+        {
+            if (status == "locked")
+            {
+                return (
+                    from user in _db.ApplicationUsers
+                    join company in _db.Companies
+                    on user.CompanyId equals company.Id
+                    into groupjoin from b in groupjoin.DefaultIfEmpty()
+                    where user.IsLockedOut
+                    select new UserLockStatusVM
+                    {
+                        Id = user.Id,
+                        Name = user.Name,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber,
+                        StreetAddress = user.StreetAddress ?? "",
+                        City = user.City ?? "",
+                        State = user.State ?? "",
+                        PostalCode = user.PostalCode ?? "",
+                        CompanyName = b == null ? "" : b.Name,
+                        IsLockedOut = user.IsLockedOut
+                    }
+                ).ToList();
+            }
+            else if (status == "unlocked")
+            {
+                return (
+                    from user in _db.ApplicationUsers
+                    join company in _db.Companies
+                    on user.CompanyId equals company.Id
+                    into groupjoin from b in groupjoin.DefaultIfEmpty()
+                    where !user.IsLockedOut
+                    select new UserLockStatusVM
+                    {
+                        Id = user.Id,
+                        Name = user.Name,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber,
+                        StreetAddress = user.StreetAddress ?? "",
+                        City = user.City ?? "",
+                        State = user.State ?? "",
+                        PostalCode = user.PostalCode ?? "",
+                        CompanyName = b == null ? "" : b.Name,
+                        IsLockedOut = user.IsLockedOut
+                    }
+                ).ToList();
+            }
+            else
+            {
+                return (
+                    from user in _db.ApplicationUsers
+                    join company in _db.Companies
+                    on user.CompanyId equals company.Id
+                    into groupjoin from b in groupjoin.DefaultIfEmpty()
+                    select new UserLockStatusVM
+                    {
+                        Id = user.Id,
+                        Name = user.Name,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber,
+                        StreetAddress = user.StreetAddress ?? "",
+                        City = user.City ?? "",
+                        State = user.State ?? "",
+                        PostalCode = user.PostalCode ?? "",
+                        CompanyName = b == null ? "" : b.Name,
+                        IsLockedOut = user.IsLockedOut
+                    }
+                ).ToList();
+            }
+        }
     }
 }
