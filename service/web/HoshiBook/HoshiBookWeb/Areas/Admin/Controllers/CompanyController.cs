@@ -1,8 +1,11 @@
 using HoshiBook.Models;
-
 using HoshiBook.DataAccess.Repository.IRepository;
 using HoshiBookWeb.Tools;
+using HoshiBookWeb.Tools.CommonTool;
+
+
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 
 
 namespace HoshiBookWeb.Areas.Admin.Controllers
@@ -12,11 +15,17 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
     {
         private readonly ILogger<CompanyController> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IConfiguration _config;
 
-        public CompanyController(ILogger<CompanyController> logger, IUnitOfWork unitOfWork)
+
+        public CompanyController(
+            ILogger<CompanyController> logger, IUnitOfWork unitOfWork,
+            IConfiguration config
+        )
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
+            _config = config;
         }
 
         public IActionResult Index()
@@ -88,7 +97,6 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             return Json(new { data = companyList });
         }
 
-        //POST
         //TODO Add ValidateAntiForgeryToken to avoid CORS attack
         [HttpDelete]
         public IActionResult Delete(int? id)
@@ -101,12 +109,176 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     new {success = false, message = "Error while deleting"}
                 );
             }
+
+            int _CompanyExistsUsersCount = _unitOfWork.Company.GetExistsUsersCompaniesCount(obj.Id);
+
+            if (_CompanyExistsUsersCount > 0)
+            {
+                return Json(
+                    new {
+                        success = false,
+                        message = $"Company has users. Cannot delete, count: {_CompanyExistsUsersCount}."
+                    }
+                );
+            }
+
             _unitOfWork.Company.Remove(obj);
             _unitOfWork.Save();
 
             return Json(
-                new {success = true, message = "Delete Successful"}
+                new {success = true, message = "Company delete Successful"}
             );
+        }
+
+        //POST
+        //TODO Add ValidateAntiForgeryToken to avoid CORS attack
+        [HttpPost]
+        public IActionResult BulkCreate(IFormFile uploadFile)
+        {
+            try {
+                if (uploadFile == null)
+                {
+                    throw new Exception("Please select a file to upload.");
+                }
+
+                var _common = new Common(_config);
+                string? uploads = "";
+                uploads = _common.GetUploadFilesStoragePath();
+                _logger.LogInformation("Document upload path: {0}", uploads);
+                string newFileName = Guid.NewGuid().ToString();
+                string oldFileName = Path.GetFileName(uploadFile.FileName);
+                string fileExtension = '.' + oldFileName.Split('.').Last();
+                string? extension = Path.GetExtension(uploadFile.FileName);
+
+                _logger.LogInformation("Received Document File extension: {0}", fileExtension);
+                bool _IsContainsExtension = FileUploadTool.IsContainsExtension(fileExtension, "import");
+
+                if (!_IsContainsExtension)
+                {
+                    throw new Exception("Upload file failed, because file extension is not allowed.");
+                }
+
+                // TODO If storage path does not exist, then create it.
+                FileTool.CheckAndCreateDirectory(uploads);
+
+                //TODO Storage user upload file to server
+                bool _IsUploadSuccess = FileUploadTool.UploadImage(uploadFile, newFileName, extension, uploads);
+
+                if (!_IsUploadSuccess)
+                {
+                    throw new Exception("Upload file failed, because save file to server local failed.");
+                }
+
+                List<List<Dictionary<string, object>>> Results = new List<List<Dictionary<string, object>>>();
+
+                string? filePath = Path.Combine(uploads, newFileName + extension);
+
+                if (filePath != null)
+                {
+                    Results = FileReadTool.ReadExcelFile(filePath, false, 1);
+
+                    if (Results.Count == 0)
+                    {
+                        throw new Exception("Upload file failed, because read file content failed.");
+                    }
+
+                    List<Company> companyList = new List<Company>();
+
+                    foreach (var sheet in Results)
+                    {
+                        foreach (var rows in sheet)
+                        {
+                            Company company = new Company();
+                            company.Name = rows["Column0"].ToString() ?? "";
+                            company.StreetAddress = rows["Column1"].ToString() ?? "";
+                            company.City = rows["Column2"].ToString() ?? "";
+                            company.State = rows["Column3"].ToString() ?? "";
+                            company.PostalCode = rows["Column4"].ToString() ?? "";
+                            company.PhoneNumber = rows["Column5"].ToString() ?? "";
+                        
+
+                            if (String.IsNullOrEmpty(company.Name))
+                            {
+                                throw new Exception("Name is required.");
+                            }
+
+                            if (String.IsNullOrEmpty(company.PhoneNumber))
+                            {
+                                throw new Exception("PhoneNumber is required.");
+                            }
+
+                            bool _NameIsExists = _unitOfWork.Company.IsExists(
+                                includeProperties: "Name", company.Name
+                            );
+                            bool _PhoneNumberIsExists = _unitOfWork.Company.IsExists(
+                                includeProperties: "PhoneNumber", company.PhoneNumber
+                            );
+
+                            if (_NameIsExists)
+                            {
+                                throw new Exception("Name is exists.");
+                            }
+
+                            if (_PhoneNumberIsExists)
+                            {
+                                throw new Exception("PhoneNumber is exists.");
+                            }
+
+                            companyList.Add(company);
+
+                            _logger.LogInformation(
+                                "Name: {0}, StreetAddress: {1}, City: {2}, State: {3}, PostalCode: {4}, PhoneNumber: {5}",
+                                company.Name, company.StreetAddress, company.City, company.State, company.PostalCode, company.PhoneNumber 
+                            );
+                        }
+                    }
+                    //TODO Bulk add categories, it is faster than add one by one. don't need to save after each add.
+                    _unitOfWork.Company.BulkAdd(companyList);
+                }
+
+                _logger.LogInformation("CompanyController.BulkCreate: {0}", "Bulk create successful!");
+                return Json(
+                    new {success = true, message = "Bulk create successful!"}
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("CompanyController.BulkCreate Message: {0}", ex.Message);
+                _logger.LogError("CompanyController.BulkCreate StackTrace: {0}", ex.StackTrace);
+                return Json(
+                    new {success = false, message = ex.Message}
+                );
+            }
+        }
+
+        [HttpGet]
+        public IActionResult ExportDetails()
+        {
+            try
+            {
+                List<Company> companyList = _unitOfWork.Company.GetAll().ToList();
+
+                if (companyList.Count == 0)
+                {
+                    throw new Exception("No data to export.");
+                }
+
+                DataSet ds = new DataSet();
+                ds = _unitOfWork.Company.ConvertToDataSet(companyList);
+
+                string fileName = DateTime.Now.ToString("yyyy_MM_dd_hh_mm_ss") + "_CompaniesDetails.xlsx";
+
+                return File(
+                    FileExportTool.ExportToExcelDownload(ds),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    fileName
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("CompanyController.ExportDetails: {0}", ex.Message);
+                return RedirectToAction(nameof(Index));
+            }
         }
         #endregion
     }

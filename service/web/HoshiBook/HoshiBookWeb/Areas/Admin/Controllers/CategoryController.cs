@@ -1,12 +1,13 @@
 using HoshiBook.Models;
 using HoshiBook.DataAccess.Repository.IRepository;
 using HoshiBook.Utility;
+using HoshiBookWeb.Tools;
+using HoshiBookWeb.Tools.CommonTool;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
-using HoshiBookWeb.Tools;
-using HoshiBookWeb.Tools.CommonTool;
+
 
 namespace HoshiBookWeb.Areas.Admin.Controllers
 {

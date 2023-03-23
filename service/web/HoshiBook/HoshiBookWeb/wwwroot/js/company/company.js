@@ -1,8 +1,50 @@
 var dataTable
 
 $(document).ready(function () {
+    initialize()
     loadDatatable()
 })
+
+function changeMainFeatureBtnStatus(isShow)
+{
+    if (isShow)
+    {
+        $('#singleCreateBtn').show()
+        $('#bulkCreateBtn').show()
+        $('#exportDetailsBtn').show()
+    }
+    else
+    {
+        $('#singleCreateBtn').hide()
+        $('#bulkCreateBtn').hide()
+        $('#exportDetailsBtn').hide()
+    }
+}
+
+function changeFileUploadFeatureBtnStatus(isShow)
+{
+    if (isShow)
+    {
+        $('#fileUpload').show()
+        $('#sendFileBtn').show()
+        $('#revertFileBtn').show()
+    }
+    else
+    {
+        $('#fileUpload').hide()
+        $('#sendFileBtn').hide()
+        $('#revertFileBtn').hide()
+    }
+}
+
+function handleResetFileUpload() {
+    $('#fileUpload').val('')
+}
+
+function initialize() {
+    changeMainFeatureBtnStatus(true);
+    changeFileUploadFeatureBtnStatus(false);
+}
 
 function loadDatatable() {
     dataTable = $('#tblData').DataTable({
@@ -62,5 +104,49 @@ function Delete(url) {
                 }
             })
         }
+    })
+}
+
+function handleBulkCreateClick() {
+    changeMainFeatureBtnStatus(false)
+    changeFileUploadFeatureBtnStatus(true)
+    handleResetFileUpload();
+}
+
+function handleRevertFileClick() {
+    changeMainFeatureBtnStatus(true)
+    changeFileUploadFeatureBtnStatus(false)
+}
+
+function handleResetFile() {
+    handleRevertFileClick()
+    handleResetFileUpload()
+}
+
+function handleSendFileClick() {
+    var getUploadFile = document.getElementById('fileUpload')
+
+    if (getUploadFile.files.length === 0) {
+        showMessage('Upload File', 'Please select a file to upload')
+        return false
+    }
+
+    var form = $('#companyListImportForm')[0]
+    var data = new FormData(form)
+    $.ajax({
+        url: '/Admin/Company/BulkCreate',
+        type: 'POST',
+        data: data,
+        contentType: false,
+        processData: false,
+        success: function (data) {
+            if (data.success) {
+                handleResetFile()
+                dataTable.ajax.reload()
+                toastr.success(data.message)
+            } else {
+                toastr.error(data.message)
+            }
+        },
     })
 }
