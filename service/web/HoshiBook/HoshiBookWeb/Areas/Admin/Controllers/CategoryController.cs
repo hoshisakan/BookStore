@@ -65,9 +65,9 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             if (id == null || id == 0) {
                 return NotFound();
             }
-            // var categoryFromDb = _unitOfWork.Category.Categories.FindAsync(id);
+
             var categoryFromDbFirst = _unitOfWork.Category.GetFirstOrDefault(u => u.Id == id);
-            // var categoryFromDbSingle = _unitOfWork.Category.Categories.SingleOrDefaultAsync(u => u.Id == id);
+
             if (categoryFromDbFirst == null)
             {
                 return NotFound();
@@ -94,50 +94,6 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             return View(obj);
         }
 
-        // //GET
-        // public IActionResult Delete(int? id)
-        // {
-        //     if (id == null || id == 0) {
-        //         return NotFound();
-        //     }
-        //     // var categoryFromDb = _unitOfWork.Category.Categories.FindAsync(id);
-        //     var categoryFromDbFirst = _unitOfWork.Category.GetFirstOrDefault(u => u.Id == id);
-        //     // var categoryFromDbSingle = _unitOfWork.Category.Categories.SingleOrDefaultAsync(u => u.Id == id);
-        //     if (categoryFromDbFirst == null) {
-        //         return NotFound();
-        //     }
-        //     return View(categoryFromDbFirst);
-        // }
-
-        // //POST
-        // //TODO Add ValidateAntiForgeryToken to avoid CORS attack
-        // [HttpPost,ActionName("Delete")]
-        // [ValidateAntiForgeryToken]
-        // public IActionResult DeletePOST(int? id)
-        // {
-        //     var obj = _unitOfWork.Category.GetFirstOrDefault(u => u.Id == id);
-
-        //     if (obj == null) {
-        //         return NotFound();
-        //     }
-
-        //     int _CategoryIsExistsProducts = _unitOfWork.Category.GetExistsProductsCategoriesCount(obj.Id);
-
-        //     if (_CategoryIsExistsProducts > 0)
-        //     {
-        //         _logger.LogWarning("Category cannot be deleted because it is associated with products.");
-        //         TempData["error"] = "Category cannot be deleted because it is associated with products.";
-        //         return RedirectToAction("Index");
-        //     }
-
-        //     _unitOfWork.Category.Remove(obj);
-        //     _unitOfWork.Save();
-        //     _logger.LogInformation("Category deleted successfully");
-        //     TempData["success"] = "Category deleted successfully";
-
-        //     return RedirectToAction("Index");
-        // }
-
         #region API CALLS
         [HttpGet]
         public IActionResult GetAll()
@@ -157,14 +113,14 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            int _CategoryIsExistsProducts = _unitOfWork.Category.GetExistsProductsCategoriesCount(obj.Id);
+            int _CategoryExistsProductsCount = _unitOfWork.Category.GetExistsProductsCategoriesCount(obj.Id);
 
-            if (_CategoryIsExistsProducts > 0)
+            if (_CategoryExistsProductsCount > 0)
             {
                 return Json(
                     new {
                             success = false,
-                            message = $"Category is already used in products, count: {_CategoryIsExistsProducts}."
+                            message = $"Category cannot be deleted because it is associated with a product, count: {_CategoryExistsProductsCount}."
                         }
                 );
             }
@@ -225,7 +181,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
                 if (filePath != null)
                 {
-                    Results = FileReadTool.ReadExcelFile(filePath, false, 3);
+                    Results = FileReadTool.ReadExcelFile(filePath, false, 1);
 
                     if (Results.Count == 0)
                     {
@@ -244,12 +200,12 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
                             if (category.Name == "")
                             {
-                                throw new Exception("Title is required.");
+                                throw new Exception("Name is required.");
                             }
 
                             if (category.DisplayOrder == 0)
                             {
-                                throw new Exception("Description is required.");
+                                throw new Exception("DisplayOrder is required.");
                             }
 
                             bool _NameIsExists = _unitOfWork.Category.IsExists(

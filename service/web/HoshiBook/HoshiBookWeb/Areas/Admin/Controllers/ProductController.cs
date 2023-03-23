@@ -189,14 +189,14 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 );
             }
 
-            int _ProductIsExistsUserOrder = _unitOfWork.Product.GetExistsOrderDetailsProductsCount(obj.Id);
+            int _ProductExistsUserOrderCount = _unitOfWork.Product.GetExistsOrderDetailsProductsCount(obj.Id);
 
-            if (_ProductIsExistsUserOrder > 0)
+            if (_ProductExistsUserOrderCount > 0)
             {
                 return Json(
                     new {
                             success = false,
-                            message = $"Product is already used in order, count: {_ProductIsExistsUserOrder}."
+                            message = $"Product cannot be deleted because it is associated with a user order, count: {_ProductExistsUserOrderCount}."
                         }
                 );
             }
