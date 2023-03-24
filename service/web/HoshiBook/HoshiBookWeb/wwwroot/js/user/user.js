@@ -2,6 +2,9 @@ var dataTable
 
 $(document).ready(function () {
     var url = window.location.search;
+
+    initialize()
+
     if (url.includes("unlocked"))
     {
         loadDatatable("unlocked");
@@ -16,10 +19,55 @@ $(document).ready(function () {
     }
 })
 
+function changeMainFeatureBtnStatus(isShow)
+{
+    if (isShow)
+    {
+        $('#singleCreateBtn').show()
+        $('#bulkCreateBtn').show()
+        $('#exportDetailsBtn').show()
+        $('#importFormatBtn').show()
+    }
+    else
+    {
+        $('#singleCreateBtn').hide()
+        $('#bulkCreateBtn').hide()
+        $('#exportDetailsBtn').hide()
+        $('#importFormatBtn').hide()
+    }
+}
+
+function changeFileUploadFeatureBtnStatus(isShow)
+{
+    if (isShow)
+    {
+        $('#fileUpload').show()
+        $('#sendFileBtn').show()
+        $('#revertFileBtn').show()
+    }
+    else
+    {
+        $('#fileUpload').hide()
+        $('#sendFileBtn').hide()
+        $('#revertFileBtn').hide()
+    }
+}
+
+function handleResetFileUpload() {
+    $('#fileUpload').val('')
+}
+
+function initialize() {
+    changeMainFeatureBtnStatus(true);
+    changeFileUploadFeatureBtnStatus(false);
+}
+
 function loadDatatable(status) {
     // showMessage("status", status)
     if (status == "unlocked")
     {
+        $('#filterListThead').show()
+        $('#allListThead').hide()
         dataTable = $('#tblData').DataTable({
             ajax: {
                 url: '/Admin/User/GetAll?status=' + status,
@@ -66,6 +114,8 @@ function loadDatatable(status) {
     }
     else if (status == "locked")
     {
+        $('#filterListThead').show()
+        $('#allListThead').hide()
         dataTable = $('#tblData').DataTable({
             ajax: {
                 url: '/Admin/User/GetAll?status=' + status,
@@ -100,6 +150,8 @@ function loadDatatable(status) {
     }
     else
     {
+        $('#filterListThead').hide()
+        $('#allListThead').show()
         dataTable = $('#tblData').DataTable({
             ajax: {
                 url: '/Admin/User/GetAll?status=' + status,
@@ -107,7 +159,7 @@ function loadDatatable(status) {
             columns: [
                 { data: 'name', width: '15%' },
                 { data: 'email', width: '15%' },
-                // { data: 'phoneNumber', width: '15%' },
+                { data: 'phoneNumber', width: '15%' },
                 // { data: 'streetAddress', width: '15%' },
                 // { data: 'city', width: '15%' },
                 // { data: 'state', width: '15%' },
@@ -118,6 +170,22 @@ function loadDatatable(status) {
             ],
         })
     }
+}
+
+function handleBulkCreateClick() {
+    changeMainFeatureBtnStatus(false)
+    changeFileUploadFeatureBtnStatus(true)
+    handleResetFileUpload()
+}
+
+function handleRevertFileClick() {
+    changeMainFeatureBtnStatus(true)
+    changeFileUploadFeatureBtnStatus(false)
+}
+
+function handleResetFile() {
+    handleRevertFileClick()
+    handleResetFileUpload()
 }
 
 function Delete(url) {
@@ -201,5 +269,33 @@ function UnLock(url) {
                 }
             })
         }
+    })
+}
+
+function handleSendFileClick() {
+    var getUploadFile = document.getElementById('fileUpload')
+
+    if (getUploadFile.files.length === 0) {
+        showMessage('Upload File', 'Please select a file to upload')
+        return false
+    }
+
+    var form = $('#userListImportForm')[0]
+    var data = new FormData(form)
+    $.ajax({
+        url: '/Admin/User/BulkCreate',
+        type: 'POST',
+        data: data,
+        contentType: false,
+        processData: false,
+        success: function (data) {
+            if (data.success) {
+                handleResetFile()
+                dataTable.ajax.reload()
+                toastr.success(data.message)
+            } else {
+                toastr.error(data.message)
+            }
+        },
     })
 }

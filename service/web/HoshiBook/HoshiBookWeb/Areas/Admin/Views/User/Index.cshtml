@@ -22,39 +22,87 @@
 }
 
 <div class="container p-3">
-    <div class="row pt-4">
-        <div class="col-6">
+    <div class="d-flex justify-content-between pt-4">
+        <div>
             <h2 class="text-primary">User List</h2>
         </div>
-        <div class="col-6 text-end">
-            <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> &nbsp; Create New User
-            </a>
+        <div>
+            <ul class="list-group list-group-horizontal-sm">
+                <a style="text-decoration: none;" asp-controller="User" asp-action="Index"
+                asp-route-status="unlocked">
+                    <li class="list-group-item @unlocked">Unlocked</li>
+                </a>
+                <a style="text-decoration: none;" asp-controller="User" asp-action="Index"
+                asp-route-status="locked">
+                    <li class="list-group-item @locked">Locked</li>
+                </a>
+                <a style="text-decoration: none;" asp-controller="User" asp-action="Index"
+                asp-route-status="all">
+                    <li class="list-group-item @all">All</li>
+                </a>
+            </ul>
         </div>
     </div>
-    <div class="p-2">
-        <ul class="list-group list-group-horizontal-sm">
-            <a style="text-decoration: none;" asp-controller="User" asp-action="Index"
-            asp-route-status="unlocked">
-                <li class="list-group-item @unlocked">Unlocked</li>
+    <div class="d-flex justify-content-between pt-4">
+        <div>
+            <form id="userListImportForm" method="post" asp-action="BulkCreate" enctype="multipart/form-data">
+                <div class="text-top">
+                    <input id="fileUpload" type="file" name="uploadFile" style="display: none" width="250">
+                    <button id="sendFileBtn" type="button" class="btn btn-primary" style="display: none" onclick="handleSendFileClick()">
+                        <i class="bi bi-send"></i> &nbsp; Send
+                    </button>
+                    <button id="revertFileBtn" type="button" class="btn btn-danger" style="display: none" onclick="handleRevertFileClick()">
+                        <i class="bi bi-backspace-reverse"></i> &nbsp; Revert
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div>
+            <a id="singleCreateBtn" asp-area="Identity" asp-page="/Account/Register" class="btn btn-primary" style="display: none">
+                <i class="bi bi-plus-circle"></i> &nbsp; Create New User
             </a>
-            <a style="text-decoration: none;" asp-controller="User" asp-action="Index"
-            asp-route-status="locked">
-                <li class="list-group-item @locked">Locked</li>
-            </a>
-            <a style="text-decoration: none;" asp-controller="User" asp-action="Index"
-            asp-route-status="all">
-                <li class="list-group-item @all">All</li>
-            </a>
-        </ul>
+            <button id="bulkCreateBtn" class="btn btn-success" style="display: none" onclick="handleBulkCreateClick()">
+                <i class="bi bi-filetype-xlsx"></i> &nbsp; Bulk Create Users
+            </button>
+            <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                Export
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                <li>
+                    <a class="dropdown-item" asp-action="ImportFormat" class="btn btn-warning">
+                        <i class="bi bi-file-earmark-arrow-down"></i> &nbsp; Users Import Format
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" asp-action="ExportDetails" class="btn btn-info">
+                        <i class="bi bi-file-earmark-arrow-down"></i> &nbsp; Users Details
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
     <br/><br/>
     <table id="tblData" class="table table-bordered table-striped" style="width: 100%;">
-        <thead>
+        <thead id="filterListThead" style="display: none">
             <tr>
                 <th>Name</th>
                 <th>Email</th>
                 @* <th>PhoneNumber</th> *@
+                @* <th>StreetAddress</th>
+                <th>City</th>
+                <th>State</th>
+                <th>PostalCode</th> *@
+                <th>RoleName</th>
+                <th>Company</th>
+                <th>IsLockedOut</th>
+                <th></th>
+            </tr>
+        </thead>
+        <thead id="allListThead" style="display: none">
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>PhoneNumber</th>
                 @* <th>StreetAddress</th>
                 <th>City</th>
                 <th>State</th>

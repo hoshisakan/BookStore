@@ -53,8 +53,8 @@
                     <span asp-validation-for="ApplicationRole.RoleNumber" class="text-danger"></span>
                 </div>
                 <div class="mb-3 col-6">
-                    <label id="label_companyId" asp-for="ApplicationUser.CompanyId"></label>
-                    <select id="user_companyId" asp-for="ApplicationUser.CompanyId" asp-items='@Model.CompanyList' class="form-control">
+                    <label id="label_companyId" asp-for="ApplicationUser.CompanyId" style="display: none"></label>
+                    <select id="user_companyId" asp-for="ApplicationUser.CompanyId" asp-items='@Model.CompanyList' class="form-control" style="display: none">
                         <option value="0" disabled selected>--Select Company--</option>
                     </select>
                     <span asp-validation-for="ApplicationUser.CompanyId" class="text-danger"></span>

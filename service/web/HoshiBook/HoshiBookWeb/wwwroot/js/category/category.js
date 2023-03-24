@@ -107,7 +107,7 @@ function Delete(url) {
 function handleBulkCreateClick() {
     changeMainFeatureBtnStatus(false)
     changeFileUploadFeatureBtnStatus(true)
-    handleResetFileUpload();
+    handleResetFileUpload()
 }
 
 function handleRevertFileClick() {

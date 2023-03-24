@@ -5,34 +5,40 @@
 
 @* <partial name="../Shared/_Notification" /> *@
 
-<div class="container p-3">
-    <div class="row pt-4">
-        <div class="col-3">
+<div id="contaier"class="container p-3">
+    <div class="d-flex justify-content-between pt-4">
+        <div class="p-2">
             <h2 class="text-primary">CoverType List</h2>
         </div>
-        <div class="col-9 text-end">
-            <a asp-controller="CoverType" asp-action="Create" class="btn btn-primary">
+        <div class="p-2">
+        </div>
+    </div>
+    <div class="d-flex justify-content-between">
+        <div>
+            <form id="coverTypeListImportForm" method="post" asp-action="BulkCreate" enctype="multipart/form-data">
+                <div class="text-top">
+                    <input id="fileUpload" type="file" name="uploadFile" style="display: none" width="250">
+                    <button id="sendFileBtn" type="button" class="btn btn-primary" style="display: none" onclick="handleSendFileClick()">
+                        <i class="bi bi-send"></i> &nbsp; Send
+                    </button>
+                    <button id="revertFileBtn" type="button" class="btn btn-danger" style="display: none" onclick="handleRevertFileClick()">
+                        <i class="bi bi-backspace-reverse"></i> &nbsp; Revert
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div>
+            <a id="singleCreateBtn" asp-controller="CoverType" asp-action="Create" class="btn btn-primary" style="display: none">
                 <i class="bi bi-plus-circle"></i> &nbsp; Create New CoverType
             </a>
-            <button id="bulkCreateBtn" class="btn btn-success" onclick="handleBulkCreateClick()">
+            <button id="bulkCreateBtn" class="btn btn-success" style="display: none" onclick="handleBulkCreateClick()">
                 <i class="bi bi-filetype-xlsx"></i> &nbsp; Bulk Create CoverTypes
             </button>
-            <a id="exportDetailsBtn" asp-controller="CoverType" asp-action="ExportDetails" class="btn btn-info">
+            <a id="exportDetailsBtn" asp-controller="CoverType" asp-action="ExportDetails" class="btn btn-info" style="display: none">
                 <i class="bi bi-file-earmark-arrow-down"></i> &nbsp; Export Details
             </a>
         </div>
     </div>
-    <form id="coverTypeListImportForm" method="post" asp-action="BulkCreate" enctype="multipart/form-data">
-        <div class="text-top">
-            <input id="fileUpload" type="file" name="uploadFile" width="250">
-            <button id="sendFileBtn" type="button" class="btn btn-primary" onclick="handleSendFileClick()">
-                <i class="bi bi-send"></i> &nbsp; Send
-            </button>
-            <button id="revertFileBtn" type="button" class="btn btn-danger" onclick="handleRevertFileClick()">
-                <i class="bi bi-backspace-reverse"></i> &nbsp; Revert
-            </button>
-        </div>
-    </form>
     <br/><br/>
     <table id="tblData" class="table table-bordered table-striped" style="width: 100%;">
         <thead>

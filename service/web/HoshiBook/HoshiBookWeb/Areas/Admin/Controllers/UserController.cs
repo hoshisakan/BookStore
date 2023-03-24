@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using System.Linq;
+using System.Data;
 using System.Text;
 using Microsoft.AspNetCore.WebUtilities;
 
@@ -48,16 +49,6 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         {
             return View();
         }
-
-        // public ActionResult Lock()
-        // {
-        //     return View();
-        // }
-
-        // public ActionResult Lockout()
-        // {
-        //     return View();
-        // }
 
         //GET
         public async Task<IActionResult> Edit(string? uid)
@@ -330,15 +321,11 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             return View(obj);
         }
 
-        #region API CALLS
-        [HttpGet]
-        public async Task<IActionResult> GetAll(string status)
+        public async Task<List<UserDetailsVM>> GetAllUsersDetails(string status)
         {
             List<UserDetailsVM> userDetails = new();
             List<UserLockStatusVM> userLockStatusVMs = new();
-
-            _logger.LogInformation("status: {0}", status);
-
+        
             userLockStatusVMs = _unitOfWork.ApplicationUser.GetUsersLockStatus(status);
 
             _logger.LogInformation("userLockStatusVMs.Count: {0}", userLockStatusVMs.Count);
@@ -362,19 +349,48 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     CompanyName = user.CompanyName,
                     IsLockedOut = user.IsLockedOut ? "Locked" : "Unlocked"
                 });
-
-                // _logger.LogInformation("user.Id: {0}", user.Id);
-                // _logger.LogInformation("user.Name: {0}", user.Name);
-                // _logger.LogInformation("user.Email: {0}", user.Email);
-                // _logger.LogInformation("user.PhoneNumber: {0}", user.PhoneNumber);
-                // _logger.LogInformation("user.StreetAddress: {0}", user.StreetAddress);
-                // _logger.LogInformation("user.City: {0}", user.City);
-                // _logger.LogInformation("user.State: {0}", user.State);
-                // _logger.LogInformation("user.PostalCode: {0}", user.PostalCode);
-                // _logger.LogInformation("user.RoleName: {0}", currentUserRole.FirstOrDefault() ?? "Nan");
-                // _logger.LogInformation("user.CompanyName: {0}", user.CompanyName);
-                // _logger.LogInformation("user.IsLockedOut: {0}", user.IsLockedOut);
             }
+            return userDetails;
+        }
+
+        public async Task<List<UserImortFormatVM>> GetUserImportFormat(string status)
+        {
+            List<UserImortFormatVM> userDetails = new();
+            List<UserLockStatusVM> userLockStatusVMs = new();
+        
+            userLockStatusVMs = _unitOfWork.ApplicationUser.GetUsersLockStatus(status);
+
+            _logger.LogInformation("userLockStatusVMs.Count: {0}", userLockStatusVMs.Count);
+
+            foreach (var user in userLockStatusVMs)
+            {
+                var currentUser = await _userManager.FindByIdAsync(user.Id);
+                var currentUserRole = await _userManager.GetRolesAsync(currentUser);
+                
+                userDetails.Add(new UserImortFormatVM
+                {
+                    Name = user.Name,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    StreetAddress = user.StreetAddress,
+                    City = user.City,
+                    State = user.State,
+                    PostalCode = user.PostalCode,
+                    RoleName = currentUserRole.FirstOrDefault() ?? "",
+                    CompanyName = user.CompanyName
+                });
+            }
+            return userDetails;
+        }
+
+        #region API CALLS
+        [HttpGet]
+        public async Task<IActionResult> GetAll(string status)
+        {
+            List<UserDetailsVM> userDetails = new();
+
+            _logger.LogInformation("status: {0}", status);
+            userDetails = await GetAllUsersDetails(status);
             
             return Json(new { data = userDetails });
         }
@@ -401,6 +417,12 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             if (checkUserlocked)
             {
                 return Json(new { success = false, message = $"Error while deleting, uid {id} account has been locked." });
+            }
+
+            int checkUserOrderCount = _unitOfWork.ApplicationUser.GetExistsOrderHeadersUsersCount(id);
+            if (checkUserOrderCount > 0)
+            {
+                return Json(new { success = false, message = $"Error while deleting, uid {id} account has been used to place orders." });
             }
 
             var userInfoRemoveResult = await _userManager.DeleteAsync(oldUser);
@@ -465,6 +487,70 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             return Json(
                 new {success = true, message = "Unlock Account Successful"}
             );
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ImportFormat()
+        {
+            try
+            {
+                List<UserImortFormatVM> userImportFormat = new();
+
+                userImportFormat = await GetUserImportFormat("all");
+
+                if (userImportFormat.Count == 0)
+                {
+                    throw new Exception("No data to export.");
+                }
+
+                DataSet ds = new DataSet();
+                ds = _unitOfWork.ApplicationUser.ConvertToDataSet(userImportFormat);
+
+                string fileName = DateTime.Now.ToString("yyyy_MM_dd_hh_mm_ss") + "_UsersImportFormat.xlsx";
+
+                return File(
+                    FileExportTool.ExportToExcelDownload(ds),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    fileName
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("CategoryController.ExportDetails: {0}", ex.Message);
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportDetails()
+        {
+            try
+            {
+                List<UserDetailsVM> userDetails = new();
+
+                userDetails = await GetAllUsersDetails("all");
+
+                if (userDetails.Count == 0)
+                {
+                    throw new Exception("No data to export.");
+                }
+
+                DataSet ds = new DataSet();
+                ds = _unitOfWork.ApplicationUser.ConvertToDataSet(userDetails);
+
+                string fileName = DateTime.Now.ToString("yyyy_MM_dd_hh_mm_ss") + "_UsersDetails.xlsx";
+
+                return File(
+                    FileExportTool.ExportToExcelDownload(ds),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    fileName
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("CategoryController.ExportDetails: {0}", ex.Message);
+                return RedirectToAction(nameof(Index));
+            }
         }
         #endregion
     }

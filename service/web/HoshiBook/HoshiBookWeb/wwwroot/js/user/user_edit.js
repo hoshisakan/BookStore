@@ -5,6 +5,9 @@ var selectedRoleText = "";
 var roleDropdownListEnabled = false;
 var companyDropdownListEnabled = false;
 
+$(document).ready(function(){
+    initilizeRole();
+});
 
 function checkRoleDropdownListEnabled() {
     var roleDisplay = $("#user_rolenumber").css("display");
@@ -87,10 +90,5 @@ $('#editUserInfo').click(function(){
         showMessage("User Edit Page", "Please select a company.");
         return false;
     }
-
     return true;
-});
-
-$(document).ready(function(){
-    initilizeRole();
 });
