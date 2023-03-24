@@ -26,14 +26,12 @@ function changeMainFeatureBtnStatus(isShow)
         $('#singleCreateBtn').show()
         $('#bulkCreateBtn').show()
         $('#exportDetailsBtn').show()
-        $('#importFormatBtn').show()
     }
     else
     {
         $('#singleCreateBtn').hide()
         $('#bulkCreateBtn').hide()
         $('#exportDetailsBtn').hide()
-        $('#importFormatBtn').hide()
     }
 }
 

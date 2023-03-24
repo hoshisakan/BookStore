@@ -12,5 +12,17 @@ namespace HoshiBook.DataAccess.Repository
         {
             _db = db;
         }
+
+        public bool IsExists(string includeProperties, string value)
+        {
+            if (includeProperties == "Name")
+            {
+                return _db.ApplicationRoles.Any(u => u.Name == value);
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

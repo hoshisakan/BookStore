@@ -11,5 +11,6 @@ namespace HoshiBook.DataAccess.Repository.IRepository
 {
     public interface IApplicationRoleRepository : IRepository<ApplicationRole>
     {
+        bool IsExists(string includeProperties, string value);
     }
 }

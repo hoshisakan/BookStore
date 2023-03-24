@@ -100,8 +100,8 @@ namespace HoshiBook.DataAccess.Repository
             List<string> columnNames = new List<string>()
             {
                 "Email", "Name", "PhoneNumber", "StreetAddress",
-                "City", "State", "PostalCode", "Password", "ConfirmPassword",
-                "RoleName", "CompanyName"
+                "City", "State", "PostalCode", "Password", "RoleName",
+                "CompanyName"
             };
             dt.TableName = "UsersImportFormat";
 
@@ -121,7 +121,6 @@ namespace HoshiBook.DataAccess.Repository
                 dr["State"] = item.State;
                 dr["PostalCode"] = item.PostalCode;
                 dr["Password"] = string.Empty;
-                dr["ConfirmPassword"] = string.Empty;
                 dr["RoleName"] = item.RoleName;
                 dr["CompanyName"] = item.CompanyName;
                 dt.Rows.Add(dr);

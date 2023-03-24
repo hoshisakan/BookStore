@@ -15,7 +15,7 @@ using System.Linq;
 using System.Data;
 using System.Text;
 using Microsoft.AspNetCore.WebUtilities;
-
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace HoshiBookWeb.Areas.Admin.Controllers
 {
@@ -29,12 +29,20 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         private readonly IConfiguration _config;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IEmailSender _emailSender;
+        private readonly IUserStore<ApplicationUser> _userStore;
+        private readonly IUserEmailStore<ApplicationUser> _emailStore;
+
 
         public UserController(
             ILogger<UserController> logger, IUnitOfWork unitOfWork,
             IWebHostEnvironment hostEnvironment, IConfiguration config,
             UserManager<ApplicationUser> userManager,
-            RoleManager<ApplicationRole> roleManager
+            RoleManager<ApplicationRole> roleManager,
+            IUserStore<ApplicationUser> userStore,
+            SignInManager<ApplicationUser> signInManager,
+            IEmailSender emailSender
         )
         {
             _logger = logger;
@@ -43,6 +51,10 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             _config = config;
             _userManager = userManager;
             _roleManager = roleManager;
+            _signInManager = signInManager;
+            _emailSender = emailSender;
+            _userStore = userStore;
+            _emailStore = GetEmailStore();
         }
 
         public ActionResult Index()
@@ -383,6 +395,29 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             return userDetails;
         }
 
+        private ApplicationUser CreateUser()
+        {
+            try
+            {
+                return Activator.CreateInstance<ApplicationUser>();
+            }
+            catch
+            {
+                throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
+                    $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
+                    $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
+            }
+        }
+
+        private IUserEmailStore<ApplicationUser> GetEmailStore()
+        {
+            if (!_userManager.SupportsUserEmail)
+            {
+                throw new NotSupportedException("The default UI requires a user store with email support.");
+            }
+            return (IUserEmailStore<ApplicationUser>)_userStore;
+        }
+
         #region API CALLS
         [HttpGet]
         public async Task<IActionResult> GetAll(string status)
@@ -487,6 +522,249 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             return Json(
                 new {success = true, message = "Unlock Account Successful"}
             );
+        }
+
+        //POST
+        //TODO Add ValidateAntiForgeryToken to avoid CORS attack
+        [HttpPost]
+        public async Task<IActionResult> BulkCreate(IFormFile uploadFile)
+        {
+            try {
+                if (uploadFile == null)
+                {
+                    throw new Exception("Please select a file to upload.");
+                }
+
+                var _common = new Common(_config);
+                string? uploads = "";
+                uploads = _common.GetUploadFilesStoragePath();
+                _logger.LogInformation("Document upload path: {0}", uploads);
+                string newFileName = Guid.NewGuid().ToString();
+                string oldFileName = Path.GetFileName(uploadFile.FileName);
+                string fileExtension = '.' + oldFileName.Split('.').Last();
+                string? extension = Path.GetExtension(uploadFile.FileName);
+
+                _logger.LogInformation("Received Document File extension: {0}", fileExtension);
+                bool _IsContainsExtension = FileUploadTool.IsContainsExtension(fileExtension, "import");
+
+                if (!_IsContainsExtension)
+                {
+                    throw new Exception("Upload file failed, because file extension is not allowed.");
+                }
+
+                // TODO If storage path does not exist, then create it.
+                FileTool.CheckAndCreateDirectory(uploads);
+
+                //TODO Storage user upload file to server
+                bool _IsUploadSuccess = FileUploadTool.UploadImage(uploadFile, newFileName, extension, uploads);
+
+                if (!_IsUploadSuccess)
+                {
+                    throw new Exception("Upload file failed, because save file to server local failed.");
+                }
+
+                List<List<Dictionary<string, object>>> Results = new List<List<Dictionary<string, object>>>();
+
+                string? filePath = Path.Combine(uploads, newFileName + extension);
+
+                if (filePath != null)
+                {
+                    Results = FileReadTool.ReadExcelFile(filePath, false, 1);
+
+                    if (Results.Count == 0)
+                    {
+                        throw new Exception("Upload file failed, because read file content failed.");
+                    }
+
+                    foreach (var sheet in Results)
+                    {
+                        foreach (var rows in sheet)
+                        {
+                            var user = CreateUser();
+                            
+                            string _Email = rows["Column0"].ToString() ?? "";
+                            string _Name = rows["Column1"].ToString() ?? "";
+                            string _PhoneNumber = rows["Column2"].ToString() ?? "";
+                            string _StreetAddress = rows["Column3"].ToString() ?? "";
+                            string _City = rows["Column4"].ToString() ?? "";
+                            string _State = rows["Column5"].ToString() ?? "";
+                            string _PostalCode = rows["Column6"].ToString() ?? "";
+                            string _Password = rows["Column7"].ToString() ?? "";
+                            string _RoleName = rows["Column8"].ToString() ?? "";
+                            string _ComanyName = rows["Column9"].ToString() ?? "";
+                            int _RoleNumber = 0;
+
+                            if (string.IsNullOrEmpty(_Email))
+                            {
+                                throw new Exception("Email is required.");
+                            }
+                            else
+                            {
+                                user.Email = _Email;
+                            }
+
+                            if (string.IsNullOrEmpty(_Name))
+                            {
+                                throw new Exception("Name is required.");
+                            }
+                            else
+                            {
+                                user.Name = _Name;
+                            }
+
+                            if (string.IsNullOrEmpty(_PhoneNumber))
+                            {
+                                throw new Exception("PhoneNumber is required.");
+                            }
+                            else
+                            {
+                                user.PhoneNumber = _PhoneNumber;
+                            }
+
+                            if (string.IsNullOrEmpty(_StreetAddress))
+                            {
+                                throw new Exception("StreetAddress is required.");
+                            }
+                            else
+                            {
+                                user.StreetAddress = _StreetAddress;
+                            }
+
+                            if (string.IsNullOrEmpty(_City))
+                            {
+                                throw new Exception("City is required.");
+                            }
+                            else
+                            {
+                                user.City = _City;
+                            }
+
+                            if (string.IsNullOrEmpty(_State))
+                            {
+                                throw new Exception("State is required.");
+                            }
+                            else
+                            {
+                                user.State = _State;
+                            }
+
+                            if (string.IsNullOrEmpty(_PostalCode))
+                            {
+                                throw new Exception("PostalCode is required.");
+                            }
+                            else
+                            {
+                                user.PostalCode = _PostalCode;
+                            }
+
+                            if (string.IsNullOrEmpty(_Password))
+                            {
+                                throw new Exception("Password is required.");
+                            }
+
+                            if (string.IsNullOrEmpty(_RoleName))
+                            {
+                                throw new Exception("RoleName is required.");
+                            }
+
+                            bool _EmailIsExists = _unitOfWork.ApplicationUser.IsExists(
+                                includeProperties: "Email", user.Email
+                            );
+                            bool _NameIsExists = _unitOfWork.ApplicationUser.IsExists(
+                                includeProperties: "Name", user.Name
+                            );
+                            bool _PhoneNumberIsExists = _unitOfWork.ApplicationUser.IsExists(
+                                includeProperties: "PhoneNumber", user.PhoneNumber
+                            );
+                            bool _RoleNameIsExists = _unitOfWork.ApplicationRole.IsExists(
+                                includeProperties: "Name", _RoleName
+                            );
+
+                            if (!_RoleNameIsExists)
+                            {
+                                throw new Exception("RoleName is not exists.");
+                            }
+                            else
+                            {
+                                _RoleNumber = _roleManager.Roles.SingleOrDefault(r => r.Name == _RoleName).RoleNumber;
+                            }
+
+                            if (_RoleNumber == 0)
+                            {
+                                throw new Exception("RoleName is not exists.");
+                            }
+
+                            if (_RoleNumber == 4 && string.IsNullOrEmpty(_ComanyName))
+                            {
+                                throw new Exception("ComanyName is required.");
+                            }
+                            else if (_RoleNumber == 4 && !string.IsNullOrEmpty(_ComanyName))
+                            {
+                                bool _ComanyNameIsExists = _unitOfWork.Company.IsExists(
+                                    includeProperties: "Name", _ComanyName
+                                );
+                                if (!_ComanyNameIsExists)
+                                {
+                                    throw new Exception("ComanyName is not exists.");
+                                }
+                                user.CompanyId = _unitOfWork.Company.GetFirstOrDefault(u => u.Name == _ComanyName).Id;
+                            }
+
+                            if (_EmailIsExists)
+                            {
+                                throw new Exception("Email is exists.");
+                            }
+
+                            if (_NameIsExists)
+                            {
+                                throw new Exception("Name is exists.");
+                            }
+
+                            if (_PhoneNumberIsExists)
+                            {
+                                throw new Exception("PhoneNumber is exists.");
+                            }
+
+                            await _userStore.SetUserNameAsync(user, user.Email, CancellationToken.None);
+                            await _emailStore.SetEmailAsync(user, user.Email, CancellationToken.None);
+
+                            var userCreatedResult = await _userManager.CreateAsync(user, _Password);
+
+                            if (userCreatedResult.Succeeded)
+                            {
+                                var userGivenRoleResult = await _userManager.AddToRoleAsync(user, _RoleName);
+                                if (!userGivenRoleResult.Succeeded)
+                                {
+                                    throw new Exception($"Given user '{user.Name}' role failed.");
+                                }
+                                _logger.LogInformation($"User '{user.Name}' created a new account with password.");
+                            }
+                            else
+                            {
+                                throw new Exception($"Create user '{user.Name}' failed.");
+                            }
+
+                            _logger.LogInformation(
+                                "Name: {0}, Email: {1}, PhoneNumber: {2}, StreetAddress: {3}, City: {4}, State: {5}, PostalCode: {6}, PasswordHash: {7}, RoleName: {8}, ComanyName: {9}, CompanyId: {10}",
+                                user.Name, user.Email, user.PhoneNumber, user.StreetAddress, user.City, user.State, user.PostalCode, _Password, _RoleName, _ComanyName, user.CompanyId
+                            );
+                        }
+                    }
+                }
+
+                _logger.LogInformation("UserController.BulkCreate: {0}", "Bulk create successful!");
+                return Json(
+                    new {success = true, message = "Bulk create successful!"}
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("UserController.BulkCreate Message: {0}", ex.Message);
+                _logger.LogError("UserController.BulkCreate StackTrace: {0}", ex.StackTrace);
+                return Json(
+                    new {success = false, message = ex.Message}
+                );
+            }
         }
 
         [HttpGet]
