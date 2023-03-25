@@ -86,15 +86,23 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 if (ModelState.IsValid)
                 {
                     bool _TitleIsExists = _unitOfWork.Product.IsExists(
-                        includeProperties: "Title", obj.Product.Title
+                        includeProperties: "Title", obj.Product.Title, obj.Product.Id
+                    );
+                    bool _SKUIsExists = _unitOfWork.Product.IsExists(
+                        includeProperties: "SKU", obj.Product.SKU, obj.Product.Id
                     );
                     bool _ISBNIsExists = _unitOfWork.Product.IsExists(
-                        includeProperties: "ISBN", obj.Product.ISBN
+                        includeProperties: "ISBN", obj.Product.ISBN, obj.Product.Id
                     );
 
                     if (_TitleIsExists)
                     {
                         throw new Exception("Title is exists.");
+                    }
+
+                    if (_SKUIsExists)
+                    {
+                        throw new Exception("SKU is exists.");
                     }
 
                     if (_ISBNIsExists)
@@ -147,11 +155,30 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
                     if (obj.Product.Id == 0)
                     {
+                        obj.Product.CreatedAt = DateTime.Now;
                         _unitOfWork.Product.Add(obj.Product);
                         _unitOfWork.Save();
                     }
                     else
                     {
+                        ProductVM productVM = new();
+                        productVM.Product = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == obj.Product.Id);
+                        productVM.Product.Title = obj.Product.Title;
+                        productVM.Product.SKU = obj.Product.SKU;
+                        productVM.Product.Description = obj.Product.Description;
+                        productVM.Product.ISBN = obj.Product.ISBN;
+                        productVM.Product.Author = obj.Product.Author;
+                        productVM.Product.ListPrice = obj.Product.ListPrice;
+                        productVM.Product.Price = obj.Product.Price;
+                        productVM.Product.Price50 = obj.Product.Price50;
+                        productVM.Product.Price100 = obj.Product.Price100;
+                        if (obj.Product.ImageUrl != null)
+                        {
+                            productVM.Product.ImageUrl = obj.Product.ImageUrl;
+                        }
+                        productVM.Product.CategoryId = obj.Product.CategoryId;
+                        productVM.Product.CoverTypeId = obj.Product.CoverTypeId;
+                        productVM.Product.ModifiedAt = DateTime.Now;
                         _unitOfWork.Product.Update(obj.Product);
                         _unitOfWork.Save();
                     }
@@ -332,20 +359,27 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                         {
                             Product product = new Product();
                             product.Title = rows["Column0"].ToString() ?? "";
-                            product.Description = rows["Column1"].ToString() ?? "";
-                            product.ISBN = rows["Column2"].ToString() ?? "";
-                            product.Author = rows["Column3"].ToString() ?? "";
-                            product.ListPrice = Convert.ToDouble(rows["Column4"].ToString() ?? "0");
-                            product.Price = Convert.ToDouble(rows["Column5"].ToString() ?? "0");
-                            product.Price50 = Convert.ToDouble(rows["Column6"].ToString() ?? "0");
-                            product.Price100 = Convert.ToDouble(rows["Column7"].ToString() ?? "0");
-                            product.ImageUrl = @$"{_config["StaticFiles:RequestPath"]}\images\products\" + rows["Column8"].ToString() ?? "";
-                            string Category = rows["Column9"].ToString() ?? "";
-                            string CoverType = rows["Column10"].ToString() ?? "";
+                            product.SKU = rows["Column1"].ToString() ?? "";
+                            product.Description = rows["Column2"].ToString() ?? "";
+                            product.ISBN = rows["Column3"].ToString() ?? "";
+                            product.Author = rows["Column4"].ToString() ?? "";
+                            product.ListPrice = Convert.ToDouble(rows["Column5"].ToString() ?? "0");
+                            product.Price = Convert.ToDouble(rows["Column6"].ToString() ?? "0");
+                            product.Price50 = Convert.ToDouble(rows["Column7"].ToString() ?? "0");
+                            product.Price100 = Convert.ToDouble(rows["Column8"].ToString() ?? "0");
+                            product.ImageUrl = @$"{_config["StaticFiles:RequestPath"]}\images\products\" + rows["Column9"].ToString() ?? "";
+                            product.CreatedAt = DateTime.Now;
+                            string Category = rows["Column10"].ToString() ?? "";
+                            string CoverType = rows["Column11"].ToString() ?? "";
 
                             if (product.Title == "")
                             {
                                 throw new Exception("Title is required.");
+                            }
+
+                            if (product.SKU == "")
+                            {
+                                throw new Exception("SKU is required.");
                             }
 
                             if (product.Description == "")
@@ -400,6 +434,9 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                             bool _TitleIsExists = _unitOfWork.Product.IsExists(
                                 includeProperties: "Title", product.Title
                             );
+                            bool _SKUIsExists = _unitOfWork.Product.IsExists(
+                                includeProperties: "SKU", product.SKU
+                            );
                             bool _ISBNIsExists = _unitOfWork.Product.IsExists(
                                 includeProperties: "ISBN", product.ISBN
                             );
@@ -407,6 +444,11 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                             if (_TitleIsExists)
                             {
                                 throw new Exception("Title is exists.");
+                            }
+
+                            if (_SKUIsExists)
+                            {
+                                throw new Exception("SKU is exists.");
                             }
 
                             if (_ISBNIsExists)
@@ -417,8 +459,8 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                             productList.Add(product);
 
                             _logger.LogInformation(
-                                "Title: {0}, Description: {1}, Price: {2}, CoverTypeId: {3}, CategoryId: {4}, ImageUrl: {5}",
-                                product.Title, product.Description, product.Price,
+                                "Title: {0}, SKU: {1} ,Description: {2}, Price: {3}, CoverTypeId: {4}, CategoryId: {5}, ImageUrl: {6}",
+                                product.Title, product.SKU ,product.Description, product.Price,
                                 product.CoverTypeId, product.CategoryId, product.ImageUrl
                             );
                         }

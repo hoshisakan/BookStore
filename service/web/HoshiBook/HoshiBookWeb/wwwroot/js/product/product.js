@@ -77,6 +77,7 @@ function loadDatatable() {
         columns: [
             { data: 'id', width: '10%' },
             { data: 'title', width: '15%' },
+            { data: 'sku', width: '15%' },
             { data: 'isbn', width: '15%' },
             { data: 'price', width: '5%' },
             { data: 'author', width: '10%' },

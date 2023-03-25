@@ -14,5 +14,6 @@ public class Category
     [DisplayName("Display Order")]
     [Range(1, 100, ErrorMessage = "Display Order muse be between 1 to 100 only!")]
     public int DisplayOrder { get; set; }
-    public DateTime CreatedDateTime { get; set; } = DateTime.Now;
+    public DateTime? CreatedAt { get; set; }
+    public DateTime ModifiedAt { get; set; } = DateTime.Now;
 }

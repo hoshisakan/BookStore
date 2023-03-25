@@ -45,7 +45,7 @@
             <button id="uploadImageBtn" class="btn btn-warning" style="display: none" onclick="handleUploadImageClick()">
                 <i class="bi bi-upload"></i> &nbsp; Upload Images
             </button>
-            <a id="exportDetailsBtn" asp-controller="Product" asp-action="ExportDetails" class="btn btn-info">
+            <a id="exportDetailsBtn" asp-controller="Product" asp-action="ExportDetails" class="btn btn-info" style="display: none">
                 <i class="bi bi-file-earmark-arrow-down"></i> &nbsp; Export Details
             </a>
         </div>
@@ -56,6 +56,7 @@
             <tr>
                 <th>Id</th>
                 <th>Title</th>
+                <th>SKU</th>
                 <th>ISBN</th>
                 <th>Price</th>
                 <th>Author</th>

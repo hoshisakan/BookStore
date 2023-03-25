@@ -15,6 +15,8 @@ namespace HoshiBook.Models
         public int Id { get; set; }
         [Required]
         public string Title { get; set; } = default!;
+        [MaxLength(50)]
+        public string SKU { get; set; } = default!;
         public string Description { get; set; } = default!;
         [Required]
         public string ISBN { get; set; } = default!;
@@ -50,5 +52,7 @@ namespace HoshiBook.Models
         [ForeignKey("CoverTypeId")]
         [ValidateNever]
         public CoverType CoverType { get; set; } = default!;
+        public DateTime? CreatedAt { get; set; }
+        public DateTime ModifiedAt { get; set; } = DateTime.Now;
     }
 }

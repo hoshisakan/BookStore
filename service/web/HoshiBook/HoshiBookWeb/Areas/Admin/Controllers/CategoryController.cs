@@ -52,6 +52,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 ModelState.AddModelError("name", "The DisplayOrder cannot exactly match the Name.");
             }
             if (ModelState.IsValid) {
+                obj.CreatedAt = DateTime.Now;
                 _unitOfWork.Category.Add(obj);
                 _unitOfWork.Save();
                 TempData["success"] = "Category created successfully";
@@ -87,7 +88,11 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 ModelState.AddModelError("name", "The DisplayOrder cannot exactly match the Name.");
             }
             if (ModelState.IsValid) {
-                _unitOfWork.Category.Update(obj);
+                Category categoryFromDb = _unitOfWork.Category.GetFirstOrDefault(u => u.Id == obj.Id);
+                categoryFromDb.Name = obj.Name;
+                categoryFromDb.DisplayOrder = obj.DisplayOrder;
+                categoryFromDb.ModifiedAt = DateTime.Now;
+                _unitOfWork.Category.Update(categoryFromDb);
                 _unitOfWork.Save();
                 TempData["success"] = "Category updated successfully";
                 return RedirectToAction("Index");
@@ -198,6 +203,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                             Category category = new Category();
                             category.Name = rows["Column0"].ToString() ?? "";
                             category.DisplayOrder = Convert.ToInt32(rows["Column1"].ToString() ?? "0");
+                            category.CreatedAt = DateTime.Now;
 
                             if (category.Name == "")
                             {

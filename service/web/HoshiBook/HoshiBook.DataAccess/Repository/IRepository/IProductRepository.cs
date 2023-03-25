@@ -15,6 +15,7 @@ namespace HoshiBook.DataAccess.Repository.IRepository
     {
         void Update(Product obj);
         bool IsExists(string includeProperties, string value);
+        bool IsExists(string includeProperties, string value, int id);
         List<Product> GetExistsOrderDetailsProducts(int productId);
         int GetExistsOrderDetailsProductsCount(int productId);
         DataSet ConvertToDataSet(List<Product> data);

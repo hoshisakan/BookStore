@@ -745,8 +745,8 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                             }
 
                             _logger.LogInformation(
-                                "Name: {0}, Email: {1}, PhoneNumber: {2}, StreetAddress: {3}, City: {4}, State: {5}, PostalCode: {6}, PasswordHash: {7}, RoleName: {8}, ComanyName: {9}, CompanyId: {10}",
-                                user.Name, user.Email, user.PhoneNumber, user.StreetAddress, user.City, user.State, user.PostalCode, _Password, _RoleName, _ComanyName, user.CompanyId
+                                "Name: {0}, Email: {1}, PhoneNumber: {2}, StreetAddress: {3}, City: {4}, State: {5}, PostalCode: {6}, RoleName: {7}, ComanyName: {8}, CompanyId: {9}",
+                                user.Name, user.Email, user.PhoneNumber, user.StreetAddress, user.City, user.State, user.PostalCode, _RoleName, _ComanyName, user.CompanyId
                             );
                         }
                     }

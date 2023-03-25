@@ -38,11 +38,35 @@ namespace HoshiBook.DataAccess.Repository
             }
         }
 
+        public bool IsExists(string includeProperties, string value, int id)
+        {
+            if (includeProperties == "Title")
+            {
+                return _db.Products.Where(u => u.Id != id).Any(u => u.Title == value);
+            }
+            else if (includeProperties == "SKU")
+            {
+                return _db.Products.Where(u => u.Id != id).Any(u => u.SKU == value);
+            }
+            else if (includeProperties == "ISBN")
+            {
+                return _db.Products.Where(u => u.Id != id).Any(u => u.ISBN == value);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public bool IsExists(string includeProperties, string value)
         {
             if (includeProperties == "Title")
             {
                 return _db.Products.Any(u => u.Title == value);
+            }
+            else if (includeProperties == "SKU")
+            {
+                return _db.Products.Any(u => u.SKU == value);
             }
             else if (includeProperties == "ISBN")
             {
@@ -82,36 +106,39 @@ namespace HoshiBook.DataAccess.Repository
             DataTable dt = new DataTable();
             List<string> columnNames = new List<string>()
             {
-                "Title", "Description", "ISBN", "Author", "ListPrice", "Price", "Price50", "Price100", "ImageUrl",
-                "Category", "CoverType"
+                "Title", "SKU", "Description", "ISBN", "Author",
+                "ListPrice", "Price", "Price50", "Price100", 
+                "ImageUrl", "Category", "CoverType"
             };
             dt.TableName = "Products";
             dt.Columns.Add(columnNames[0], typeof(string));
             dt.Columns.Add(columnNames[1], typeof(string));
             dt.Columns.Add(columnNames[2], typeof(string));
             dt.Columns.Add(columnNames[3], typeof(string));
-            dt.Columns.Add(columnNames[4], typeof(double));
+            dt.Columns.Add(columnNames[4], typeof(string));
             dt.Columns.Add(columnNames[5], typeof(double));
             dt.Columns.Add(columnNames[6], typeof(double));
             dt.Columns.Add(columnNames[7], typeof(double));
-            dt.Columns.Add(columnNames[8], typeof(string));
+            dt.Columns.Add(columnNames[8], typeof(double));
             dt.Columns.Add(columnNames[9], typeof(string));
             dt.Columns.Add(columnNames[10], typeof(string));
+            dt.Columns.Add(columnNames[11], typeof(string));
 
             foreach (var product in data)
             {
                 DataRow row = dt.NewRow();
                 row[columnNames[0]] = product.Title;
-                row[columnNames[1]] = product.Description;
-                row[columnNames[2]] = product.ISBN;
-                row[columnNames[3]] = product.Author;
-                row[columnNames[4]] = product.ListPrice;
-                row[columnNames[5]] = product.Price;
-                row[columnNames[6]] = product.Price50;
-                row[columnNames[7]] = product.Price100;
-                row[columnNames[8]] = product.ImageUrl.Split("\\").LastOrDefault()?.Replace(" ", "%20") ?? "default.png";
-                row[columnNames[9]] = product.Category.Name;
-                row[columnNames[10]] = product.CoverType.Name;
+                row[columnNames[1]] = product.SKU;
+                row[columnNames[2]] = product.Description;
+                row[columnNames[3]] = product.ISBN;
+                row[columnNames[4]] = product.Author;
+                row[columnNames[5]] = product.ListPrice;
+                row[columnNames[6]] = product.Price;
+                row[columnNames[7]] = product.Price50;
+                row[columnNames[8]] = product.Price100;
+                row[columnNames[9]] = product.ImageUrl.Split("\\").LastOrDefault()?.Replace(" ", "%20") ?? "default.png";
+                row[columnNames[10]] = product.Category.Name;
+                row[columnNames[11]] = product.CoverType.Name;
                 dt.Rows.Add(row);
             }
             ds.Tables.Add(dt);
