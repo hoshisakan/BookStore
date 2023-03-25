@@ -72,6 +72,11 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             {
                 // update product
                 productVM.Product = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == id);
+                if (productVM.Product == null)
+                {
+                    return NotFound();
+                }
+    
                 return View(productVM);
             }
         }

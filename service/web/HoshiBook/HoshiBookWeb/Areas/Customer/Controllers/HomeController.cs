@@ -36,18 +36,26 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             return View(productList);
         }
 
-        public IActionResult Details(int? productId)
+        public IActionResult Details(string? productId)
         {
             if (productId == null)
+            {
+                return NotFound();
+            }
+            var product = _unitOfWork.Product.GetFirstOrDefault(
+                u => u.SKU == productId,
+                includeProperties: "Category,CoverType"
+            );
+            if (product == null)
             {
                 return NotFound();
             }
             ShoppingCart cardObj = new ()
             {
                 Count = 1,
-                ProductId = productId.Value,
+                ProductId = product.Id,
                 Product = _unitOfWork.Product.GetFirstOrDefault(
-                            u => u.Id == productId,
+                            u => u.SKU == productId,
                             includeProperties: "Category,CoverType"
                         )
             };
