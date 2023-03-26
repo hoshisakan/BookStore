@@ -323,6 +323,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 string oldFileName = Path.GetFileName(uploadFile.FileName);
                 string fileExtension = '.' + oldFileName.Split('.').Last();
                 string? extension = Path.GetExtension(uploadFile.FileName);
+                int _productCreatedCount = 0;
 
                 _logger.LogInformation("Received Document File extension: {0}", fileExtension);
                 bool _IsContainsExtension = FileUploadTool.IsContainsExtension(fileExtension, "import");
@@ -362,7 +363,9 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     {
                         foreach (var rows in sheet)
                         {
+                            bool _allowCreateProduct = true;
                             Product product = new Product();
+                            
                             product.Title = rows["Column0"].ToString() ?? "";
                             product.SKU = rows["Column1"].ToString() ?? "";
                             product.Description = rows["Column2"].ToString() ?? "";
@@ -448,20 +451,30 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
                             if (_TitleIsExists)
                             {
-                                throw new Exception("Title is exists.");
+                                // throw new Exception("Title is exists.");
+                                _logger.LogInformation("Title is exists.");
+                                _allowCreateProduct = false;
                             }
 
                             if (_SKUIsExists)
                             {
-                                throw new Exception("SKU is exists.");
+                                // throw new Exception("SKU is exists.");
+                                _logger.LogInformation("SKU is exists.");
+                                _allowCreateProduct = false;
                             }
 
                             if (_ISBNIsExists)
                             {
-                                throw new Exception("ISBN is exists.");
+                                // throw new Exception("ISBN is exists.");
+                                _logger.LogInformation("ISBN is exists.");
+                                _allowCreateProduct = false;
                             }
 
-                            productList.Add(product);
+                            if (_allowCreateProduct)
+                            {
+                                productList.Add(product);
+                                _productCreatedCount++;
+                            }
 
                             _logger.LogInformation(
                                 "Title: {0}, SKU: {1} ,Description: {2}, Price: {3}, CoverTypeId: {4}, CategoryId: {5}, ImageUrl: {6}",
@@ -470,14 +483,27 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                             );
                         }
                     }
-                    //TODO Bulk add products, it is faster than add one by one. don't need to save after each add.
-                    _unitOfWork.Product.BulkAdd(productList);
+                    if (productList.Count > 0)
+                    {
+                        //TODO Bulk add products, it is faster than add one by one. don't need to save after each add.
+                        _unitOfWork.Product.BulkAdd(productList);
+                    }
                 }
 
-                _logger.LogInformation("ProductController.BulkCreate: {0}", "Bulk create successful!");
-                return Json(
-                    new {success = true, message = "Bulk create successful!"}
-                );
+                if (_productCreatedCount > 0)
+                {
+                    _logger.LogInformation("ProductController.BulkCreate: {0}", "Bulk create successful!");
+                    return Json(
+                        new {success = true, message = "Bulk create successful!"}
+                    );
+                }
+                else
+                {
+                    _logger.LogInformation("ProductController.BulkCreate: {0}", "No product created!");
+                    return Json(
+                        new {success = false, message = "No product created!"}
+                    );
+                }
             }
             catch (Exception ex)
             {

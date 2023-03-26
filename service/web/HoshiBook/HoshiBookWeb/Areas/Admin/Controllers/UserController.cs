@@ -543,6 +543,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 string oldFileName = Path.GetFileName(uploadFile.FileName);
                 string fileExtension = '.' + oldFileName.Split('.').Last();
                 string? extension = Path.GetExtension(uploadFile.FileName);
+                int _userCreatedCount = 0;
 
                 _logger.LogInformation("Received Document File extension: {0}", fileExtension);
                 bool _IsContainsExtension = FileUploadTool.IsContainsExtension(fileExtension, "import");
@@ -580,6 +581,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     {
                         foreach (var rows in sheet)
                         {
+                            bool _allowCreateUser = true;
                             var user = CreateUser();
                             
                             string _Email = rows["Column0"].ToString() ?? "";
@@ -712,50 +714,75 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
                             if (_EmailIsExists)
                             {
-                                throw new Exception("Email is exists.");
+                                // throw new Exception("Email is exists.");
+                                _logger.LogInformation($"Email {_Email} is exists.");
+                                _allowCreateUser = false;
                             }
 
                             if (_NameIsExists)
                             {
-                                throw new Exception("Name is exists.");
+                                // throw new Exception("Name is exists.");
+                                _logger.LogInformation($"Name {_Name} is exists.");
+                                _allowCreateUser = false;
                             }
 
                             if (_PhoneNumberIsExists)
                             {
-                                throw new Exception("PhoneNumber is exists.");
+                                // throw new Exception("PhoneNumber is exists.");
+                                _logger.LogInformation($"PhoneNumber {_PhoneNumber} is exists.");
+                                _allowCreateUser = false;
                             }
 
-                            await _userStore.SetUserNameAsync(user, user.Email, CancellationToken.None);
-                            await _emailStore.SetEmailAsync(user, user.Email, CancellationToken.None);
-
-                            var userCreatedResult = await _userManager.CreateAsync(user, _Password);
-
-                            if (userCreatedResult.Succeeded)
+                            if (_allowCreateUser)
                             {
-                                var userGivenRoleResult = await _userManager.AddToRoleAsync(user, _RoleName);
-                                if (!userGivenRoleResult.Succeeded)
+                                await _userStore.SetUserNameAsync(user, user.Email, CancellationToken.None);
+                                await _emailStore.SetEmailAsync(user, user.Email, CancellationToken.None);
+
+                                var userCreatedResult = await _userManager.CreateAsync(user, _Password);
+
+                                if (userCreatedResult.Succeeded)
                                 {
-                                    throw new Exception($"Given user '{user.Name}' role failed.");
+                                    var userGivenRoleResult = await _userManager.AddToRoleAsync(user, _RoleName);
+                                    if (!userGivenRoleResult.Succeeded)
+                                    {
+                                        throw new Exception($"Given user '{user.Name}' role failed.");
+                                    }
+                                    _logger.LogInformation($"User '{user.Name}' created a new account with password.");
+                                    _userCreatedCount++;
                                 }
-                                _logger.LogInformation($"User '{user.Name}' created a new account with password.");
+                                else
+                                {
+                                    throw new Exception($"Create user '{user.Name}' failed.");
+                                }
+
+                                _logger.LogInformation(
+                                    "Name: {0}, Email: {1}, PhoneNumber: {2}, StreetAddress: {3}, City: {4}, State: {5}, PostalCode: {6}, RoleName: {7}, ComanyName: {8}, CompanyId: {9}",
+                                    user.Name, user.Email, user.PhoneNumber, user.StreetAddress, user.City, user.State, user.PostalCode, _RoleName, _ComanyName, user.CompanyId
+                                );
                             }
                             else
                             {
-                                throw new Exception($"Create user '{user.Name}' failed.");
+                                user = new();
+                                _logger.LogInformation($"User '{_Email}' or '{_Name}' or '{_PhoneNumber}' is exists.");
                             }
-
-                            _logger.LogInformation(
-                                "Name: {0}, Email: {1}, PhoneNumber: {2}, StreetAddress: {3}, City: {4}, State: {5}, PostalCode: {6}, RoleName: {7}, ComanyName: {8}, CompanyId: {9}",
-                                user.Name, user.Email, user.PhoneNumber, user.StreetAddress, user.City, user.State, user.PostalCode, _RoleName, _ComanyName, user.CompanyId
-                            );
                         }
                     }
                 }
 
-                _logger.LogInformation("UserController.BulkCreate: {0}", "Bulk create successful!");
-                return Json(
-                    new {success = true, message = "Bulk create successful!"}
-                );
+                if (_userCreatedCount > 0)
+                {
+                    _logger.LogInformation("UserController.BulkCreate: {0}", "Bulk create successful!");
+                    return Json(
+                        new {success = true, message = "Bulk create successful!"}
+                    );
+                }
+                else
+                {
+                    _logger.LogInformation("UserController.BulkCreate: {0}", "No user created.");
+                    return Json(
+                        new {success = false, message = "No user created."}
+                    );
+                }
             }
             catch (Exception ex)
             {

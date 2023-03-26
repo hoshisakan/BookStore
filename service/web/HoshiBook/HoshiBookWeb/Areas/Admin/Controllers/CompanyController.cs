@@ -149,6 +149,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 string oldFileName = Path.GetFileName(uploadFile.FileName);
                 string fileExtension = '.' + oldFileName.Split('.').Last();
                 string? extension = Path.GetExtension(uploadFile.FileName);
+                int _companyCreatedCount = 0;
 
                 _logger.LogInformation("Received Document File extension: {0}", fileExtension);
                 bool _IsContainsExtension = FileUploadTool.IsContainsExtension(fileExtension, "import");
@@ -188,6 +189,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     {
                         foreach (var rows in sheet)
                         {
+                            bool _allowCreateCompany = true;
                             Company company = new Company();
                             company.Name = rows["Column0"].ToString() ?? "";
                             company.StreetAddress = rows["Column1"].ToString() ?? "";
@@ -195,7 +197,6 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                             company.State = rows["Column3"].ToString() ?? "";
                             company.PostalCode = rows["Column4"].ToString() ?? "";
                             company.PhoneNumber = rows["Column5"].ToString() ?? "";
-                        
 
                             if (String.IsNullOrEmpty(company.Name))
                             {
@@ -216,15 +217,21 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
                             if (_NameIsExists)
                             {
-                                throw new Exception("Name is exists.");
+                                // throw new Exception("Name is exists.");
+                                _allowCreateCompany = false;
                             }
 
                             if (_PhoneNumberIsExists)
                             {
-                                throw new Exception("PhoneNumber is exists.");
+                                // throw new Exception("PhoneNumber is exists.");
+                                _allowCreateCompany = false;
                             }
 
-                            companyList.Add(company);
+                            if (_allowCreateCompany)
+                            {
+                                companyList.Add(company);
+                                _companyCreatedCount++;
+                            }
 
                             _logger.LogInformation(
                                 "Name: {0}, StreetAddress: {1}, City: {2}, State: {3}, PostalCode: {4}, PhoneNumber: {5}",
@@ -232,14 +239,27 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                             );
                         }
                     }
-                    //TODO Bulk add categories, it is faster than add one by one. don't need to save after each add.
-                    _unitOfWork.Company.BulkAdd(companyList);
+                    if (companyList.Count > 0)
+                    {
+                        //TODO Bulk add categories, it is faster than add one by one. don't need to save after each add.
+                        _unitOfWork.Company.BulkAdd(companyList);
+                    }
                 }
 
-                _logger.LogInformation("CompanyController.BulkCreate: {0}", "Bulk create successful!");
-                return Json(
-                    new {success = true, message = "Bulk create successful!"}
-                );
+                if (_companyCreatedCount > 0)
+                {
+                    _logger.LogInformation("CompanyController.BulkCreate: {0}", "Bulk create successful!");
+                    return Json(
+                        new {success = true, message = "Bulk create successful!"}
+                    );
+                }
+                else
+                {
+                    _logger.LogInformation("CompanyController.BulkCreate: {0}", "No company created!");
+                    return Json(
+                        new {success = false, message = "No company created!"}
+                    );
+                }
             }
             catch (Exception ex)
             {

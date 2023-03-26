@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HoshiBook.Models.ViewModels
+namespace HoshiBook.Models.ViewModels.Cart
 {
     public class ShoppingCartVM
     {

@@ -140,6 +140,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 string oldFileName = Path.GetFileName(uploadFile.FileName);
                 string fileExtension = '.' + oldFileName.Split('.').Last();
                 string? extension = Path.GetExtension(uploadFile.FileName);
+                int _coverTypeCreatedCount = 0;
 
                 _logger.LogInformation("Received Document File extension: {0}", fileExtension);
                 bool _IsContainsExtension = FileUploadTool.IsContainsExtension(fileExtension, "import");
@@ -179,6 +180,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     {
                         foreach (var rows in sheet)
                         {
+                            bool _allowCreateCoverType = true;
                             CoverType coverType = new CoverType();
                             coverType.Name = rows["Column0"].ToString() ?? "";
 
@@ -193,22 +195,40 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
                             if (_NameIsExists)
                             {
-                                throw new Exception("Name is exists.");
+                                // throw new Exception("Name is exists.");
+                                _allowCreateCoverType = false;
                             }
 
-                            coverTypeList.Add(coverType);
+                            if (_allowCreateCoverType)
+                            {
+                                coverTypeList.Add(coverType);
+                                _coverTypeCreatedCount++;
+                            }
 
                             _logger.LogInformation("Name: {0}", coverType.Name);
                         }
                     }
-                    //TODO Bulk add categories, it is faster than add one by one. don't need to save after each add.
-                    _unitOfWork.CoverType.BulkAdd(coverTypeList);
+                    if (coverTypeList.Count > 0)
+                    {
+                        //TODO Bulk add categories, it is faster than add one by one. don't need to save after each add.
+                        _unitOfWork.CoverType.BulkAdd(coverTypeList);
+                    }
                 }
 
-                _logger.LogInformation("CoverTypeController.BulkCreate: {0}", "Bulk create successful!");
-                return Json(
-                    new {success = true, message = "Bulk create successful!"}
-                );
+                if (_coverTypeCreatedCount > 0)
+                {
+                    _logger.LogInformation("CoverTypeController.BulkCreate: {0}", "Bulk create successful!");
+                    return Json(
+                        new {success = true, message = "Bulk create successful!"}
+                    );
+                }
+                else
+                {
+                    _logger.LogInformation("CoverTypeController.BulkCreate: {0}", "No cover type created!");
+                    return Json(
+                        new {success = false, message = "No cover type created!"}
+                    );
+                }
             }
             catch (Exception ex)
             {

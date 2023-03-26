@@ -161,6 +161,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 string oldFileName = Path.GetFileName(uploadFile.FileName);
                 string fileExtension = '.' + oldFileName.Split('.').Last();
                 string? extension = Path.GetExtension(uploadFile.FileName);
+                int _categoryCreatedCount = 0;
 
                 _logger.LogInformation("Received Document File extension: {0}", fileExtension);
                 bool _IsContainsExtension = FileUploadTool.IsContainsExtension(fileExtension, "import");
@@ -200,6 +201,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     {
                         foreach (var rows in sheet)
                         {
+                            bool _allowCreateCategory = true;
                             Category category = new Category();
                             category.Name = rows["Column0"].ToString() ?? "";
                             category.DisplayOrder = Convert.ToInt32(rows["Column1"].ToString() ?? "0");
@@ -224,15 +226,21 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
                             if (_NameIsExists)
                             {
-                                throw new Exception("Name is exists.");
+                                // throw new Exception("Name is exists.");
+                                _allowCreateCategory = false;
                             }
 
                             if (_DisplayOrderIsExists)
                             {
-                                throw new Exception("DisplayOrder is exists.");
+                                // throw new Exception("DisplayOrder is exists.");
+                                _allowCreateCategory = false;
                             }
 
-                            categoryList.Add(category);
+                            if (_allowCreateCategory)
+                            {
+                                categoryList.Add(category);
+                                _categoryCreatedCount++;
+                            }
 
                             _logger.LogInformation(
                                 "Name: {0}, DisplayOrder: {1}",
@@ -240,14 +248,27 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                             );
                         }
                     }
-                    //TODO Bulk add categories, it is faster than add one by one. don't need to save after each add.
-                    _unitOfWork.Category.BulkAdd(categoryList);
+                    if (categoryList.Count > 0)
+                    {
+                        //TODO Bulk add categories, it is faster than add one by one. don't need to save after each add.
+                        _unitOfWork.Category.BulkAdd(categoryList);
+                    }
                 }
 
-                _logger.LogInformation("CategoryController.BulkCreate: {0}", "Bulk create successful!");
-                return Json(
-                    new {success = true, message = "Bulk create successful!"}
-                );
+                if (_categoryCreatedCount > 0)
+                {
+                    _logger.LogInformation("CategoryController.BulkCreate: {0}", "Bulk create successful!");
+                    return Json(
+                        new {success = true, message = "Bulk create successful!"}
+                    );
+                }
+                else
+                {
+                    _logger.LogInformation("CategoryController.BulkCreate: {0}", "No category created!");
+                    return Json(
+                        new {success = false, message = "No category created!"}
+                    );
+                }
             }
             catch (Exception ex)
             {
