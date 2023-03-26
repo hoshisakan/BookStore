@@ -246,6 +246,7 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
                 user.Name = Input.Name;
                 user.PhoneNumber = Input.PhoneNumber;
                 user.IsLockedOut = false;
+                user.CreatedAt = DateTime.Now;
 
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
