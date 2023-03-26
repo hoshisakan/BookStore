@@ -28,6 +28,7 @@ namespace HoshiBook.DataAccess.Repository
                 {
                     orderFromDb.PaymentStatus = paymentStatus;
                 }
+                orderFromDb.LastUpdateTime = DateTime.Now;
             }
         }
 
@@ -37,6 +38,7 @@ namespace HoshiBook.DataAccess.Repository
             orderFromDb.PaymentDate = DateTime.Now;
             orderFromDb.SessionId = sessionId;
             orderFromDb.PaymentIntentId = paymentItentId;
+            orderFromDb.LastUpdateTime = DateTime.Now;
         }
     }
 }

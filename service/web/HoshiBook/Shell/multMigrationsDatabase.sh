@@ -23,7 +23,7 @@
 # sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ExtendProductFieldSKUAndTimeRelatedToDb
 # sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ExtendCategoryFieldAndChangeFieldNameToDb
 # sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ChangeCategoryFieldDefaultValueToDb
-# sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ExtendOrderHeaderLastUpdateTimeFieldToDb
+sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ExtendOrderHeaderLastUpdateTimeFieldToDb
 sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ExtendCoverTypeTimeRelatedFieldToDb
 sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ExtendCompanyTimeRelatedFieldToDb
 sh D:\\Files\\Learn\\ASP_Dotnet_Core_Learn\\BookStore\\service\\web\\HoshiBook\\Shell\\migrationsDatabase.sh ExtendIdentityUserTimeRelatedFieldToDb

@@ -26,8 +26,8 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
-            domain = _config.GetValue<string>("DomainList:Kestrel:LocalDebug:Domain:https");
-            // domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:https");
+            // domain = _config.GetValue<string>("DomainList:Kestrel:LocalDebug:Domain:https");
+            domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:https");
             // domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:http");
         }
 
@@ -159,6 +159,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             {
                 orderHeaderFromDb.TrackingNumber = OrderVM.OrderHeader.TrackingNumber;
             }
+            orderHeaderFromDb.LastUpdateTime = DateTime.Now;
             _unitOfWork.OrderHeader.Update(orderHeaderFromDb);
             _unitOfWork.Save();
             TempData["Success"] = "Order Details Updated Successfully.";
@@ -205,6 +206,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             {
                 orderHeader.PaymentDueDate = DateTime.Now.AddDays(30);
             }
+            orderHeader.LastUpdateTime = DateTime.Now;
             _unitOfWork.OrderHeader.Update(orderHeader);
             _unitOfWork.Save();
             TempData["Success"] = "Order Shipped Successfully.";
