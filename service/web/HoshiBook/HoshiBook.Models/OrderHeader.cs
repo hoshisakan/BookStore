@@ -43,5 +43,6 @@ namespace HoshiBook.Models
         public string PostalCode { get; set; } = default!;
         [Required]
         public string Name { get; set; } = default!;
+        public DateTime LastUpdateTime { get; set; } = DateTime.Now;
     }
 }

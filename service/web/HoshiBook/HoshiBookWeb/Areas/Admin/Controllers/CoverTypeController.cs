@@ -49,6 +49,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         public IActionResult Create(CoverType obj)
         {
             if (ModelState.IsValid) {
+                obj.CreatedAt = DateTime.Now;
                 _unitOfWork.CoverType.Add(obj);
                 _unitOfWork.Save();
                 TempData["success"] = "CoverType created successfully";
@@ -79,7 +80,10 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         public IActionResult Edit(CoverType obj)
         {
             if (ModelState.IsValid) {
-                _unitOfWork.CoverType.Update(obj);
+                CoverType coverTypeFromDbFirst = _unitOfWork.CoverType.GetFirstOrDefault(u => u.Id == obj.Id);
+                coverTypeFromDbFirst.Name = obj.Name;
+                coverTypeFromDbFirst.ModifiedAt = DateTime.Now;
+                _unitOfWork.CoverType.Update(coverTypeFromDbFirst);
                 _unitOfWork.Save();
                 TempData["success"] = "CoverType updated successfully";
                 return RedirectToAction("Index");
@@ -183,6 +187,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                             bool _allowCreateCoverType = true;
                             CoverType coverType = new CoverType();
                             coverType.Name = rows["Column0"].ToString() ?? "";
+                            coverType.CreatedAt = DateTime.Now;
 
                             if (coverType.Name == "")
                             {

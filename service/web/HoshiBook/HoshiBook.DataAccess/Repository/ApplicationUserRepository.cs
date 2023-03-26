@@ -65,7 +65,8 @@ namespace HoshiBook.DataAccess.Repository
             List<string> columnNames = new List<string>()
             {
                 "Id", "Name", "Email", "PhoneNumber", "StreetAddress",
-                "City", "State", "PostalCode", "CompanyName", "IsLockedOut"
+                "City", "State", "PostalCode", "CompanyName", "IsLockedOut",
+                "CreatedAt", "ModifiedAt", "LastLoginTime", "LoginIPv4Address"
             };
             dt.TableName = "Users";
 
@@ -87,6 +88,10 @@ namespace HoshiBook.DataAccess.Repository
                 dr["PostalCode"] = item.PostalCode;
                 dr["CompanyName"] = item.CompanyName;
                 dr["IsLockedOut"] = item.IsLockedOut;
+                dr["CreatedAt"] = item.CreatedAt;
+                dr["ModifiedAt"] = item.ModifiedAt;
+                dr["LastLoginTime"] = item.LastLoginTime;
+                dr["LoginIPv4Address"] = item.LoginIPv4Address;
                 dt.Rows.Add(dr);
             }
             ds.Tables.Add(dt);
@@ -150,7 +155,10 @@ namespace HoshiBook.DataAccess.Repository
                         State = user.State ?? "",
                         PostalCode = user.PostalCode ?? "",
                         CompanyName = b == null ? "" : b.Name,
-                        IsLockedOut = user.IsLockedOut
+                        IsLockedOut = user.IsLockedOut,
+                        CreatedAt = user.CreatedAt.ToString() ?? "",
+                        ModifiedAt = user.ModifiedAt.ToString() ?? "",
+                        LastLoginTime = user.LastLoginTime.ToString() ?? ""
                     }
                 ).ToList();
             }
@@ -173,7 +181,10 @@ namespace HoshiBook.DataAccess.Repository
                         State = user.State ?? "",
                         PostalCode = user.PostalCode ?? "",
                         CompanyName = b == null ? "" : b.Name,
-                        IsLockedOut = user.IsLockedOut
+                        IsLockedOut = user.IsLockedOut,
+                        CreatedAt = user.CreatedAt.ToString() ?? "",
+                        ModifiedAt = user.ModifiedAt.ToString() ?? "",
+                        LastLoginTime = user.LastLoginTime.ToString() ?? ""
                     }
                 ).ToList();
             }
@@ -200,7 +211,11 @@ namespace HoshiBook.DataAccess.Repository
                         State = user.State ?? "",
                         PostalCode = user.PostalCode ?? "",
                         CompanyName = b == null ? "" : b.Name,
-                        IsLockedOut = user.IsLockedOut
+                        IsLockedOut = user.IsLockedOut,
+                        CreatedAt = user.CreatedAt.ToString() ?? "",
+                        ModifiedAt = user.ModifiedAt.ToString() ?? "",
+                        LastLoginTime = user.LastLoginTime.ToString() ?? "",
+                        LoginIPv4Address = user.LoginIPv4Address ?? ""
                     }
                 ).ToList();
             }
@@ -223,7 +238,11 @@ namespace HoshiBook.DataAccess.Repository
                         State = user.State ?? "",
                         PostalCode = user.PostalCode ?? "",
                         CompanyName = b == null ? "" : b.Name,
-                        IsLockedOut = user.IsLockedOut
+                        IsLockedOut = user.IsLockedOut,
+                        CreatedAt = user.CreatedAt.ToString() ?? "",
+                        ModifiedAt = user.ModifiedAt.ToString() ?? "",
+                        LastLoginTime = user.LastLoginTime.ToString() ?? "",
+                        LoginIPv4Address = user.LoginIPv4Address ?? ""
                     }
                 ).ToList();
             }
@@ -245,7 +264,11 @@ namespace HoshiBook.DataAccess.Repository
                         State = user.State ?? "",
                         PostalCode = user.PostalCode ?? "",
                         CompanyName = b == null ? "" : b.Name,
-                        IsLockedOut = user.IsLockedOut
+                        IsLockedOut = user.IsLockedOut,
+                        CreatedAt = user.CreatedAt.ToString() ?? "",
+                        ModifiedAt = user.ModifiedAt.ToString() ?? "",
+                        LastLoginTime = user.LastLoginTime.ToString() ?? "",
+                        LoginIPv4Address = user.LoginIPv4Address ?? ""
                     }
                 ).ToList();
             }

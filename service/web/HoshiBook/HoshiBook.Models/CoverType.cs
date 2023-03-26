@@ -17,5 +17,7 @@ namespace HoshiBook.Models
         [Required]
         [MaxLength(50)]
         public string Name { get; set; } = null!;
+        public DateTime? CreatedAt { get; set; }
+        public DateTime ModifiedAt { get; set; } = DateTime.Now;
     }
 }

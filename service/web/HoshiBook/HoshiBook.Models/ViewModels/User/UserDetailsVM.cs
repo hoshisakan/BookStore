@@ -22,5 +22,9 @@ namespace HoshiBook.Models.ViewModels.User
         public string RoleName { get; set; } = default!;
         public string CompanyName { get; set; } = default!;
         public string IsLockedOut { get; set; } = default!;
+        public string CreatedAt { get; set; } = default!;
+        public string ModifiedAt { get; set; } = default!;
+        public string LastLoginTime { get; set; } = default!;
+        public string LoginIPv4Address { get; set; } = default!;
     }
 }

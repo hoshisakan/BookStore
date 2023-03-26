@@ -63,6 +63,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     if (obj.Id == 0)
                     {
                         _logger.LogInformation("CompanyController.Upsert: Create company {0}", obj.Id);
+                        obj.CreatedAt = DateTime.Now;
                         _unitOfWork.Company.Add(obj);
                         _unitOfWork.Save();
                         TempData["success"] = "Company created successfully";
@@ -70,7 +71,15 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     else
                     {
                         _logger.LogInformation("CompanyController.Upsert: Update company {0}", obj.Id);
-                        _unitOfWork.Company.Update(obj);
+                        Company companyFromDb = _unitOfWork.Company.GetFirstOrDefault(u => u.Id == obj.Id);
+                        companyFromDb.Name = obj.Name;
+                        companyFromDb.StreetAddress = obj.StreetAddress;
+                        companyFromDb.City = obj.City;
+                        companyFromDb.State = obj.State;
+                        companyFromDb.PostalCode = obj.PostalCode;
+                        companyFromDb.PhoneNumber = obj.PhoneNumber;
+                        companyFromDb.ModifiedAt = DateTime.Now;
+                        _unitOfWork.Company.Update(companyFromDb);
                         _unitOfWork.Save();
                         TempData["success"] = "Company updated successfully";
                     }
@@ -191,12 +200,14 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                         {
                             bool _allowCreateCompany = true;
                             Company company = new Company();
+
                             company.Name = rows["Column0"].ToString() ?? "";
                             company.StreetAddress = rows["Column1"].ToString() ?? "";
                             company.City = rows["Column2"].ToString() ?? "";
                             company.State = rows["Column3"].ToString() ?? "";
                             company.PostalCode = rows["Column4"].ToString() ?? "";
                             company.PhoneNumber = rows["Column5"].ToString() ?? "";
+                            company.CreatedAt = DateTime.Now;
 
                             if (String.IsNullOrEmpty(company.Name))
                             {

@@ -22,5 +22,7 @@ namespace HoshiBook.Models
         public string? LoginIPv6Address { get; set; }
         public DateTime? LastLoginTime { get; set; }
         public DateTime? LastTryLoginTime { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public DateTime ModifiedAt { get; set; } = DateTime.Now;
     }
 }

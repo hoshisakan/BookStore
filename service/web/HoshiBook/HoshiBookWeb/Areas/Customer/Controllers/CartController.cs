@@ -38,8 +38,8 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             _unitOfWork = unitOfWork;
             _emailSender = email;
             _cache = cache;
-            // domain = _config.GetValue<string>("DomainList:Kestrel:LocalDebug:Domain:https");
-            domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:https");
+            domain = _config.GetValue<string>("DomainList:Kestrel:LocalDebug:Domain:https");
+            // domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:https");
             // domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:http");
         }
 
@@ -161,6 +161,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     _unitOfWork.Save();
                 }
 
+                //TODO If current user is not company user, then create a stripe session.
                 if (applicationUser.CompanyId.GetValueOrDefault() == 0)
                 {
                     var options = new SessionCreateOptions
@@ -209,6 +210,8 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     );
                     _unitOfWork.Save();
 
+                    _logger.LogInformation($"session url: {session.Url}");
+
                     Response.Headers.Add("Location", session.Url);
                     return new StatusCodeResult(303);
                 }
@@ -219,7 +222,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             }
             catch (Exception ex)
             {
-                ExceptionTool.CollectDetailMessage(ex);
+                _logger.LogError($"SummaryPOST: {ExceptionTool.CollectDetailMessage(ex)}");
             }
             return View();
         }

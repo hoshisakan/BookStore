@@ -184,7 +184,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                         productVM.Product.CategoryId = obj.Product.CategoryId;
                         productVM.Product.CoverTypeId = obj.Product.CoverTypeId;
                         productVM.Product.ModifiedAt = DateTime.Now;
-                        _unitOfWork.Product.Update(obj.Product);
+                        _unitOfWork.Product.Update(productVM.Product);
                         _unitOfWork.Save();
                     }
                     TempData["success"] = "Product created successfully";

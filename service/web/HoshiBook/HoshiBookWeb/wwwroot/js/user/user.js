@@ -156,15 +156,18 @@ function loadDatatable(status) {
             },
             columns: [
                 { data: 'name', width: '15%' },
-                { data: 'email', width: '15%' },
-                { data: 'phoneNumber', width: '15%' },
+                // { data: 'email', width: '15%' },
+                // { data: 'phoneNumber', width: '15%' },
                 // { data: 'streetAddress', width: '15%' },
                 // { data: 'city', width: '15%' },
                 // { data: 'state', width: '15%' },
                 // { data: 'postalCode', width: '15%' },
                 { data: 'roleName', width: '15%' },
                 { data: 'companyName', width: '15%' },
-                { data: 'isLockedOut', width: '15%' }
+                { data: 'isLockedOut', width: '15%' },
+                // { data: 'createdAt', width: '15%' },
+                { data: 'lastLoginTime', width: '15%' },
+                { data: 'loginIPv4Address', width: '15%'}
             ],
         })
     }

@@ -174,6 +174,7 @@ namespace HoshiBookWeb.Areas.Identity.Pages.Account
                     user.Name = Input.Name;
                     user.PhoneNumber = Input.PhoneNumber;
                     user.IsLockedOut = false;
+                    user.CreatedAt = DateTime.Now;
 
                     int? selectRoleId = Input.Role == null ? -1 : Convert.ToInt32(Input.Role);
 

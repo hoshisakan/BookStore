@@ -108,7 +108,8 @@ namespace HoshiBook.DataAccess.DbInitializer
                         State = _adminRoleConfig["State"],
                         PostalCode = _adminRoleConfig["PostalCode"],
                         City = _adminRoleConfig["City"],
-                        IsLockedOut = false
+                        IsLockedOut = false,
+                        CreatedAt = DateTime.Now
                     }, _adminRoleConfig["Password"]);
 
                     if (result.Result.Succeeded)

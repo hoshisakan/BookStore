@@ -15,5 +15,9 @@ namespace HoshiBook.Models.ViewModels.User
         public string PostalCode { get; set; } = default!;
         public string CompanyName { get; set; } = default!;
         public bool IsLockedOut { get; set; }
+        public string CreatedAt { get; set; } = default!;
+        public string ModifiedAt { get; set; } = default!;
+        public string LastLoginTime { get; set; } = default!;
+        public string LoginIPv4Address { get; set; } = default!;
     }
 }

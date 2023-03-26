@@ -28,7 +28,7 @@
             </form>
         </div>
         <div>
-            <a asp-controller="Category" asp-action="Create" class="btn btn-primary" style="display: none">
+            <a id="singleCreateBtn" asp-controller="Category" asp-action="Create" class="btn btn-primary" style="display: none">
                 <i class="bi bi-plus-circle"></i> &nbsp; Create New Category
             </a>
             <button id="bulkCreateBtn" class="btn btn-success" style="display: none" onclick="handleBulkCreateClick()">

@@ -218,6 +218,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     oldUser.City = City;
                     oldUser.State = State;
                     oldUser.PostalCode = PostalCode;
+                    oldUser.ModifiedAt = DateTime.Now;
 
                     if (RoleNumber == 4 && CompanyId != 0)
                     {
@@ -316,6 +317,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     }
                     else
                     {
+                        user.ModifiedAt = DateTime.Now;
                         var result = await _userManager.ResetPasswordAsync(user, Code, Password);
                         if (result.Succeeded)
                         {
@@ -359,7 +361,11 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     PostalCode = user.PostalCode,
                     RoleName = currentUserRole.FirstOrDefault() ?? "",
                     CompanyName = user.CompanyName,
-                    IsLockedOut = user.IsLockedOut ? "Locked" : "Unlocked"
+                    IsLockedOut = user.IsLockedOut ? "Locked" : "Unlocked",
+                    CreatedAt = user.CreatedAt,
+                    ModifiedAt = user.ModifiedAt,
+                    LastLoginTime = user.LastLoginTime,
+                    LoginIPv4Address = user.LoginIPv4Address
                 });
             }
             return userDetails;
@@ -486,6 +492,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 return Json(new { success = false, message = $"Error while locking, unknown uid {id}." });
             }
 
+            oldUser.ModifiedAt = DateTime.Now;
             oldUser.IsLockedOut = true;
 
             var userInfoUpdateResult = await _userManager.UpdateAsync(oldUser);
@@ -514,6 +521,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 return Json(new { success = false, message = $"Error while unlocking, unknown uid {id}." });
             }
 
+            oldUser.ModifiedAt = DateTime.Now;
             oldUser.IsLockedOut = false;
 
             var userInfoUpdateResult = await _userManager.UpdateAsync(oldUser);
@@ -735,6 +743,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
                             if (_allowCreateUser)
                             {
+                                user.CreatedAt = DateTime.Now;
                                 await _userStore.SetUserNameAsync(user, user.Email, CancellationToken.None);
                                 await _emailStore.SetEmailAsync(user, user.Email, CancellationToken.None);
 
