@@ -58,7 +58,7 @@ namespace HoshiBook.DataAccess.Repository
             ).Count();
         }
 
-        public DataSet ConvertToDataSet(List<UserDetailsVM> data)
+        public DataSet ConvertToDataSet(List<UserDetailsVM> data, string? includeProperty = null, bool isDescendingOrder = false)
         {
             DataSet ds = new DataSet();
             DataTable dt = new DataTable();
@@ -69,6 +69,91 @@ namespace HoshiBook.DataAccess.Repository
                 "CreatedAt", "ModifiedAt", "LastLoginTime", "LoginIPv4Address"
             };
             dt.TableName = "Users";
+
+            if (includeProperty != null && isDescendingOrder == true)
+            {
+                switch (includeProperty)
+                {
+                    case "Name":
+                        data = data.OrderByDescending(u => u.Name).ToList();
+                        break;
+                    case "Email":
+                        data = data.OrderByDescending(u => u.Email).ToList();
+                        break;
+                    case "PhoneNumber":
+                        data = data.OrderByDescending(u => u.PhoneNumber).ToList();
+                        break;
+                    case "StreetAddress":
+                        data = data.OrderByDescending(u => u.StreetAddress).ToList();
+                        break;
+                    case "City":
+                        data = data.OrderByDescending(u => u.City).ToList();
+                        break;
+                    case "State":
+                        data = data.OrderByDescending(u => u.State).ToList();
+                        break;
+                    case "PostalCode":
+                        data = data.OrderByDescending(u => u.PostalCode).ToList();
+                        break;
+                    case "RoleNumber":
+                        data = data.OrderByDescending(u => u.RoleNumber).ToList();
+                        break;
+                    case "CreatedAt":
+                        data = data.OrderByDescending(u => u.CreatedAt).ToList();
+                        break;
+                    case "ModifiedAt":
+                        data = data.OrderByDescending(u => u.ModifiedAt).ToList();
+                        break;
+                    case "LastLoginTime":
+                        data = data.OrderByDescending(u => u.LastLoginTime).ToList();
+                        break;
+                    case "LoginIPv4Address":
+                        data = data.OrderByDescending(u => u.LoginIPv4Address).ToList();
+                        break;
+                }
+            }
+            else if (includeProperty != null && isDescendingOrder == false)
+            {
+                switch (includeProperty)
+                {
+                    case "Name":
+                        data = data.OrderBy(u => u.Name).ToList();
+                        break;
+                    case "Email":
+                        data = data.OrderBy(u => u.Email).ToList();
+                        break;
+                    case "PhoneNumber":
+                        data = data.OrderBy(u => u.PhoneNumber).ToList();
+                        break;
+                    case "StreetAddress":
+                        data = data.OrderBy(u => u.StreetAddress).ToList();
+                        break;
+                    case "City":
+                        data = data.OrderBy(u => u.City).ToList();
+                        break;
+                    case "State":
+                        data = data.OrderBy(u => u.State).ToList();
+                        break;
+                    case "PostalCode":
+                        data = data.OrderBy(u => u.PostalCode).ToList();
+                        break;
+                    case "RoleNumber":
+                        data = data.OrderBy(u => u.RoleNumber).ToList();
+                        break;
+                    case "CreatedAt":
+                        data = data.OrderBy(u => u.CreatedAt).ToList();
+                        break;
+                    case "ModifiedAt":
+                        data = data.OrderBy(u => u.ModifiedAt).ToList();
+                        break;
+                    case "LastLoginTime":
+                        data = data.OrderBy(u => u.LastLoginTime).ToList();
+                        break;
+                    case "LoginIPv4Address":
+                        data = data.OrderBy(u => u.LoginIPv4Address).ToList();
+                        break;
+                }
+            }
 
             foreach (string columnName in columnNames)
             {
@@ -98,7 +183,7 @@ namespace HoshiBook.DataAccess.Repository
             return ds;
         }
 
-        public DataSet ConvertToDataSet(List<UserImortFormatVM> data)
+        public DataSet ConvertToDataSet(List<UserImortFormatVM> data, string? includeProperty = null, bool isDescendingOrder = false)
         {
             DataSet ds = new DataSet();
             DataTable dt = new DataTable();
@@ -113,6 +198,73 @@ namespace HoshiBook.DataAccess.Repository
             foreach (string columnName in columnNames)
             {
                 dt.Columns.Add(columnName);
+            }
+
+            if (includeProperty != null && isDescendingOrder == true)
+            {
+                switch (includeProperty)
+                {
+                    case "Name":
+                        data = data.OrderByDescending(u => u.Name).ToList();
+                        break;
+                    case "Email":
+                        data = data.OrderByDescending(u => u.Email).ToList();
+                        break;
+                    case "PhoneNumber":
+                        data = data.OrderByDescending(u => u.PhoneNumber).ToList();
+                        break;
+                    case "StreetAddress":
+                        data = data.OrderByDescending(u => u.StreetAddress).ToList();
+                        break;
+                    case "City":
+                        data = data.OrderByDescending(u => u.City).ToList();
+                        break;
+                    case "State":
+                        data = data.OrderByDescending(u => u.State).ToList();
+                        break;
+                    case "PostalCode":
+                        data = data.OrderByDescending(u => u.PostalCode).ToList();
+                        break;
+                    case "RoleName":
+                        data = data.OrderByDescending(u => u.RoleName).ToList();
+                        break;
+                    case "CompanyName":
+                        data = data.OrderByDescending(u => u.CompanyName).ToList();
+                        break;
+                }
+            }
+            else if (includeProperty != null && isDescendingOrder == false)
+            {
+                switch (includeProperty)
+                {
+                    case "Name":
+                        data = data.OrderBy(u => u.Name).ToList();
+                        break;
+                    case "Email":
+                        data = data.OrderBy(u => u.Email).ToList();
+                        break;
+                    case "PhoneNumber":
+                        data = data.OrderBy(u => u.PhoneNumber).ToList();
+                        break;
+                    case "StreetAddress":
+                        data = data.OrderBy(u => u.StreetAddress).ToList();
+                        break;
+                    case "City":
+                        data = data.OrderBy(u => u.City).ToList();
+                        break;
+                    case "State":
+                        data = data.OrderBy(u => u.State).ToList();
+                        break;
+                    case "PostalCode":
+                        data = data.OrderBy(u => u.PostalCode).ToList();
+                        break;
+                    case "RoleName":
+                        data = data.OrderBy(u => u.RoleName).ToList();
+                        break;
+                    case "CompanyName":
+                        data = data.OrderBy(u => u.CompanyName).ToList();
+                        break;
+                }
             }
 
             foreach (var item in data)

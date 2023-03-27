@@ -17,8 +17,8 @@ namespace HoshiBook.DataAccess.Repository.IRepository
         bool IsExists(string includeProperties, string value);
         List<ApplicationUser> GetExistsOrderHeadersUsers(string userId);
         int GetExistsOrderHeadersUsersCount(string userId);
-        DataSet ConvertToDataSet(List<UserDetailsVM> data);
-        DataSet ConvertToDataSet(List<UserImortFormatVM> data);
+        DataSet ConvertToDataSet(List<UserDetailsVM> data, string? includeProperty = null, bool isDescendingOrder = false);
+        DataSet ConvertToDataSet(List<UserImortFormatVM> data, string? includeProperty = null, bool isDescendingOrder = false);
         List<UserLockStatusVM> GetUsersLockStatus(bool isLockedOut);
         List<UserLockStatusVM> GetUsersLockStatus(string status);
     }

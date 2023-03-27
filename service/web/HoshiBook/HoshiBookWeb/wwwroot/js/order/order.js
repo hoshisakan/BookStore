@@ -46,6 +46,7 @@ function loadDatatable(status) {
                 width: '5%',
             },
         ],
+        order: [[0, 'asc']]
     })
 }
 

@@ -52,6 +52,7 @@ function loadDatatable() {
             url: '/Admin/Company/GetAll',
         },
         columns: [
+            { data: 'id', width: '10%' },
             { data: 'name', width: '15%' },
             { data: 'streetAddress', width: '15%' },
             { data: 'city', width: '15%' },
@@ -76,6 +77,7 @@ function loadDatatable() {
                 width: '15%',
             },
         ],
+        order: [[0, 'asc']]
     })
 }
 

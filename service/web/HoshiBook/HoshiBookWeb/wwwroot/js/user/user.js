@@ -108,6 +108,7 @@ function loadDatatable(status) {
                     width: '15%',
                 },
             ],
+            order: [[2, "asc"]]
         })
     }
     else if (status == "locked")
@@ -144,7 +145,8 @@ function loadDatatable(status) {
                     width: '15%',
                 },
             ],
-        })
+            order: [[2, "asc"]]
+        }) 
     }
     else
     {
@@ -162,6 +164,7 @@ function loadDatatable(status) {
                 // { data: 'city', width: '15%' },
                 // { data: 'state', width: '15%' },
                 // { data: 'postalCode', width: '15%' },
+                // { data: 'roleNumber', width: '15%' },
                 { data: 'roleName', width: '15%' },
                 { data: 'companyName', width: '15%' },
                 { data: 'isLockedOut', width: '15%' },
@@ -169,6 +172,7 @@ function loadDatatable(status) {
                 { data: 'lastLoginTime', width: '15%' },
                 { data: 'loginIPv4Address', width: '15%'}
             ],
+            order: [[4, "desc"]]
         })
     }
 }

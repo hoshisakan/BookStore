@@ -26,5 +26,6 @@ namespace HoshiBook.Models.ViewModels.User
         public string ModifiedAt { get; set; } = default!;
         public string LastLoginTime { get; set; } = default!;
         public string LoginIPv4Address { get; set; } = default!;
+        public int RoleNumber { get; set; } = default!;
     }
 }

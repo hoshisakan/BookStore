@@ -348,7 +348,15 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             {
                 var currentUser = await _userManager.FindByIdAsync(user.Id);
                 var currentUserRole = await _userManager.GetRolesAsync(currentUser);
-                
+                string _currentUserRoleName = currentUserRole.FirstOrDefault() ?? "";
+                int _currentUserRoleNumber = string.IsNullOrEmpty(_currentUserRoleName) ? -1 : (
+                    from role in _roleManager.Roles
+                    where role.Name == _currentUserRoleName
+                    select role.RoleNumber
+                ).SingleOrDefault();
+
+                _logger.LogInformation("_currentUserRoleNumber: {0}", _currentUserRoleNumber);
+
                 userDetails.Add(new UserDetailsVM
                 {
                     Id = user.Id,
@@ -359,13 +367,14 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     City = user.City,
                     State = user.State,
                     PostalCode = user.PostalCode,
-                    RoleName = currentUserRole.FirstOrDefault() ?? "",
+                    RoleName = _currentUserRoleName,
                     CompanyName = user.CompanyName,
                     IsLockedOut = user.IsLockedOut ? "Locked" : "Unlocked",
                     CreatedAt = user.CreatedAt,
                     ModifiedAt = user.ModifiedAt,
                     LastLoginTime = user.LastLoginTime,
-                    LoginIPv4Address = user.LoginIPv4Address
+                    LoginIPv4Address = user.LoginIPv4Address,
+                    RoleNumber = _currentUserRoleNumber
                 });
             }
             return userDetails;
@@ -432,7 +441,6 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
 
             _logger.LogInformation("status: {0}", status);
             userDetails = await GetAllUsersDetails(status);
-            
             return Json(new { data = userDetails });
         }
 
@@ -818,7 +826,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 }
 
                 DataSet ds = new DataSet();
-                ds = _unitOfWork.ApplicationUser.ConvertToDataSet(userImportFormat);
+                ds = _unitOfWork.ApplicationUser.ConvertToDataSet(userImportFormat, includeProperty: "RoleName");
 
                 string fileName = DateTime.Now.ToString("yyyy_MM_dd_hh_mm_ss") + "_UsersImportFormat.xlsx";
 
@@ -850,7 +858,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 }
 
                 DataSet ds = new DataSet();
-                ds = _unitOfWork.ApplicationUser.ConvertToDataSet(userDetails);
+                ds = _unitOfWork.ApplicationUser.ConvertToDataSet(userDetails, includeProperty: "RoleNumber");
 
                 string fileName = DateTime.Now.ToString("yyyy_MM_dd_hh_mm_ss") + "_UsersDetails.xlsx";
 
