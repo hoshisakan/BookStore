@@ -26,8 +26,8 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
-            // domain = _config.GetValue<string>("DomainList:Kestrel:LocalDebug:Domain:https");
-            domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:https");
+            domain = _config.GetValue<string>("DomainList:Kestrel:LocalDebug:Domain:https");
+            // domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:https");
             // domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:http");
         }
 
@@ -105,7 +105,6 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             return new StatusCodeResult(303);
         }
 
-        //TODO Maybe can be added 'lastUpdateTime' to OrderHeader table for record the payment data last update time
         public IActionResult PaymentConfirmation(int orderHeaderid)
         {
             OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(u => u.Id == orderHeaderid);
