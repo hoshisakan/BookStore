@@ -12,61 +12,72 @@
 ※ Product list aren't for sale and commercial, just for demo
 * Open the browser and enter the URL: https://localhost
 * You will see the following user login page
-![alt text](https://imgur.com/sze7POz.png)
+![alt text](https://imgur.com/5VZ3vjG.png)
 
 * Click the "Register" button to register a new user
-![alt text](https://imgur.com/jqoVLUS.png)
+![alt text](https://imgur.com/TQVEsuP.png)
 
 * Enter the user name and password to login
 ![alt text](https://imgur.com/ssq6YUm.png)
 
 * You will see the following page (Product list aren't for sale and commercial, just for demo)
-![alt text](https://imgur.com/6Vp5o2g.png)
+![alt text](https://imgur.com/Ie552i8.png)
 
 * Click details to view the product details
-![alt text](https://imgur.com/lvasLwg.png)
+![alt text](https://imgur.com/MKrl42p.png)
 
 * You will see the cart quantity on the top left corner of the page after add the product to the shopping cart
-![alt text](https://imgur.com/IGd81vi.png)
+![alt text](https://imgur.com/UbMT8U8.png)
 
 * Click the shopping cart icon to view the shopping cart
-![alt text](https://imgur.com/ImbxDun.png)
+![alt text](https://imgur.com/KNBwPWZ.png)
+![alt text](https://imgur.com/bkW4xpm.png)
 
 * Place an order by clicking the "Place Order" button
-![alt text](https://imgur.com/nk8wyci.png)
-
-* Pay the order by clicking the "Pay" button
-![alt text](https://imgur.com/dd3lMQ6.png)
-
-* You will see the blue pay button becomes green button after the payment is successful
-![alt text](https://imgur.com/wQMHpvT.png)
+![alt text](https://imgur.com/i47ShSD.png)
 
 * You will see the order status is "Approved" after the payment is successful
-![alt text](https://imgur.com/VrzoiTH.png)
+![alt text](https://imgur.com/nQPkSnf.png)
 
-* Click the "Order History" button to view the order history
-![alt text](https://imgur.com/HF9UGCy.png)
+* Click the Edit icon button right side of the page to view the order details
+![alt text](https://imgur.com/yYG7ekC.png)
 
 ### Admin
 * Enter the user name and password to login
-![alt text](https://imgur.com/J6XK0aM.png)
+![alt text](https://imgur.com/Al263Ow.png)
 
 * You will see the following page
-![alt text](https://imgur.com/sHQw0bi.png)
+![alt text](https://imgur.com/NHfNkKC.png)
 
 * Click the "Content Management" -> "Category" button to view the dashboard
-![alt text](https://imgur.com/i4aCJ8Z.png)
+![alt text](https://imgur.com/2f8ln30.png)
 
 * Click the "Cover Type Management" -> "Category" button to view the dashboard
-![alt text](https://imgur.com/waojUx7.png)
+![alt text](https://imgur.com/9CxjC9o.png)
 
 * Click the "Product Management" -> "Category" button to view the dashboard
-![alt text](https://imgur.com/5zevr3m.png)
+![alt text](https://imgur.com/dgYU2my.png)
 
-* Click the "User Management" button to view the user management page
-![alt text](.png)
+* Click the "Company Management" -> "Category" button to view the dashboard
+![alt text](https://imgur.com/RwYKrZ0.png)
 
+* Click the "Manage User" button to view the user management page
+![alt text](https://imgur.com/Ik8rTM1.png)
 
+* Click "Locked" link display the locked user list
+![alt text](https://imgur.com/4Yw9lbi.png)
+
+* Click "Unlocked" link display the unlocked user list
+![alt text](https://imgur.com/JtkZ6ZK.png)
+
+* Click the "Manage Order" button to view the order management page
+![alt text](https://imgur.com/GbGEDr2.png)
+
+* Click the "SHIP ORDER" button to ship the order
+![alt text](https://imgur.com/psNRt3M.png)
+
+* Go back to the order management page, you will see the order status is "Shipped"
+![alt text](https://imgur.com/lswwUhk.png)
 
 ## Build the Docker services
 ### Reverse Proxy Server
@@ -156,14 +167,18 @@ services:
         container_name: redis-dev
         env_file:
           - ./.env
+        environment:
+            - REDIS_AOF_ENABLED=${REDIS_AOF_ENABLED}
+            - REDIS_PWD=${REDIS_PWD}
         volumes:
             - ./data/redis:/data
+            - ./conf/redis/setting/redis.conf:/usr/local/etc/redis/redis.conf
         ports:
             - 6379:6379
         networks:
             bookstore_common_net:
               ipv4_address: ${REDIS_HOST_IP}
-        command: redis-server --appendonly yes
+        command: redis-server --appendonly yes --requirepass ${REDIS_PWD}
         restart: on-failure:3
 
     reverse_proxy:
