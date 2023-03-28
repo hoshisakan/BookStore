@@ -361,6 +361,7 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                 {
                     Id = user.Id,
                     Name = user.Name,
+                    UserName = user.UserName,
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber,
                     StreetAddress = user.StreetAddress,
@@ -374,6 +375,8 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
                     ModifiedAt = user.ModifiedAt,
                     LastLoginTime = user.LastLoginTime,
                     LoginIPv4Address = user.LoginIPv4Address,
+                    LastTryLoginTime = user.LastTryLoginTime,
+                    AccessFailedCount = user.AccessFailedCount,
                     RoleNumber = _currentUserRoleNumber
                 });
             }

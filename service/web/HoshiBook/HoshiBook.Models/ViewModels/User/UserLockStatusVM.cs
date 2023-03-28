@@ -7,6 +7,7 @@ namespace HoshiBook.Models.ViewModels.User
     {
         public string Id { get; set; } = default!;
         public string Name { get; set; } = default!;
+        public string UserName { get; set; } = default!;
         public string Email { get; set; } = default!;
         public string PhoneNumber { get; set; } = default!;
         public string StreetAddress { get; set; } = default!;
@@ -19,5 +20,7 @@ namespace HoshiBook.Models.ViewModels.User
         public string ModifiedAt { get; set; } = default!;
         public string LastLoginTime { get; set; } = default!;
         public string LoginIPv4Address { get; set; } = default!;
+        public string LastTryLoginTime { get; set; } = default!;
+        public int AccessFailedCount { get; set; } = default!;
     }
 }

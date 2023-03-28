@@ -66,7 +66,8 @@ namespace HoshiBook.DataAccess.Repository
             {
                 "Id", "Name", "Email", "PhoneNumber", "StreetAddress",
                 "City", "State", "PostalCode", "CompanyName", "IsLockedOut",
-                "CreatedAt", "ModifiedAt", "LastLoginTime", "LoginIPv4Address"
+                "CreatedAt", "ModifiedAt", "LastLoginTime", "LoginIPv4Address",
+                "LastTryLoginTime", "AccessFailedCount"
             };
             dt.TableName = "Users";
 
@@ -177,6 +178,8 @@ namespace HoshiBook.DataAccess.Repository
                 dr["ModifiedAt"] = item.ModifiedAt;
                 dr["LastLoginTime"] = item.LastLoginTime;
                 dr["LoginIPv4Address"] = item.LoginIPv4Address;
+                dr["LastTryLoginTime"] = item.LastTryLoginTime;
+                dr["AccessFailedCount"] = item.AccessFailedCount;
                 dt.Rows.Add(dr);
             }
             ds.Tables.Add(dt);
@@ -300,6 +303,7 @@ namespace HoshiBook.DataAccess.Repository
                     {
                         Id = user.Id,
                         Name = user.Name,
+                        UserName = user.UserName,
                         Email = user.Email,
                         PhoneNumber = user.PhoneNumber,
                         StreetAddress = user.StreetAddress ?? "",
@@ -310,7 +314,10 @@ namespace HoshiBook.DataAccess.Repository
                         IsLockedOut = user.IsLockedOut,
                         CreatedAt = user.CreatedAt.ToString() ?? "",
                         ModifiedAt = user.ModifiedAt.ToString() ?? "",
-                        LastLoginTime = user.LastLoginTime.ToString() ?? ""
+                        LastLoginTime = user.LastLoginTime.ToString() ?? "",
+                        LoginIPv4Address = user.LoginIPv4Address ?? "",
+                        LastTryLoginTime = user.LastTryLoginTime.ToString() ?? "",
+                        AccessFailedCount = user.AccessFailedCount
                     }
                 ).ToList();
             }
@@ -326,6 +333,7 @@ namespace HoshiBook.DataAccess.Repository
                     {
                         Id = user.Id,
                         Name = user.Name,
+                        UserName = user.UserName,
                         Email = user.Email,
                         PhoneNumber = user.PhoneNumber,
                         StreetAddress = user.StreetAddress ?? "",
@@ -336,7 +344,10 @@ namespace HoshiBook.DataAccess.Repository
                         IsLockedOut = user.IsLockedOut,
                         CreatedAt = user.CreatedAt.ToString() ?? "",
                         ModifiedAt = user.ModifiedAt.ToString() ?? "",
-                        LastLoginTime = user.LastLoginTime.ToString() ?? ""
+                        LastLoginTime = user.LastLoginTime.ToString() ?? "",
+                        LoginIPv4Address = user.LoginIPv4Address ?? "",
+                        LastTryLoginTime = user.LastTryLoginTime.ToString() ?? "",
+                        AccessFailedCount = user.AccessFailedCount
                     }
                 ).ToList();
             }
@@ -356,6 +367,7 @@ namespace HoshiBook.DataAccess.Repository
                     {
                         Id = user.Id,
                         Name = user.Name,
+                        UserName = user.UserName,
                         Email = user.Email,
                         PhoneNumber = user.PhoneNumber,
                         StreetAddress = user.StreetAddress ?? "",
@@ -367,7 +379,9 @@ namespace HoshiBook.DataAccess.Repository
                         CreatedAt = user.CreatedAt.ToString() ?? "",
                         ModifiedAt = user.ModifiedAt.ToString() ?? "",
                         LastLoginTime = user.LastLoginTime.ToString() ?? "",
-                        LoginIPv4Address = user.LoginIPv4Address ?? ""
+                        LoginIPv4Address = user.LoginIPv4Address ?? "",
+                        LastTryLoginTime = user.LastTryLoginTime.ToString() ?? "",
+                        AccessFailedCount = user.AccessFailedCount
                     }
                 ).ToList();
             }
@@ -383,6 +397,7 @@ namespace HoshiBook.DataAccess.Repository
                     {
                         Id = user.Id,
                         Name = user.Name,
+                        UserName = user.UserName,
                         Email = user.Email,
                         PhoneNumber = user.PhoneNumber,
                         StreetAddress = user.StreetAddress ?? "",
@@ -394,7 +409,9 @@ namespace HoshiBook.DataAccess.Repository
                         CreatedAt = user.CreatedAt.ToString() ?? "",
                         ModifiedAt = user.ModifiedAt.ToString() ?? "",
                         LastLoginTime = user.LastLoginTime.ToString() ?? "",
-                        LoginIPv4Address = user.LoginIPv4Address ?? ""
+                        LoginIPv4Address = user.LoginIPv4Address ?? "",
+                        LastTryLoginTime = user.LastTryLoginTime.ToString() ?? "",
+                        AccessFailedCount = user.AccessFailedCount
                     }
                 ).ToList();
             }
@@ -409,6 +426,7 @@ namespace HoshiBook.DataAccess.Repository
                     {
                         Id = user.Id,
                         Name = user.Name,
+                        UserName = user.UserName,
                         Email = user.Email,
                         PhoneNumber = user.PhoneNumber,
                         StreetAddress = user.StreetAddress ?? "",
@@ -420,7 +438,9 @@ namespace HoshiBook.DataAccess.Repository
                         CreatedAt = user.CreatedAt.ToString() ?? "",
                         ModifiedAt = user.ModifiedAt.ToString() ?? "",
                         LastLoginTime = user.LastLoginTime.ToString() ?? "",
-                        LoginIPv4Address = user.LoginIPv4Address ?? ""
+                        LoginIPv4Address = user.LoginIPv4Address ?? "",
+                        LastTryLoginTime = user.LastTryLoginTime.ToString() ?? "",
+                        AccessFailedCount = user.AccessFailedCount
                     }
                 ).ToList();
             }

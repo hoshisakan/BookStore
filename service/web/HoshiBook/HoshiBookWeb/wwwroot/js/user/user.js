@@ -157,7 +157,7 @@ function loadDatatable(status) {
                 url: '/Admin/User/GetAll?status=' + status,
             },
             columns: [
-                { data: 'name', width: '15%' },
+                { data: 'userName', width: '15%' },
                 // { data: 'email', width: '15%' },
                 // { data: 'phoneNumber', width: '15%' },
                 // { data: 'streetAddress', width: '15%' },
@@ -170,7 +170,9 @@ function loadDatatable(status) {
                 { data: 'isLockedOut', width: '15%' },
                 // { data: 'createdAt', width: '15%' },
                 { data: 'lastLoginTime', width: '15%' },
-                { data: 'loginIPv4Address', width: '15%'}
+                // { data: 'loginIPv4Address', width: '15%'}
+                // { data: 'lastTryLoginTime', width: '15%' },
+                { data: 'accessFailedCount', width: '15%' }
             ],
             order: [[4, "desc"]]
         })
