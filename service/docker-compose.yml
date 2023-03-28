@@ -6,15 +6,18 @@ services:
         container_name: redis-dev
         env_file:
           - ./.env
+        environment:
+            - REDIS_AOF_ENABLED=${REDIS_AOF_ENABLED}
+            - REDIS_PWD=${REDIS_PWD}
         volumes:
             - ./data/redis:/data
-            # - ./conf/redis/setting/redis.conf:/etc/redis/redis.conf
+            - ./conf/redis/setting/redis.conf:/usr/local/etc/redis/redis.conf
         ports:
             - 6379:6379
         networks:
             bookstore_common_net:
               ipv4_address: ${REDIS_HOST_IP}
-        command: redis-server --appendonly yes
+        command: redis-server --appendonly yes --requirepass ${REDIS_PWD}
         restart: on-failure:3
 
     reverse_proxy:
