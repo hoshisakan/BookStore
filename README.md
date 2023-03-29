@@ -3,7 +3,7 @@
 ## Use Docker to build the following services
 * Nginx 1.23.3
 * PostgreSQL 15.2
-* PgAdmin 6.21
+* pgAdmin 6.21
 * Dotnet Core 6.0 through Ubuntu 22.10
 * Redis 6.2.5
 
