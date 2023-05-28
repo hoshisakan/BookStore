@@ -1,4 +1,5 @@
 git_init.sh
+git_remove_branch.sh
 service/backup
 service/logs
 service/data
@@ -61,3 +62,10 @@ demo
 *.jpg
 *.gif
 Untitled-1.md
+git_batch_remove_branch.sh
+.gitignore
+.gitignore
+.gitignore
+.gitignore
+.gitignore
+.gitignore

@@ -1,5 +1,8 @@
 # HoshiBook
 
+## About
+Bhrugen's Udemy Course : Complete guide to ASP.NET Core MVC (6.0) and Entity Framework web development, including how to building a shopping cart with payment integration and more.
+
 ## Use Docker to build the following services
 * Nginx 1.23.3
 * PostgreSQL 15.2
