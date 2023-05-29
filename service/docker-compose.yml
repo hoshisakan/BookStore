@@ -2,7 +2,7 @@ version: '3.9'
 services:
     redis:
         build: ./conf/redis
-        image: ${CONTAINER_AUTHOR}/${PROJECT_NAME}/redis:6.2.5
+        image: ${CONTAINER_AUTHOR}/${PROJECT_NAME}/redis:${REDIS_IMAGE_VERSION}
         container_name: redis-dev
         env_file:
           - ./.env
@@ -30,7 +30,7 @@ services:
                 - NGINX_LANG_INPUTFILE=${NGINX_LANG_INPUTFILE}
                 - NGINX_LANG_CHARMAP=${NGINX_LANG_CHARMAP}
                 - DEBIAN_FRONTEND=${NGINX_DEBIAN_FRONTEND}
-        image: ${CONTAINER_AUTHOR}/${PROJECT_NAME}/nginx:1.23.3
+        image: ${CONTAINER_AUTHOR}/${PROJECT_NAME}/nginx:${NGINX_IMAGE_VERSION}
         container_name: nginx-dev
         env_file:
           - ./.env
@@ -58,7 +58,7 @@ services:
 
     web:
       build:
-          context: ./conf/dotnet/6.0/ubuntu
+          context: ./conf/dotnet/ubuntu
           dockerfile: Dockerfile
           args:
               - DOTNET_VERSION=${DOTNET_VERSION}
@@ -71,7 +71,7 @@ services:
               - DOTNET_POSTGRESQL_CLIENT_VERSION=${DOTNET_POSTGRESQL_CLIENT_VERSION}
               - POSTGRES_DATA_BACKUP_PATH=:${POSTGRES_DATA_BACKUP_PATH}
               - DOTNET_PACKAGES_PATH=${DOTNET_PACKAGES_PATH}
-      image: ${CONTAINER_AUTHOR}/${PROJECT_NAME}/dotnet:6.0
+      image: ${CONTAINER_AUTHOR}/${PROJECT_NAME}/dotnet:${DOTNET_IMAGE_VERSION}
       container_name: web-dev
       env_file:
           - ./.env
@@ -109,7 +109,7 @@ services:
                 - POSTGRES_LANG_NAME=${POSTGRES_LANG_NAME}
                 - POSTGRES_LANG_INPUTFILE=${POSTGRES_LANG_INPUTFILE}
                 - POSTGRES_LANG_CHARMAP=${POSTGRES_LANG_CHARMAP}
-        image: ${CONTAINER_AUTHOR}/${PROJECT_NAME}/postgresql:15.2
+        image: ${CONTAINER_AUTHOR}/${PROJECT_NAME}/postgresql:${POSTGRES_IMAGE_VERSION}
         container_name: postgresql-dev
         env_file:
           - ./.env
@@ -125,7 +125,7 @@ services:
             - ./data/postgresql/pgdata:/var/lib/postgresql/data
             - ./data/postgresql/pgdata_backup:${POSTGRES_DATA_BACKUP_PATH}
         ports:
-            - 5432:${POSTGRES_PORT}
+            - 5432:5432
         networks:
             bookstore_common_net:
                 ipv4_address: ${POSTGRES_HOST_IP}
@@ -133,7 +133,7 @@ services:
 
     pgadmin:
         build: ./conf/postgresql_admin
-        image: ${CONTAINER_AUTHOR}/${PROJECT_NAME}/pgadmin:6.21
+        image: ${CONTAINER_AUTHOR}/${PROJECT_NAME}/pgadmin:${PGADMIN_IMAGE_VERSION}
         container_name: postgresql-admin-dev
         env_file:
           - ./.env

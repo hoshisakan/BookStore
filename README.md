@@ -6,9 +6,9 @@ Bhrugen's Udemy Course : Complete guide to ASP.NET Core MVC (6.0) and Entity Fra
 ## Use Docker to build the following services
 * Nginx 1.23.3
 * PostgreSQL 15.2
-* pgAdmin 6.21
+* pgAdmin 7.1
 * Dotnet Core 6.0 through Ubuntu 22.10
-* Redis 6.2.5
+* Redis 7.0.9
 
 ## Browse the web application
 ### Customer
