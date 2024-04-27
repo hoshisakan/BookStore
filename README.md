@@ -6,9 +6,9 @@ Bhrugen's Udemy Course : Complete guide to ASP.NET Core MVC (6.0) and Entity Fra
 ## Use Docker to build the following services
 * Nginx 1.23.3
 * PostgreSQL 15.2
-* pgAdmin 6.21
+* pgAdmin 7.1
 * Dotnet Core 6.0 through Ubuntu 22.10
-* Redis 6.2.5
+* Redis 7.0.9
 
 ## Browse the web application
 ### Customer
@@ -120,7 +120,7 @@ RUN rm -rf /var/lib/apt/lists/*
 ```
 FROM ubuntu:22.10
 
-ARG DOTNET_VERSION
+ARG DOTNET_IMAGE_VERSION
 ARG DOTNET_POSTGRESQL_CLIENT_HOME
 ARG DOTNET_POSTGRESQL_CLIENT_VERSION
 ARG POSTGRES_DATA_BACKUP_PATH
@@ -136,8 +136,8 @@ RUN rm packages-microsoft-prod.deb
 
 * Install the dotnet core 6.0 SDK and runtime
 ```
-RUN apt install -y dotnet-sdk-${DOTNET_VERSION}.0
-RUN dotnet tool install --global dotnet-ef --version ${DOTNET_VERSION}.*
+RUN apt install -y dotnet-sdk-${DOTNET_IMAGE_VERSION}.0
+RUN dotnet tool install --global dotnet-ef --version ${DOTNET_IMAGE_VERSION}.*
 ```
 
 * Install the PostgreSQL client 15.2 for scheduling backup database
@@ -225,7 +225,7 @@ services:
           context: ./conf/dotnet/6.0/ubuntu
           dockerfile: Dockerfile
           args:
-              - DOTNET_VERSION=${DOTNET_VERSION}
+              - DOTNET_IMAGE_VERSION=${DOTNET_IMAGE_VERSION}
               - DOTNET_TIME_ZONE=${DOTNET_TIME_ZONE}
               - DOTNET_LANG_NAME=${DOTNET_LANG_NAME}
               - DOTNET_LANG_INPUTFILE=${DOTNET_LANG_INPUTFILE}
