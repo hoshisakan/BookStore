@@ -7,13 +7,13 @@ Bhrugen's Udemy Course : Complete guide to ASP.NET Core MVC (6.0) and Entity Fra
 * Nginx 1.23.3
 * PostgreSQL 15.2
 * pgAdmin 7.1
-* Dotnet Core 6.0 through Ubuntu 22.10
+* Dotnet Core 6.0 through Ubuntu 23.10
 * Redis 7.0.9
 
 ## Browse the web application
 ### Customer
 ※ Product list aren't for sale and commercial, just for demo
-* Open the browser and enter the URL: https://localhost
+* Open the browser and enter the URL: https://bookstore.serveirc.com
 * You will see the following user login page
 ![alt text](https://imgur.com/5VZ3vjG.png)
 
@@ -166,21 +166,22 @@ version: '3.9'
 services:
     redis:
         build: ./conf/redis
-        image: hoshisakan/bookstore/redis:6.2.5
-        container_name: redis-dev
+        image: ${CONTAINER_AUTHOR}/${PROJECT_NAME}/redis:${REDIS_IMAGE_VERSION}
+        container_name: ${PROJECT_NAME}_redis
         env_file:
-          - ./.env
+            - ${ENV_FILE_PATH}
         environment:
             - REDIS_AOF_ENABLED=${REDIS_AOF_ENABLED}
             - REDIS_PWD=${REDIS_PWD}
         volumes:
             - ./data/redis:/data
-            - ./conf/redis/setting/redis.conf:/usr/local/etc/redis/redis.conf
+            - ./logs/redis:/var/log
+            # - ./conf/redis/setting/redis.conf:/usr/local/etc/redis/redis.conf
         ports:
-            - 6379:6379
+            - ${REDIS_OUTER_PORT}:${REDIS_INNER_PORT}
         networks:
             bookstore_common_net:
-              ipv4_address: ${REDIS_HOST_IP}
+                ipv4_address: ${REDIS_HOST_IP}
         command: redis-server --appendonly yes --requirepass ${REDIS_PWD}
         restart: on-failure:3
 
@@ -194,75 +195,77 @@ services:
                 - NGINX_LANG_INPUTFILE=${NGINX_LANG_INPUTFILE}
                 - NGINX_LANG_CHARMAP=${NGINX_LANG_CHARMAP}
                 - DEBIAN_FRONTEND=${NGINX_DEBIAN_FRONTEND}
-        image: hoshisakan/bookstore/nginx:1.23.3
-        container_name: nginx-dev
+        image: ${CONTAINER_AUTHOR}/${PROJECT_NAME}/nginx:${NGINX_IMAGE_VERSION}
+        container_name: ${PROJECT_NAME}_nginx
         env_file:
-          - ./.env
+            - ${ENV_FILE_PATH}
         environment:
-          - LANG=${NGINX_LANG_NAME}
+            - LANG=${NGINX_LANG_NAME}
         volumes:
             - ./web/temp/dist/index.html:/web/dist/index.html
             - ./conf/nginx/nginx.conf:/etc/nginx/nginx.conf
             - ./conf/nginx/conf.d:/etc/nginx/conf.d
-            - ./web/deploy/certs:/etc/nginx/ssl
+            - ./web/deploy/certs/ssl:/etc/nginx/ssl
+            - ./web/deploy/certs/data:/usr/share/nginx/html/letsencrypt
             - ./logs/nginx:/var/log/nginx
         ports:
-            - 80:80
-            - 443:443
+            - ${NGINX_HTTP_EXPOSE_PORT}:${NGINX_HTTP_INNER_PORT}
+            - ${NGINX_HTTPS_EXPOSE_PORT}:${NGINX_HTTPS_INNER_PORT}
         depends_on:
             - postgres_db
             - redis
             - web
         networks:
-          bookstore_common_net:
-              ipv4_address: ${NGINX_HOST_IP}
+            bookstore_common_net:
+                ipv4_address: ${NGINX_HOST_IP}
         user: root
         tty: true
         restart: on-failure:3
 
     web:
-      build:
-          context: ./conf/dotnet/6.0/ubuntu
-          dockerfile: Dockerfile
-          args:
-              - DOTNET_IMAGE_VERSION=${DOTNET_IMAGE_VERSION}
-              - DOTNET_TIME_ZONE=${DOTNET_TIME_ZONE}
-              - DOTNET_LANG_NAME=${DOTNET_LANG_NAME}
-              - DOTNET_LANG_INPUTFILE=${DOTNET_LANG_INPUTFILE}
-              - DOTNET_LANG_CHARMAP=${DOTNET_LANG_CHARMAP}
-              - DEBIAN_FRONTEND=${DOTNET_DEBIAN_FRONTEND}
-              - DOTNET_POSTGRESQL_CLIENT_HOME=${DOTNET_POSTGRESQL_CLIENT_HOME}
-              - DOTNET_POSTGRESQL_CLIENT_VERSION=${DOTNET_POSTGRESQL_CLIENT_VERSION}
-              - POSTGRES_DATA_BACKUP_PATH=:${POSTGRES_DATA_BACKUP_PATH}
-              - DOTNET_PACKAGES_PATH=${DOTNET_PACKAGES_PATH}
-      image: hoshisakan/bookstore/dotnet:6.0
-      container_name: web-dev
-      env_file:
-          - ./.env
-      environment:
-          - DOTNET_LANG_NAME=${DOTNET_LANG_NAME}
-          - PGPASSWORD=${POSTGRES_PASSWORD}
-          - DOTNET_POSTGRES_USER=${POSTGRES_USER}
-          - DOTNET_POSTGRES_HOST_IP=${POSTGRES_HOST_IP}
-          - DOTNET_POSTGRES_PORT=${POSTGRES_PORT}
-      volumes:
-          - ./web/HoshiBook:/app
-          - ./web/deploy/HoshiBookWeb:/deploy/HoshiBookWeb
-          - ./web/deploy/certs:/deploy/certs
-          - ./web/deploy/staticfiles:/deploy/staticfiles
-          - ./data/postgresql/pgdata_backup:${POSTGRES_DATA_BACKUP_PATH}
-          - ./logs/dotnet:/var/log/dotnet
-      expose:
-        - 5002
-        - 7232
-      depends_on:
-        - postgres_db
-        - redis
-      networks:
-          bookstore_common_net:
-              ipv4_address: ${DOTNET_HOST_IP}
-      tty: true
-      restart: on-failure:3
+        build:
+            # context: ./conf/dotnet/ubuntu
+            context: ./web
+            dockerfile: Dockerfile
+            args:
+                - DOTNET_IMAGE_VERSION=${DOTNET_IMAGE_VERSION}
+                - DOTNET_TIME_ZONE=${DOTNET_TIME_ZONE}
+                - DOTNET_LANG_NAME=${DOTNET_LANG_NAME}
+                - DOTNET_LANG_INPUTFILE=${DOTNET_LANG_INPUTFILE}
+                - DOTNET_LANG_CHARMAP=${DOTNET_LANG_CHARMAP}
+                - DEBIAN_FRONTEND=${DOTNET_DEBIAN_FRONTEND}
+                - DOTNET_POSTGRESQL_CLIENT_HOME=${DOTNET_POSTGRESQL_CLIENT_HOME}
+                - DOTNET_POSTGRESQL_CLIENT_VERSION=${DOTNET_POSTGRESQL_CLIENT_VERSION}
+                - POSTGRES_DATA_BACKUP_PATH=:${POSTGRES_DATA_BACKUP_PATH}
+                - DOTNET_PACKAGES_PATH=${DOTNET_PACKAGES_PATH}
+        image: ${CONTAINER_AUTHOR}/${PROJECT_NAME}/dotnet:${DOTNET_IMAGE_VERSION}
+        container_name: ${PROJECT_NAME}_web
+        env_file:
+            - ${ENV_FILE_PATH}
+        environment:
+            - DOTNET_LANG_NAME=${DOTNET_LANG_NAME}
+            - PGPASSWORD=${POSTGRES_PASSWORD}
+            - DOTNET_POSTGRES_USER=${POSTGRES_USER}
+            - DOTNET_POSTGRES_HOST_IP=${POSTGRES_HOST_IP}
+            - DOTNET_POSTGRES_PORT=${POSTGRES_INNER_PORT}
+        volumes:
+            - ./web/HoshiBook:/app
+            # - ./web/deploy/HoshiBookWeb:/deploy/HoshiBookWeb
+            # - ./web/deploy/certs:/deploy/certs
+            # - ./web/deploy/staticfiles:/deploy/staticfiles
+            - ./data/postgresql/pgdata_backup:${POSTGRES_DATA_BACKUP_PATH}
+            - ./logs/dotnet:/var/log/dotnet
+        expose:
+            - 5002
+            - 7232
+        depends_on:
+            - postgres_db
+            - redis
+        networks:
+            bookstore_common_net:
+                ipv4_address: ${DOTNET_HOST_IP}
+        tty: true
+        restart: on-failure:3
 
     postgres_db:
         build:
@@ -273,10 +276,10 @@ services:
                 - POSTGRES_LANG_NAME=${POSTGRES_LANG_NAME}
                 - POSTGRES_LANG_INPUTFILE=${POSTGRES_LANG_INPUTFILE}
                 - POSTGRES_LANG_CHARMAP=${POSTGRES_LANG_CHARMAP}
-        image: hoshisakan/bookstore/postgresql:15.2
-        container_name: postgresql-dev
+        image: ${CONTAINER_AUTHOR}/${PROJECT_NAME}/postgresql:${POSTGRES_IMAGE_VERSION}
+        container_name: ${PROJECT_NAME}_postgresql
         env_file:
-          - ./.env
+            - ${ENV_FILE_PATH}
         environment:
             - DATABASE_HOST=${DATABASE_HOST}
             - POSTGRES_USER=${POSTGRES_USER}
@@ -289,7 +292,7 @@ services:
             - ./data/postgresql/pgdata:/var/lib/postgresql/data
             - ./data/postgresql/pgdata_backup:${POSTGRES_DATA_BACKUP_PATH}
         ports:
-            - 5432:${POSTGRES_PORT}
+            - ${POSTGRES_EXTERNAL_PORT}:${POSTGRES_INNER_PORT}
         networks:
             bookstore_common_net:
                 ipv4_address: ${POSTGRES_HOST_IP}
@@ -297,10 +300,10 @@ services:
 
     pgadmin:
         build: ./conf/postgresql_admin
-        image: hoshisakan/bookstore/pgadmin:6.21
-        container_name: postgresql-admin-dev
+        image: ${CONTAINER_AUTHOR}/${PROJECT_NAME}/pgadmin:${PGADMIN_IMAGE_VERSION}
+        container_name: ${PROJECT_NAME}_pgadmin
         env_file:
-          - ./.env
+            - ${ENV_FILE_PATH}
         environment:
             - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-test@test.com}
             - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-test123!}
@@ -308,21 +311,21 @@ services:
             - pgadmin:/var/lib/pgadmin
             - ./data/pgadmin/pgadmin_data:/var/lib/pgadmin
         ports:
-            - 5433:80
+            - ${PGADMIN_EXTERNAL_PORT}:${PGADMIN_INNER_PORT}
         depends_on:
             - postgres_db
         networks:
-          bookstore_common_net:
-              ipv4_address: ${PGADMIN_HOST_IP}
+            bookstore_common_net:
+                ipv4_address: ${PGADMIN_HOST_IP}
         user: root
         restart: on-failure:2
 
 networks:
     bookstore_common_net:
         ipam:
-          config:
-            - subnet: ${NETWORK_SUBNET}
-              gateway: ${NETWORK_GATEWAY}
+            config:
+                - subnet: ${NETWORK_SUBNET}
+                  gateway: ${NETWORK_GATEWAY}
 
 volumes:
     pgadmin:

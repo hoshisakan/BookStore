@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 services:
     redis:
         build: ./conf/redis
@@ -41,7 +41,8 @@ services:
             - ./web/temp/dist/index.html:/web/dist/index.html
             - ./conf/nginx/nginx.conf:/etc/nginx/nginx.conf
             - ./conf/nginx/conf.d:/etc/nginx/conf.d
-            - ./web/deploy/certs:/etc/nginx/ssl
+            - ./web/deploy/certs/ssl:/etc/nginx/ssl
+            - ./web/deploy/certs/data:/usr/share/nginx/html/letsencrypt
             - ./logs/nginx:/var/log/nginx
         ports:
             - ${NGINX_HTTP_EXPOSE_PORT}:${NGINX_HTTP_INNER_PORT}
@@ -82,9 +83,9 @@ services:
             - PGPASSWORD=${POSTGRES_PASSWORD}
             - DOTNET_POSTGRES_USER=${POSTGRES_USER}
             - DOTNET_POSTGRES_HOST_IP=${POSTGRES_HOST_IP}
-            - DOTNET_POSTGRES_PORT=${POSTGRES_EXTERNAL_PORT}
+            - DOTNET_POSTGRES_PORT=${POSTGRES_INNER_PORT}
         volumes:
-            # - ./web/HoshiBook:/app
+            - ./web/HoshiBook:/app
             # - ./web/deploy/HoshiBookWeb:/deploy/HoshiBookWeb
             # - ./web/deploy/certs:/deploy/certs
             # - ./web/deploy/staticfiles:/deploy/staticfiles

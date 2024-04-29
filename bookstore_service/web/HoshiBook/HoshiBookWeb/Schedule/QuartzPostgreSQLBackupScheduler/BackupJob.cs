@@ -55,6 +55,9 @@ public class BackupJob : IJob
                 throw new Exception($"backupDbName or backupStoragePath is null that event occurred at {scheduleLocalExecuteFormatTime}..");
             }
 
+            _logger?.LogInformation($"postgresUser: {postgresUser}\npostgresHost: {postgresHost}\npostgresPort: {postgresPort}");
+
+
             //TODO Set backup file name and path and command.
             string backupFileName = $"{backupFileTime}_{backupDbName}_db_backup.dump";
             string backupDirectory = $"{backupStoragePath}/{backupDbName}/{backupFileDate}";

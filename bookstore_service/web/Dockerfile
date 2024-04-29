@@ -77,13 +77,13 @@ WORKDIR /app
 # Publish web application to specific HoshiBookWeb
 RUN dotnet publish -c Release -o /deploy/HoshiBookWeb
 
-# Switch 
+# Switch to static files
 WORKDIR /deploy/staticfiles
 
 # Copy local machine static images to container
 COPY /deploy/staticfiles /deploy/staticfiles
 
-# Switch to deploy web application directory
+# # Switch to deploy web application directory
 WORKDIR /deploy/HoshiBookWeb
 
 # Run the app

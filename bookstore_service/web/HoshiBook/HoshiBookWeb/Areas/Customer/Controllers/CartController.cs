@@ -39,7 +39,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             _emailSender = email;
             _cache = cache;
             // domain = _config.GetValue<string>("DomainList:Kestrel:LocalDebug:Domain:https");
-            domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:https");
+            domain = _config.GetValue<string>("DomainList:Kestrel:CloudContainer:Domain:https");
             // domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:http");
         }
 
