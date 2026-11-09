@@ -32,8 +32,9 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
 
         public ActionResult Index()
         {
+            // 從資料庫取得所有商品，並包含分類與封面資料
             List<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category,CoverType");
-            return View(productList);
+            return View(productList); // 傳給前端 View 顯示商品
         }
 
         public IActionResult Details(string? productId)
@@ -42,14 +43,18 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             {
                 return NotFound();
             }
+
+            // 根據 SKU 取得商品（包含分類與封面類型）
             var product = _unitOfWork.Product.GetFirstOrDefault(
                 u => u.SKU == productId,
                 includeProperties: "Category,CoverType"
             );
             if (product == null)
             {
-                return NotFound();
+                return NotFound(); // 找不到商品
             }
+
+            // 準備加入購物車的資料（初始數量為 1）
             ShoppingCart cartObj = new ()
             {
                 Count = 1,
@@ -59,6 +64,8 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                             includeProperties: "Category,CoverType"
                         )
             };
+
+            // 建立 ViewModel 包含 SKU 與購物車資料
             ShoppingCartForSKUVM cartAndSKUObj = new ()
             {
                 SKU = productId,
@@ -69,7 +76,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize]
+        [Authorize] // 必須登入才能加入購物車
         public IActionResult Details(ShoppingCartForSKUVM obj)
         {
             ShoppingCart shoppingCart = new();
@@ -78,10 +85,13 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             {
                 shoppingCart = obj.ShoppingCart;
 
+                // 取得目前登入使用者 ID
                 var claimsIdentity = (ClaimsIdentity?)User.Identity;
                 var claim = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier);
                 shoppingCart.ApplicationUserId = claim.Value;
 
+
+                // 查詢該使用者是否已將此商品加入購物車
                 //TODO Get the product from the database.
                 ShoppingCart cartFromDb = _unitOfWork.ShoppingCart.GetFirstOrDefault(
                     u => u.ApplicationUserId == claim.Value && u.ProductId == shoppingCart.ProductId
@@ -94,6 +104,8 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     shoppingCart.Id, shoppingCart.ProductId, shoppingCart.Count, shoppingCart.ApplicationUserId
                 );
 
+
+                // 若購物車中沒有該商品
                 //TODO Check the product does exists in currently logged in user's cart.
                 if (cartFromDb == null)
                 {
@@ -104,8 +116,11 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     }
                     else
                     {
+                        // 新增至購物車資料表
                         _unitOfWork.ShoppingCart.Add(shoppingCart);
                         _unitOfWork.Save();
+
+                        // 更新快取中的購物車數量
                         // TODO Get the count of the single product in the cart.
                         List<ShoppingCart> cartList = _unitOfWork.ShoppingCart.GetAll(
                             u => u.ApplicationUserId == claim.Value
@@ -114,7 +129,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                         _cache.SetString(SD.SessionCart, JsonSerializer.Serialize(count));
                     }
                 }
-                else
+                else // 若已存在此商品於購物車
                 {
                     if (shoppingCart.Count < 1)
                     {
@@ -123,9 +138,12 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     }
                     else
                     {
+                        // 增加現有商品數量
                         TempData["success"] = $"Add to car sucessfully.";
                         _unitOfWork.ShoppingCart.IncrementCount(cartFromDb, shoppingCart.Count);
                         _unitOfWork.Save();
+
+                        // 更新快取中的購物車總數量
                         // TODO Get the count of the single product in the cart.
                         List<ShoppingCart> cartList = _unitOfWork.ShoppingCart.GetAll(
                             u => u.ApplicationUserId == claim.Value
@@ -137,6 +155,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             }
             catch (Exception ex)
             {
+                // 發生例外時回報錯誤並回到商品頁
                 TempData["error"] = $"Add to car failed, because {ex.Message}";
                 _logger.LogError(ex, $"Add to car failed, because {ex.Message}\n{ex.StackTrace}");
                 return RedirectToAction(nameof(Details), new { productId = obj.SKU });
@@ -146,12 +165,13 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
 
         public IActionResult Privacy()
         {
-            return View();
+            return View(); // 隱私權政策頁
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
+            // 錯誤頁面顯示 RequestId（用於錯誤追蹤）
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }

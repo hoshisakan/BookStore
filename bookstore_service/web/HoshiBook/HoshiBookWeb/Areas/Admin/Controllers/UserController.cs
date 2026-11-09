@@ -873,6 +873,9 @@ namespace HoshiBookWeb.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
+
+
+
                 _logger.LogError("CategoryController.ExportDetails: {0}", ex.Message);
                 return RedirectToAction(nameof(Index));
             }

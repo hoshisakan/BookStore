@@ -38,16 +38,20 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             _unitOfWork = unitOfWork;
             _emailSender = email;
             _cache = cache;
-            // domain = _config.GetValue<string>("DomainList:Kestrel:LocalDebug:Domain:https");
-            domain = _config.GetValue<string>("DomainList:Kestrel:CloudContainer:Domain:https");
-            // domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:http");
+            domain = _config.GetValue<string>("DomainList:Kestrel:LocalDebug:Domain:https");
+            // 若要使用容器化部署時的域名，請取消以下註解
+            // domain = _config.GetValue<string>("DomainList:Kestrel:CloudContainer:Domain:https");
+            //domain = _config.GetValue<string>("DomainList:Kestrel:LocalContainer:Domain:https");
         }
 
+        // 顯示購物車主畫面
         public IActionResult Index()
         {
+            // 取得登入使用者的 ID
             var claimsIdentity = (ClaimsIdentity?)User.Identity;
             var claim = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier);
 
+            // 建立 ViewModel 並取得該用戶所有購物車項目
             ShoppingCartVM = new ShoppingCartVM()
             {
                 ListCart = _unitOfWork.ShoppingCart.GetAll(
@@ -55,7 +59,8 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     includeProperties: "Product"),
                 OrderHeader = new ()
             };
-            foreach(var cart in ShoppingCartVM.ListCart)
+            // 計算每項商品價格與總金額
+            foreach (var cart in ShoppingCartVM.ListCart)
             {
                 cart.Price = GetPriceBasedOnQuantity(
                     cart.Count, cart.Product.Price, cart.Product.Price50, cart.Product.Price100
@@ -65,11 +70,13 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             return View(ShoppingCartVM);
         }
 
+        // 顯示結帳摘要頁面
         public IActionResult Summary()
         {
             var claimsIdentity = (ClaimsIdentity?)User.Identity;
             var claim = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier);
 
+            // 若購物車為空，導回首頁
             ShoppingCart cartFromDb = _unitOfWork.ShoppingCart.GetFirstOrDefault(
                 u => u.ApplicationUserId == claim.Value
             );
@@ -78,6 +85,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // 建立 ViewModel，並讀取購物車與使用者資訊
             ShoppingCartVM = new ShoppingCartVM()
             {
                 ListCart = _unitOfWork.ShoppingCart.GetAll(
@@ -90,6 +98,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                 u => u.Id == claim.Value
             );
 
+            // 將使用者的資訊帶入訂單中（若為 null 則設空字串）
             ShoppingCartVM.OrderHeader.Name = ShoppingCartVM.OrderHeader.ApplicationUser.Name;
             ShoppingCartVM.OrderHeader.PhoneNumber = ShoppingCartVM.OrderHeader.ApplicationUser.PhoneNumber;
             //TODO ApplicationUser StreetAddress, City, State, PostalCode maybe is null.
@@ -98,7 +107,8 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             ShoppingCartVM.OrderHeader.State = ShoppingCartVM.OrderHeader.ApplicationUser.State ?? "";
             ShoppingCartVM.OrderHeader.PostalCode = ShoppingCartVM.OrderHeader.ApplicationUser.PostalCode ?? "";
 
-            foreach(var cart in ShoppingCartVM.ListCart)
+            // 計算總金額
+            foreach (var cart in ShoppingCartVM.ListCart)
             {
                 cart.Price = GetPriceBasedOnQuantity(
                     cart.Count, cart.Product.Price, cart.Product.Price50, cart.Product.Price100
@@ -108,6 +118,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             return View(ShoppingCartVM);
         }
 
+        // 提交結帳
         [HttpPost]
         [ActionName("Summary")]
         [ValidateAntiForgeryToken]
@@ -117,6 +128,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             var claim = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier);
 
             try {
+                // 取得購物車資料
                 ShoppingCartVM.ListCart = _unitOfWork.ShoppingCart.GetAll(
                     u => u.ApplicationUserId == claim.Value,
                     includeProperties: "Product"
@@ -125,7 +137,8 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                 ShoppingCartVM.OrderHeader.OrderDate = DateTime.Now;
                 ShoppingCartVM.OrderHeader.ApplicationUserId = claim.Value;
 
-                foreach(var cart in ShoppingCartVM.ListCart)
+                // 計算價格與總金額
+                foreach (var cart in ShoppingCartVM.ListCart)
                 {
                     cart.Price = GetPriceBasedOnQuantity(
                         cart.Count, cart.Product.Price, cart.Product.Price50, cart.Product.Price100
@@ -134,6 +147,8 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                 }
 
                 ApplicationUser applicationUser = _unitOfWork.ApplicationUser.GetFirstOrDefault(u => u.Id == claim.Value);
+
+                // 若為公司用戶則延後付款，否則預設為待付款
                 if (applicationUser.CompanyId.GetValueOrDefault() == 0)
                 {
                     ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
@@ -145,10 +160,12 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusApproved;
                 }
 
+                // 儲存訂單資料
                 _unitOfWork.OrderHeader.Add(ShoppingCartVM.OrderHeader);
                 _unitOfWork.Save();
 
-                foreach(var cart in ShoppingCartVM.ListCart)
+                // 新增訂單明細
+                foreach (var cart in ShoppingCartVM.ListCart)
                 {
                     OrderDetail orderDetail = new()
                     {
@@ -161,6 +178,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                     _unitOfWork.Save();
                 }
 
+                // 若非公司用戶，建立 Stripe Session 並導向付款頁
                 //TODO If current user is not company user, then create a stripe session.
                 if (applicationUser.CompanyId.GetValueOrDefault() == 0)
                 {
@@ -217,6 +235,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                 }
                 else
                 {
+                    // 公司用戶直接跳轉訂單完成頁
                     return RedirectToAction("OrderConfirmation", "Cart", new { id = ShoppingCartVM.OrderHeader.Id });
                 }
             }
@@ -227,6 +246,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             return View();
         }
 
+        // Stripe 支付完成跳轉回來的頁面
         //TODO Maybe can be added 'lastUpdateTime' to OrderHeader table for record the payment data last update time
         public async Task<IActionResult> OrderConfirmation(int id)
         {
@@ -236,6 +256,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                 includeProperties: "ApplicationUser"
             );
 
+            // Stripe 付款狀態檢查
             if (orderHeader.PaymentStatus != SD.PaymentStatusDelayed)
             {
                 var service = new SessionService();
@@ -256,11 +277,13 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
                 }
             }
             _logger.LogInformation($"orderHeader.ApplicationUser.Email: {orderHeader.ApplicationUser.Email}");
+            // 寄送訂單通知信
             await _emailSender.SendEmailAsync(
                 orderHeader.ApplicationUser.Email,
                 "New Order - Hoshi Book",
                 "<p>New Order Created</p>"
             );
+            // 清除購物車資料與快取
             List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart.GetAll(
                 u => u.ApplicationUserId == orderHeader.ApplicationUserId
             );
@@ -270,12 +293,14 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             return View(id);
         }
 
+        // 增加商品數量
         public IActionResult Plus(int? cartId)
         {
             if (cartId == null)
             {
                 return NotFound();
             }
+            // 更新快取中的數量
             var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault(u => u.Id == cartId);
             _unitOfWork.ShoppingCart.IncrementCount(cart, 1);
             _unitOfWork.Save();
@@ -288,6 +313,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // 減少商品數量，若為 1 則移除該項
         public IActionResult Minus(int? cartId)
         {
             if (cartId == null)
@@ -320,6 +346,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // 移除購物車項目
         public IActionResult Remove(int? cartId)
         {
             if (cartId == null)
@@ -338,6 +365,7 @@ namespace HoshiBookWeb.Areas.Customer.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // 根據數量取得折扣後價格
         private double GetPriceBasedOnQuantity(double quantity, double price, double price50, double price100)
         {
             if (quantity <= 50)

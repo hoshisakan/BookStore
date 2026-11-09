@@ -1,9 +1,11 @@
 # HoshiBook
 
 ## About
+
 Bhrugen's Udemy Course : Complete guide to ASP.NET Core MVC (6.0) and Entity Framework web development, including how to building a shopping cart with payment integration and more.
 
 ## Use Docker to build the following services
+
 * Nginx 1.23.3
 * PostgreSQL 15.2
 * pgAdmin 7.1
@@ -11,81 +13,69 @@ Bhrugen's Udemy Course : Complete guide to ASP.NET Core MVC (6.0) and Entity Fra
 * Redis 7.0.9
 
 ## Browse the web application
+
 ### Customer
+
 ※ Product list aren't for sale and commercial, just for demo
+
 * Open the browser and enter the URL: https://bookstore.serveirc.com
 * You will see the following user login page
-![alt text](https://imgur.com/5VZ3vjG.png)
-
+  ![alt text](https://imgur.com/5VZ3vjG.png)
 * Click the "Register" button to register a new user
-![alt text](https://imgur.com/TQVEsuP.png)
-
+  ![alt text](https://imgur.com/TQVEsuP.png)
 * Enter the user name and password to login
-![alt text](https://imgur.com/ssq6YUm.png)
-
+  ![alt text](https://imgur.com/ssq6YUm.png)
 * You will see the following page (Product list aren't for sale and commercial, just for demo)
-![alt text](https://imgur.com/Ie552i8.png)
-
+  ![alt text](https://imgur.com/Ie552i8.png)
 * Click details to view the product details
-![alt text](https://imgur.com/MKrl42p.png)
-
+  ![alt text](https://imgur.com/MKrl42p.png)
 * You will see the cart quantity on the top left corner of the page after add the product to the shopping cart
-![alt text](https://imgur.com/UbMT8U8.png)
-
+  ![alt text](https://imgur.com/UbMT8U8.png)
 * Click the shopping cart icon to view the shopping cart
-![alt text](https://imgur.com/KNBwPWZ.png)
-![alt text](https://imgur.com/bkW4xpm.png)
-
+  ![alt text](https://imgur.com/KNBwPWZ.png)
+  ![alt text](https://imgur.com/bkW4xpm.png)
 * Place an order by clicking the "Place Order" button
-![alt text](https://imgur.com/i47ShSD.png)
-
+  ![alt text](https://imgur.com/i47ShSD.png)
 * You will see the order status is "Approved" after the payment is successful
-![alt text](https://imgur.com/nQPkSnf.png)
-
+  ![alt text](https://imgur.com/nQPkSnf.png)
 * Click the Edit icon button right side of the page to view the order details
-![alt text](https://imgur.com/yYG7ekC.png)
+  ![alt text](https://imgur.com/yYG7ekC.png)
 
 ### Admin
+
 * Enter the user name and password to login
-![alt text](https://imgur.com/Al263Ow.png)
-
+  ![alt text](https://imgur.com/Al263Ow.png)
 * You will see the following page
-![alt text](https://imgur.com/NHfNkKC.png)
-
+  ![alt text](https://imgur.com/NHfNkKC.png)
 * Click the "Content Management" -> "Category" button to view the dashboard
-![alt text](https://imgur.com/2f8ln30.png)
-
+  ![alt text](https://imgur.com/2f8ln30.png)
 * Click the "Cover Type Management" -> "Category" button to view the dashboard
-![alt text](https://imgur.com/9CxjC9o.png)
-
+  ![alt text](https://imgur.com/9CxjC9o.png)
 * Click the "Product Management" -> "Category" button to view the dashboard
-![alt text](https://imgur.com/dgYU2my.png)
-
+  ![alt text](https://imgur.com/dgYU2my.png)
 * Click the "Company Management" -> "Category" button to view the dashboard
-![alt text](https://imgur.com/RwYKrZ0.png)
-
+  ![alt text](https://imgur.com/RwYKrZ0.png)
 * Click the "Manage User" button to view the user management page
-![alt text](https://imgur.com/Ik8rTM1.png)
-
+  ![alt text](https://imgur.com/Ik8rTM1.png)
 * Click "Locked" link display the locked user list
-![alt text](https://imgur.com/4Yw9lbi.png)
-
+  ![alt text](https://imgur.com/4Yw9lbi.png)
 * Click "Unlocked" link display the unlocked user list
-![alt text](https://imgur.com/JtkZ6ZK.png)
-
+  ![alt text](https://imgur.com/JtkZ6ZK.png)
 * Click the "Manage Order" button to view the order management page
-![alt text](https://imgur.com/GbGEDr2.png)
-
+  ![alt text](https://imgur.com/GbGEDr2.png)
 * Click the "SHIP ORDER" button to ship the order
-![alt text](https://imgur.com/psNRt3M.png)
-
+  ![alt text](https://imgur.com/psNRt3M.png)
 * Go back to the order management page, you will see the order status is "Shipped"
-![alt text](https://imgur.com/lswwUhk.png)
+  ![alt text](https://imgur.com/lswwUhk.png)
 
 ## Build the Docker services
+
 ### Reverse Proxy Server
+
 #### Create a Dockerfile build Nginx version number 1.21.3
+
 * Install the Nginx, and install packages
+
 ```
 FROM nginx:1.23.3
 
@@ -115,8 +105,11 @@ RUN rm -rf /var/lib/apt/lists/*
 ```
 
 ### Based on the Ubuntu 20.04 image, install the dotnet core 6.0 SDK and runtime
+
 #### Create a Dockerfile build Ubuntu version number 20.04
+
 * Install the dotnet core 6.0 SDK and runtime
+
 ```
 FROM ubuntu:22.10
 
@@ -128,6 +121,7 @@ ARG DOTNET_PACKAGES_PATH
 ```
 
 * Add the Microsoft package signing key to your list of trusted keys and add the package repository
+
 ```
 RUN wget https://packages.microsoft.com/config/ubuntu/22.10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
 RUN dpkg -i packages-microsoft-prod.deb
@@ -135,12 +129,14 @@ RUN rm packages-microsoft-prod.deb
 ```
 
 * Install the dotnet core 6.0 SDK and runtime
+
 ```
 RUN apt install -y dotnet-sdk-${DOTNET_IMAGE_VERSION}.0
 RUN dotnet tool install --global dotnet-ef --version ${DOTNET_IMAGE_VERSION}.*
 ```
 
 * Install the PostgreSQL client 15.2 for scheduling backup database
+
 ```
 RUN wget https://ftp.postgresql.org/pub/source/v${DOTNET_POSTGRESQL_CLIENT_VERSION}/postgresql-${DOTNET_POSTGRESQL_CLIENT_VERSION}.tar.gz
 
@@ -154,13 +150,16 @@ RUN rm -rf ${DOTNET_PACKAGES_PATH}/postgresql-${DOTNET_POSTGRESQL_CLIENT_VERSION
 ```
 
 * Run the dll file of dotnet web application in the container
+
 ```
 WORKDIR /deploy/HoshiBookWeb
 ENTRYPOINT [ "dotnet", "HoshiBookWeb.dll" ]
 ```
 
 ### Create docker-compose.yml file to build the container
+
 * docker-compose.yml file content is as follows
+
 ```
 version: '3.9'
 services:
@@ -332,6 +331,7 @@ volumes:
 ```
 
 * Use the docker-compose command to build the container
+
 ```
 docker-compose up -d
 ```

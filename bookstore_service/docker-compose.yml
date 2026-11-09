@@ -41,8 +41,9 @@ services:
             - ./web/temp/dist/index.html:/web/dist/index.html
             - ./conf/nginx/nginx.conf:/etc/nginx/nginx.conf
             - ./conf/nginx/conf.d:/etc/nginx/conf.d
-            - ./web/deploy/certs/ssl:/etc/nginx/ssl
-            - ./web/deploy/certs/data:/usr/share/nginx/html/letsencrypt
+            # - ./web/deploy/certs/ssl:/etc/nginx/ssl
+            - ./web/deploy/certs/:/etc/nginx/ssl
+            # - ./web/deploy/certs/data:/usr/share/nginx/html/letsencrypt
             - ./logs/nginx:/var/log/nginx
         ports:
             - ${NGINX_HTTP_EXPOSE_PORT}:${NGINX_HTTP_INNER_PORT}

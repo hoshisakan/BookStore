@@ -58,15 +58,35 @@ try
             ValidationAlgorithm = ValidationAlgorithm.HMACSHA256
         }
     );
-    
+
     //TODO Add Kestrel server runtime dotnet core project in linux environment.
+    // builder.WebHost.UseKestrel(options =>
+    // {
+    //    options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Http:Port").Get<int>());
+    //    options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Https:Port").Get<int>(), listenOptions =>
+    //    {
+    //        listenOptions.UseHttps(
+    //            builder.Configuration["Deployment:Kestrel:Https:Certificate:Path"],
+    //            builder.Configuration["Deployment:Kestrel:Https:Certificate:Password"]
+    //        );
+    //    });
+    //    options.Limits.MaxRequestBodySize = int.MaxValue;
+    // });
     builder.WebHost.UseKestrel(options =>
     {
         options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Http:Port").Get<int>());
         options.ListenAnyIP(builder.Configuration.GetSection("Deployment:Kestrel:Https:Port").Get<int>(), listenOptions =>
         {
+            string certPath = builder.Configuration["Deployment:Kestrel:Https:Certificate:Path"];
+            
+            // 自動轉換：如果是相對路徑，則結合目前應用程式的基礎目錄
+            if (certPath.StartsWith("./") || certPath.StartsWith("../"))
+            {
+                certPath = Path.Combine(AppContext.BaseDirectory, certPath);
+            }
+
             listenOptions.UseHttps(
-                builder.Configuration["Deployment:Kestrel:Https:Certificate:Path"],
+                certPath,
                 builder.Configuration["Deployment:Kestrel:Https:Certificate:Password"]
             );
         });
@@ -104,27 +124,28 @@ try
     });
 
     builder.Services.AddAuthentication()
-        .AddFacebook(options =>
-        {
-            options.AppId = builder.Configuration["Authentication:ExternalLogin:Facebook:Kestrel:AppId"];
-            options.AppSecret = builder.Configuration["Authentication:ExternalLogin:Facebook:Kestrel:AppSecret"];
-        })
+    //     .AddFacebook(options =>
+    //     {
+    //         options.AppId = builder.Configuration["Authentication:ExternalLogin:Facebook:Kestrel:AppId"];
+    //         options.AppSecret = builder.Configuration["Authentication:ExternalLogin:Facebook:Kestrel:AppSecret"];
+    //     })
         .AddGoogle(options =>
         {
             options.ClientId = builder.Configuration["Authentication:ExternalLogin:Google:Kestrel:ClientId"];
             options.ClientSecret = builder.Configuration["Authentication:ExternalLogin:Google:Kestrel:ClientSecret"];
         })
-        .AddMicrosoftAccount(options =>
-        {
-            options.ClientId = builder.Configuration["Authentication:ExternalLogin:Microsoft:Kestrel:ClientId"];
-            options.ClientSecret = builder.Configuration["Authentication:ExternalLogin:Microsoft:Kestrel:ClientSecret"];
-        });
+    //     .AddMicrosoftAccount(options =>
+    //     {
+    //         options.ClientId = builder.Configuration["Authentication:ExternalLogin:Microsoft:Kestrel:ClientId"];
+    //         options.ClientSecret = builder.Configuration["Authentication:ExternalLogin:Microsoft:Kestrel:ClientSecret"];
+    //     });
+    ;
 
     //TODO Add PostgreSQL database context and connection settting and change default migration save table from 'public' to 'bootstore'.
     builder.Services.AddDbContext<ApplicationDbContext>(
         options => options.UseNpgsql(
-            builder.Configuration.GetConnectionString("DeploymentConnection"),
-            // builder.Configuration.GetConnectionString("LocalTestConnecton"),
+             builder.Configuration.GetConnectionString("DeploymentConnection"),
+             //builder.Configuration.GetConnectionString("LocalTestConnecton"),
             x => x.MigrationsHistoryTable(
                 HistoryRepository.DefaultTableName,
                 builder.Configuration.GetSection("PostgreSQLConfigure:Schema").Get<string>()
@@ -140,7 +161,7 @@ try
     });
 
     builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
-    builder.Services.AddIdentity<ApplicationUser,ApplicationRole>().AddDefaultTokenProviders()
+    builder.Services.AddIdentity<ApplicationUser, ApplicationRole>().AddDefaultTokenProviders()
         .AddEntityFrameworkStores<ApplicationDbContext>();
     builder.Services.AddSingleton<IEmailSender, EmailSender>();
     //TODO Register ProgramInitializer to services.
@@ -202,8 +223,8 @@ try
             .WithCronSchedule(
                 builder.Configuration.GetSection(
                     "Quartz:MainDatabaseBackupJob:Schedule:WeekendCronExpression"
-                    // "Quartz:MainDatabaseBackupJob:Schedule:WeekdaysCronExpression"
-                    // "Quartz:MainDatabaseBackupJob:Schedule:LocalTestCronExpression"
+                // "Quartz:MainDatabaseBackupJob:Schedule:WeekdaysCronExpression"
+                // "Quartz:MainDatabaseBackupJob:Schedule:LocalTestCronExpression"
                 ).Get<string>()
             )
         );
@@ -222,8 +243,8 @@ try
             .WithCronSchedule(
                 builder.Configuration.GetSection(
                     "Quartz:SecondaryDatabaseBackupJob:Schedule:WeekendCronExpression"
-                    // "Quartz:SecondaryDatabaseBackupJob:Schedule:WeekdaysCronExpression"
-                    // "Quartz:SecondaryDatabaseBackupJob:Schedule:LocalTestCronExpression"
+                // "Quartz:SecondaryDatabaseBackupJob:Schedule:WeekdaysCronExpression"
+                // "Quartz:SecondaryDatabaseBackupJob:Schedule:LocalTestCronExpression"
                 ).Get<string>()
             )
         );
@@ -304,5 +325,7 @@ try
 catch (Exception ex)
 {
     Log.Error($"An error occurred while starting the application: {ex.Message}");
+    Console.WriteLine(ex.ToString());
+    throw;
 }
 Log.CloseAndFlush();
